@@ -71,6 +71,7 @@ doc ///
       :Weight Filtrations
 	@TOH "adjointIdeal"@
 	@TOH "localCohomFW"@
+	@TOH "monodromyWeightHodgeOnV"@
 	@TOH "nuAlpha"@
 	@TOH "pFunction"@
 	@TOH "weightCheck"@
