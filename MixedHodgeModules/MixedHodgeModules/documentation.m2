@@ -128,11 +128,15 @@ doc ///
 
      [MP20b] M. Mustaţă and M. Popa, Hodge filtration, minimal exponent, and local vanishing, Invent. Math. {\bf 220} (2020), no. 2, 453--478; MR4081135
 
+     [MP22] M. Mustaţă and M. Popa, Hodge filtration on local cohomology, Du Bois complex, and local cohomological dimension, Forum Math. Pi 10 (2022), Paper No. e22
+
      [Ola22] S. Olano, Weighted multiplier ideals of reduced divisors, Math. Ann. {\bf 384} (2022), no. 3-4, 1091--1126; MR4498468
 
      [Ola23] S. Olano, Weighted Hodge ideals of reduced divisors, Forum Math. Sigma {\bf 11} (2023), Paper No. e51, 28 pp.; MR4603110
 
      [PR21] M. Perlman and C. Raicu, Hodge ideals for the determinant hypersurface, Selecta Math. (N.S.) {\bf 27} (2021), no. 1, Paper No. 1, 22 pp.; MR4198526
+
+     [SVV] W. Shen, S. Venkatesh, and A. D. Vo, On k-Du Bois and k-rational singularities, Ann. Inst. Fourier, to appear.
 
      [SY25] C. Schnell and R. Yang, Higher multiplier ideals, Journal für die reine und angewandte Mathematik (Crelle's Journal), DOI: 10.1515/crelle-2025-0097
      
@@ -1375,7 +1379,7 @@ doc ///
   Key
     gradedDuBoisComplex
   Headline
-    compute the graded Du Bois complexes for a divisor
+    compute the graded Du Bois complexes $\underline{\Omega}^p_D$ for a divisor
   Usage
     C = gradedDuBoisComplex(f,p)
   Inputs
@@ -1391,13 +1395,31 @@ doc ///
      Given a reduced polynomial $f\in S=\mathbb{Q}[x_1,\cdots,x_n]$ and $0\leq p\leq n-1$, this function computes a free complex
      quasi-isomorphic to $\underline{\Omega}^p_D$, where $D=V(f)$. As complexes in Macaulay2
      are homologically graded, the $-i$-th homology of this complex is the $i$-th
-     cohomology of $\underline{\Omega}^p_D$.
+     cohomology of $\underline{\Omega}^p_D$. The homology of this complex lives in non-positive degrees.
+
+     If $D$ is non-singular, we get $S$-free resolutions of the Kahler differentials
+    Example
+     S = QQ[x,y,z];
+     f = y^2-x;
+     DB0 = gradedDuBoisComplex(f,0)
+     prune HH_0(DB0)
+     DB1 = gradedDuBoisComplex(f,1)
+     prune HH_0(DB1)
+     DB2 = gradedDuBoisComplex(f,2)
+     prune HH_0(DB2)
+    Text
+     The following example shows that the cusp does not have Du Bois singularities, as $H^1(\underline{\Omega}^0_D)\neq 0$.
+    Example
+     S = QQ[x,y];
+     f = x^2+y^3;
+     DB0 = gradedDuBoisComplex(f,0)
+     prune HH_(-1)(DB0)
+     DB1 = gradedDuBoisComplex(f,1)
+     prune HH_(-1)(DB1)
   SeeAlso
      intersectionDuBoisComplex
      gradedDeRhamComplexH1
      gradedDeRhamCohomologyH1
-  References
-     See 
 ///
 
 
@@ -1405,7 +1427,7 @@ doc ///
   Key
     gradedDeRhamComplexH1
   Headline
-    compute the graded de Rham complexes for a divisor
+    compute the complexes $\operatorname{Gr}^F_p(\operatorname{DR}(H^1_f(S)))$
   Usage
     C = gradedDeRhamComplexH1(f,p)
   Inputs
@@ -1422,12 +1444,21 @@ doc ///
      quasi-isomorphic to $\operatorname{Gr}^F_p(\operatorname{DR}(H^1_f(S)))$. As complexes in Macaulay2
      are homologically graded, the $-i$-th homology of this complex is the $i$-th
      cohomology of $\operatorname{Gr}^F_p(\operatorname{DR}(H^1_f(S)))$.
+    Example
+     S = QQ[x,y,z]
+     f = x^2+y^3+z^2
+     C1 = gradedDeRhamComplexH1(f,-3)
+     prune HH_0(C1)
+     C2 = gradedDeRhamComplexH1(f,-2)
+     prune HH_0(C2)
+     prune HH_1(C2)
+     C3 = gradedDeRhamComplexH1(f,-1)
+     prune HH_2(C3)
   SeeAlso
      intersectionDuBoisComplex
      gradedDuBoisComplex
      gradedDeRhamCohomologyH1
-  References
-     See 
+
 ///
 
 
@@ -1437,7 +1468,7 @@ doc ///
     gradedDeRhamCohomologyH1
     (gradedDeRhamCohomologyH1,RingElement,ZZ,ZZ)
   Headline
-    compute cohomology of graded de Rham complexes for a divisor
+    compute cohomology of $\operatorname{Gr}^F_p(\operatorname{DR}(H^1_f(S)))$
   Usage
     H = gradedDeRhamCohomologyH1(f,p,q)
   Inputs
@@ -1456,12 +1487,19 @@ doc ///
      this function computes the $q$-th cohomology $\operatorname{Gr}^F_p(\operatorname{DR}(H^1_f(S)))$
      (which is a co-chain complex lying in cohomological degrees $\geq -n$). This function is more
      efficient than gradedDeRhamComplexH1, as it does not construct the entire complex.
+    Example
+     S = QQ[x,y,z]
+     f = x^2+y^3+z^2
+     gradedDeRhamCohomologyH1(f,-3,0)
+     gradedDeRhamCohomologyH1(f,-2,0)
+     gradedDeRhamCohomologyH1(f,-2,-1)
+     gradedDeRhamCohomologyH1(f,-1,-2)
+    Text
+     Compare to the calculation in @TO "gradedDeRhamComplexH1"@.
   SeeAlso
      intersectionDuBoisComplex
      gradedDeRhamComplexH1
      gradedDuBoisComplex
-  References
-     See 
 
 ///
 
@@ -1471,7 +1509,7 @@ doc ///
   Key
     intersectionDuBoisComplex
   Headline
-    compute the intersection Du Bois complexes for a divisor
+    compute the intersection Du Bois complexes $I\underline{\Omega}^p_D$ for a divisor
   Usage
     C = intersectionDuBoisComplex(f,p)
   Inputs
@@ -1487,13 +1525,46 @@ doc ///
      Given a reduced polynomial $f\in S=\mathbb{Q}[x_1,\cdots,x_n]$ and $0\leq p\leq n-1$, this function computes a free complex
      quasi-isomorphic to $I\underline{\Omega}^p_D$, where $D=V(f)$. As complexes in Macaulay2
      are homologically graded, the $-i$-th homology of this complex is the $i$-th
-     cohomology of $I\underline{\Omega}^p_D$.
+     cohomology of $I\underline{\Omega}^p_D$. The homology of this complex lives in non-positive degrees.
+
+     If $D$ is a rational homology manifold, this complex is quasi-isomorphic to $\underline{\Omega}^p_D$:
+    Example
+     S = QQ[x,y,z];
+     f = y^2-x*z;
+     DB0 = gradedDuBoisComplex(f,0)
+     IDB0 = intersectionDuBoisComplex(f,0)
+     prune HH_0(DB0)
+     prune HH_0(IDB0)
+     DB1 = gradedDuBoisComplex(f,1)
+     IDB1 = intersectionDuBoisComplex(f,1)
+     prune HH_0(DB1)
+     prune HH_0(IDB1)
+     DB2 = gradedDuBoisComplex(f,2)
+     IDB2 = intersectionDuBoisComplex(f,2)
+     prune HH_0(DB2)
+     prune HH_0(IDB2)
+    Text
+     We see that $D$ is pre $k$-Du Bois for all $k\geq 0$ (see [Proposition E, SVV]).
+
+     The next example shows that, when $f=xw-yz$, the Hodge filtration on $\operatorname{IC}_D$ is
+     generated in the first nonzero level (see [Theorem 3.1, PR21] and [Lemma 10.1, MP22])
+    Example
+     S = QQ[x,y,z,w];
+     f = x*w-y*z;
+     IDB0 = intersectionDuBoisComplex(f,0)
+     prune HH_0(IDB0)
+     IDB1 = intersectionDuBoisComplex(f,1)
+     prune HH_0(IDB1)
+     prune HH_(-1)(IDB1)
+     IDB2 = intersectionDuBoisComplex(f,2)
+     prune HH_0(IDB2)
+     prune HH_(-1)(IDB2)
   SeeAlso
      gradedDuBoisComplex
      gradedDeRhamComplexH1
      gradedDeRhamCohomologyH1
   References
-     See 
+     See [PR21], [MP22], and [SVV] in @TO "Works Cited"@.
 /// 
 
 --symbols:

@@ -6,10 +6,6 @@
 --(2) launch the package from this file, using code after "end"
 
 
---recent changes:
---(1) added HRHCheck and HRHLevel
---(2) added localCohomWF
---(3) added de Rham and Du Bois functions
 
 --to do:
 --(1) monodromy weight filtration on F_p(Gr_V^{alpha}(B_f)). Should be easy to add
@@ -20,7 +16,7 @@
 --(6) There is an old comment on pFunction "to do: modify so don't compute high nus". Action needed?
 --(7) There is an old comment on weightCheck "possible bug here, use percent instead?". Action needed?
 --(8) un-export weightHodgeOnV once monodromy is implemented?
---(9) document de Rham and Du Bois functions
+
 
 
 --change/add soon:
