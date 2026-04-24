@@ -84,12 +84,6 @@ export {
     "weightedHodgeIdeal",
     "weightHodgeOnV",
 
-    "compareHodgeIequalHigherMultI",
-    "testBrieskornPham",
-    "testHodgeIdealforWeightedHomog",
-    "testHodgeIhigherMultImodf",
-    "testWeightedHodge",
-
     "gradedDuBoisComplex",
     "intersectionDuBoisComplex",
     "gradedDeRhamComplexH1",
@@ -144,11 +138,6 @@ load "./MixedHodgeModules/nuAlpha.m2"
 load "./MixedHodgeModules/deRham.m2"
 
 ---------------------------------------------------------------
---functions to facilitate testing
----------------------------------------------------------------
-load "./MixedHodgeModules/testFunctions.m2"
-
----------------------------------------------------------------
 --files related to tests and documentation
 ---------------------------------------------------------------
 load "./MixedHodgeModules/tests.m2"
@@ -182,26 +171,6 @@ uninstallPackage "MixedHodgeModules"
 --tests/ examples
 
 
-needsPackage "SchurComplexes"
-R=QQ[x,y,z]
-f=y^2-x-z
-DB=gradedDuBoisComplex(f,1)
-M=prune HH_0 DB
-F=res M
-F.dd
-G=schurComplex({1,1},F)
-G.dd
-prune HH_0(G)
-prune HH_1(G)
-prune HH_2(G)
-
-
-R=QQ[x,y,z,w]
-f=x*w-y*z
-DB=intersectionDuBoisComplex(f,3)
-dd^DB
-prune HH_(-1) DB
-for i from -1 to 10 do print hilbertFunction(i,o31)
 
 
 --------------------------------------------------------------
@@ -251,10 +220,6 @@ testWeightedHodge(f,p,m)
 adjointIdeal(f)
 
 
-p=3
-compareHodgeIequalHigherMultI(f,p)--equal by Lorincz--Yang
-
-testHodgeIhigherMultImodf(f,p)
 
 S=QQ[x,y,z,w]
 f=x*y*z
@@ -276,18 +241,6 @@ hodgeIdeal(f,alpha,2)
 hodgeIdeal(f,alpha,3)
 hodgeIdeal(f,alpha,4)
 
-for p from 0 to 4 do print doesGenerateNext(f,1,p)
-generationLevel(f)
-p=5
-u={1/2,1/2,1/2,1/2}
-testHodgeIdealforWeightedHomog(f,p,u, UseGenLevel => False)
-testHodgeIdealforWeightedHomog(f,p,u)
-
-p=3
-m=2
-testWeightedHodge(f,p,m)
-adjointIdeal(f)
-
 
 hodgeOnV(f,2, UseBasis => sBasis)
 weightHodgeOnV(f,1,2,1, UseBasis => sBasis)
@@ -297,11 +250,6 @@ weightHodgeOnV(f,1,2,1, UseBasis => dtBasis)
 hodgeOnV(f,1,1)
 
 
-p=3
-compareHodgeIequalHigherMultI(f,p)--equal by Lorincz--Yang
---see also Zhang Conjecture E
-
-testHodgeIhigherMultImodf(f,p)
 
 ---------------------------------------------------------------
 
@@ -314,19 +262,7 @@ alpha=1
 generationLevel(f,alpha)
 w={1/3,1/2}
 p=4
-testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
-testHodgeIdealforWeightedHomog(f,p,w)
-testBrieskornPham({2,3},p)
-p=3
-m=1
-testWeightedHodge(f,p,m)
-adjointIdeal(f)
 
-
-p=3
-compareHodgeIequalHigherMultI(f,p)
-
-testHodgeIhigherMultImodf(f,p)
 
 --Davis--Yang page 4
 --Zhang Conjecture E
@@ -346,28 +282,7 @@ f=y^2-x*z
 hodgeOnV(f,1)
 w={1/2,1/2,1/2}
 p=5
-testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
-testHodgeIdealforWeightedHomog(f,p,w)
 
-p=3
-m=1
-testWeightedHodge(f,p,m)
-adjointIdeal(f)
-
-p=3
-compareHodgeIequalHigherMultI(f,p)--equal by Lorincz--Yang
---see also Zhang Conjecture E
-
-testHodgeIhigherMultImodf(f,p)
-
----------------------------------------------------------------
-
-
---Brieskorn Pham
-L={2,2,2,2,2}
-p=2
-testBrieskornPham(L,p, UseGenLevel => False)
-testBrieskornPham(L,p)
 
 
 ---------------------------------------------------------------
@@ -381,14 +296,9 @@ for p from 0 to 2 do print hodgeIdeal(f,1,p)
 ll=weightLength(f,1)
 p=1
 m=ll
-testWeightedHodge(f,p,m)
 adjointIdeal(f)
 
 
-p=2
-compareHodgeIequalHigherMultI(f,p)
-
-testHodgeIhigherMultImodf(f,p)
 
 ---------------------------------------------------------------
 
@@ -402,13 +312,8 @@ for p from 0 to 2 do print hodgeIdeal(f,alpha,p)
 
 p=0
 m=1
-testWeightedHodge(f,p,m)
 adjointIdeal(f)
 
-p=2
-compareHodgeIequalHigherMultI(f,p)
-
-testHodgeIhigherMultImodf(f,p)
 
 ---------------------------------------------------------------
 
@@ -433,11 +338,7 @@ for p from 0 to 1 do print hodgeIdeal(f,alpha,p)
 
 p=0
 m=1
-testWeightedHodge(f,p,m)--slow
-adjointIdeal(f)
 
-p=1
-compareHodgeIequalHigherMultI(f,p)--equal by Lorincz--Yang
 
 DB=gradedDuBoisComplex(f,1)
 dd^DB
@@ -455,13 +356,9 @@ time for p from 0 to 1 do print hodgeIdeal(f,alpha,p)
 
 p=0
 m=1
-testWeightedHodge(f,p,m)--slow, but runs
 adjointIdeal(f)
 
-p=1
-compareHodgeIequalHigherMultI(f,p)--equal by Lorincz--Yang
 
-testHodgeIhigherMultImodf(f,p)
 ---------------------------------------------------------------
 
 --Blanco example 1
@@ -475,7 +372,6 @@ for a in keys V do (
  
 p=0
 m=1
-testWeightedHodge(f,p,m)
 adjointIdeal(f)
 
 
@@ -492,7 +388,6 @@ for a in keys V do (
 
 p=0
 m=1
-testWeightedHodge(f,p,m)
 adjointIdeal(f)
 
 
@@ -507,8 +402,7 @@ hodgeOnV(f,0)--doesnt finish on my computer
 
 w={1/3,1/3,1/3}
 p=0
-testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
-testHodgeIdealforWeightedHomog(f,p,w)
+
 
 adjointIdeal(f)
 
@@ -523,22 +417,8 @@ f=x^2+y^2+z^(n+1);
 hodgeOnV(f,1)
 w={1/2,1/2,1/(n+1)}
 p=2
-testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
-testHodgeIdealforWeightedHomog(f,p,w)
-testBrieskornPham({2,2,n+1},p)
 
 
-p=0
-m=1
-testWeightedHodge(f,p,m)
-adjointIdeal(f)
-
-
-p=2
-compareHodgeIequalHigherMultI(f,p)
---see also Zhang Conjecture E
-
-testHodgeIhigherMultImodf(f,p)
 
 ---------------------------------------------------------------
 
@@ -553,19 +433,7 @@ factorBFunction generalB({f},1_S,Exponent => 2)
 hodgeOnV(f,1)
 w={1/2,1/(n-1),(n-2)/(2*(n-1))}
 p=1
-testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
-testHodgeIdealforWeightedHomog(f,p,w)
 
-p=0
-m=1
-testWeightedHodge(f,p,m)
-adjointIdeal(f)
-
-p=2
-compareHodgeIequalHigherMultI(f,p)
---see also Zhang Conjecture E
-
-testHodgeIhigherMultImodf(f,p)
 
 ---------------------------------------------------------------
     
@@ -577,15 +445,7 @@ f=x^2+y^3+z^4
 hodgeOnV(f,1) 
 w={1/2,1/3,1/4}
 p=1
-testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
-testHodgeIdealforWeightedHomog(f,p,w)
 
-p=0
-m=1
-testWeightedHodge(f,p,m)
-adjointIdeal(f)
-
-testHodgeIhigherMultImodf(f,p)
 ---------------------------------------------------------------
     
 
@@ -597,15 +457,7 @@ factorBFunction oo
 alpha=1
 w={1/2,1/3,2/9}
 p=1
-testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
-testHodgeIdealforWeightedHomog(f,p,w)
 
-p=0
-m=1
-testWeightedHodge(f,p,m)
-adjointIdeal(f)
-
-testHodgeIhigherMultImodf(f,p)
 ---------------------------------------------------------------
 
 --E8 singularity
@@ -616,15 +468,7 @@ factorBFunction oo
 alpha=1
 w={1/2,1/3,1/5}
 p=1
-testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
-testHodgeIdealforWeightedHomog(f,p,w)
 
-p=1
-m=1
-testWeightedHodge(f,p,m)
-adjointIdeal(f)
-
-testHodgeIhigherMultImodf(f,p)
 
 ---------------------------------------------------------------
 
@@ -656,8 +500,6 @@ for i from 0 to p do (
     print J;
     )
 
-
-testHodgeIhigherMultImodf(f,p)
 
 
 --------------------------------------------------------------

@@ -33,7 +33,6 @@ doc ///
      discussed above using the module $V^{\alpha}(B_f)$.
 
      This package has functionality for calculating the Hodge filtration $F_{\bullet}$ on $V^{\alpha}(B_f)$,
-     as well as the monodromy weight filtration on a Hodge filtered piece $F_p(\operatorname{Gr}_V^{\alpha}(B_f))$,
      using algorithms based on [Bla22]. As applications, this package computes the Hodge ideals, weighted Hodge ideals,
      and higher multiplier ideals for $\mathbb{Q}$-divisors, as well as related invariants including the generation
      level of the Hodge filtration on $S_ff^{-\alpha}$ and the HRH level.
@@ -1436,6 +1435,7 @@ doc ///
 doc ///
   Key
     gradedDeRhamCohomologyH1
+    (gradedDeRhamCohomologyH1,RingElement,ZZ,ZZ)
   Headline
     compute cohomology of graded de Rham complexes for a divisor
   Usage
