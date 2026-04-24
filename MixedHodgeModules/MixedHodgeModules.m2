@@ -8,14 +8,13 @@
 
 
 --to do:
---(1) monodromy weight filtration on F_p(Gr_V^{alpha}(B_f)). Should be easy to add
---(2) fill in descriptions and examples in documentation for nuAlpha, pFunction (and their strategies)
---(3) add examples in doc of other strategies for weightLength
---(4) create tests for every function and add to tests.m2
---(5) determine which strategy for weightLength should be default.
---(6) There is an old comment on pFunction "to do: modify so don't compute high nus". Action needed?
---(7) There is an old comment on weightCheck "possible bug here, use percent instead?". Action needed?
---(8) un-export weightHodgeOnV once monodromy is implemented?
+--(1) fill in descriptions and examples in documentation for nuAlpha, pFunction (and their strategies)
+--(2) add examples in doc of other strategies for weightLength
+--(3) create tests for every function and add to tests.m2
+--(4) determine which strategy for weightLength should be default.
+--(5) There is an old comment on pFunction "to do: modify so don't compute high nus". Action needed?
+--(6) There is an old comment on weightCheck "possible bug here, use percent instead?". Action needed?
+--(7) un-export weightHodgeOnV once monodromy is implemented?
 
 
 
@@ -72,6 +71,7 @@ export {
     "HRHLevel",
     "IHmoduleAdjoint",
     "localCohomFW",
+    "monodromyWeightHodgeOnV",
     "nuAlpha",
     "pFunction",
     "weightCheck",

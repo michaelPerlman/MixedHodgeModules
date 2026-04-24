@@ -370,3 +370,166 @@ localCohomFW = (I,q,p,m) -> (
 
     prune Hq
     ) 
+
+
+----------------------------------------------------------------
+----------------------------------------------------------------
+
+monodromyWeightHodgeOnV = method(Options => {UseBasis => dtBasis})
+
+--use "UseBasis => sBasis" to get s-basis (will have denominators)
+
+monodromyWeightHodgeOnV(RingElement, ZZ, ZZ, ZZ) :=
+monodromyWeightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,ell) -> (
+--alpha is a rational number in (0,1]
+--p is a non-negative integer
+--ell is the monodromy weight index, centered at 0
+--calculates W(N)_ell F_p Gr^alpha_V(B_f), lifted to F_p V^alpha(B_f)
+
+    if (options.UseBasis != dtBasis) and  (options.UseBasis != sBasis) then error "invalid UseBasis";
+
+    ------------------------------------------------------------------------
+    -- Step 1. Basic setup and annihilator data for f^s
+    ------------------------------------------------------------------------
+
+    negAlphaQQ := -sub(alpha,QQ);
+    AnnFsf := AnnFs f;
+    Ds := ring AnnFsf;
+    G := gens gb AnnFsf;
+    numGensDs := numgens Ds;
+    ss := Ds_(numGensDs-1);
+    DsF := substitute(f,Ds);
+
+    bs := generalB({f},1_(ring f), Exponent => p+1);
+    bsFac := factorBFunction bs;
+    rhoFp := sort apply(toList(0..(#bsFac-1)), i -> {sub((ring bs)_0-(bsFac#i#0),QQ),bsFac#i#1});
+    --the roots are rational numbers
+
+    ------------------------------------------------------------------------
+    -- Step 2. Build J_p and the module M = D/J_p
+    ------------------------------------------------------------------------
+
+    Gp := flatten entries G;
+    Jp := ideal(Gp) + ideal(DsF^(p+1));
+    M := Ds^1 / Jp;
+
+    ------------------------------------------------------------------------
+    -- Step 3. Compute eigenspace kernels for V^>alpha and V^alpha
+    ------------------------------------------------------------------------
+
+    sLamMapsLess := {};
+    sLamMapsAlpha := {};
+
+    for i in rhoFp do (
+        lam := sub(i_0, Ds);
+        mult := i_1;
+        a := (ss - lam)^mult;
+
+        if i_0 < negAlphaQQ-p then (
+            sLamMapsLess = append(sLamMapsLess, map(M, M, matrix{{a}}))
+        )
+        else if i_0 == negAlphaQQ-p then (
+            sLamMapsAlpha = append(sLamMapsAlpha, map(M, M, matrix{{a}}))
+        );
+    );
+
+    Galpha := ideal flatten apply(sLamMapsLess, i -> flatten entries gens kernel i);
+    Klams := ideal flatten apply(sLamMapsAlpha, i -> flatten entries gens kernel i);
+
+    preVgAlpha := Galpha;              -- corresponds to V^(>alpha)
+    preVAlpha := Galpha + Klams;       -- corresponds to V^alpha
+
+    ------------------------------------------------------------------------
+    -- Step 4. Monodromy operator N = s + alpha
+    -- In the shifted M-coordinate, this is ss + p + alpha
+    ------------------------------------------------------------------------
+
+    Nop := ss + p + alpha;
+
+    ------------------------------------------------------------------------
+    -- Step 5. Nilpotence index at alpha
+    ------------------------------------------------------------------------
+
+    nilIndex := 0;
+
+    for i in rhoFp do (
+        if i_0 == negAlphaQQ-p then nilIndex = i_1;
+    );
+
+    ------------------------------------------------------------------------
+    -- Step 6. Helper functions for lifted kernels and images
+    --
+    -- kerLift(r) = lift of ker(N^r) inside V^alpha/V^>alpha
+    -- imLift(b)  = lift of im(N^b) inside V^alpha/V^>alpha
+    ------------------------------------------------------------------------
+
+    preVgAlpha = sub(preVgAlpha, Ds);
+    preVAlpha = sub(preVAlpha, Ds);
+
+    kerLift := r -> (
+        if r <= 0 then ideal(0_Ds)
+        else intersect(preVAlpha, ((preVgAlpha + Jp) : ideal(Nop^r)))
+    );
+
+    imLift := b -> (
+        if b == 0 then preVAlpha
+        else (
+            ideal flatten apply(flatten entries gens preVAlpha, g -> Nop^b*g)
+        ) + preVgAlpha + Jp
+    );
+
+    ------------------------------------------------------------------------
+    -- Step 7. Compute W(N)_ell, centered at 0:
+    --
+    -- W(N)_ell = sum_{i+j=ell} ker(N^(i+1)) cap im(N^(-j))
+    --
+    -- Equivalently, writing b = -j >= 0:
+    --
+    -- W(N)_ell = sum_{b >= 0, ell+b >= 0}
+    --            ker(N^(ell+b+1)) cap im(N^b)
+    ------------------------------------------------------------------------
+
+    Wlift := preVgAlpha + Jp;
+
+    for b from 0 to nilIndex do (
+        i := ell + b;
+
+        if i >= 0 then (
+            summand := intersect(kerLift(i+1), imLift(b));
+            Wlift = Wlift + summand;
+        );
+    );
+
+    K := intersect(preVAlpha, Wlift);
+
+    ------------------------------------------------------------------------
+    -- Step 8. Eliminate, truncate, and change coordinates
+    ------------------------------------------------------------------------
+
+    Halpha := DsToRs(K);
+    Rs := ring Halpha_0;
+    WFVpM := select(Halpha, g -> degree(Rs_0, g) <= p);
+    -- this is W(N)_ell F_p Gr^alpha_V in the M-coordinate, lifted to V^alpha
+
+    WFVpBf := WFVpM;
+
+    if options.UseBasis == sBasis then WFVpBf = fromMRsToBf(WFVpBf, f, Rs,p);
+    if options.UseBasis == dtBasis then WFVpBf = convertMStoDtBasisBf(WFVpBf, f, Rs, p);
+
+    WFVpBf
+    )
+
+
+
+end
+
+monodromyWeightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,ell)
+
+
+S=QQ[x,y,z,w]
+alpha=1
+f=x*w-y*z
+
+for p from 0 to 3 do (
+    for ell from 0 to 3 do (
+	print monodromyWeightHodgeOnV(f,alpha,p,ell)))
