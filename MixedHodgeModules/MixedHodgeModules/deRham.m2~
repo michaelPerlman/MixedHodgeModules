@@ -1,0 +1,720 @@
+--Copyright 2026 by Andras Lorincz and Michael Perlman
+
+
+--to do:
+--(0) change q to minus q?
+--(1) get correct shifts in exported functions
+--(2) de Rham table?
+--(3) comment the code more
+--(5) make koszul slice faster?
+--(6) document exported functions
+--(7) make sections of documentation?
+--(8) weighted homogeneous isolated option
+
+
+
+--------------------------------------------------------------------
+--helper functions to represent S-presentations of Gr^F_p
+--------------------------------------------------------------------
+
+Epair = (f,I,J) -> (
+
+    M := module(J)/module(f*I);
+    P := matrix entries presentation M;
+
+    P
+    )
+
+--------------------------------------------------------------------
+
+Ematrix = (f,idealList) -> (
+
+    S := ring f;
+
+    t := #idealList;
+    Epairs := apply(toList(0..t-2), i -> Epair(f,idealList_i, idealList_(i+1)));
+
+    EpairsFixZeros := apply(Epairs, M -> if M == 0_ZZ then matrix{{0_S}} else M);
+    
+    Emat := directSum(EpairsFixZeros);
+
+    Emat
+    )
+
+
+--------------------------------------------------------------------
+--helper functions for UV matrices, which encode syzygies between
+--two graded pieces via differential operators
+--------------------------------------------------------------------
+
+
+
+diSyz = (f,IJ,aa,p,i) -> (
+--output {U^i,V^i} for IJ in idealPairs of UVList    
+
+    S := ring f;
+
+    I := IJ_1;
+    J := IJ_2;
+
+    diI := ideal(apply(flatten entries gens I, m -> diff(S_i,m)*f-(aa+p+IJ_0+1)*m*diff(S_i,f)));--double check factor
+
+    syzMat := matrix entries syz gens (diI + J);
+
+    UBlockRows := toList(0..IJ_3-1);
+
+
+    UBlock := submatrix(syzMat, UBlockRows, );
+
+    VBlockRows := toList(IJ_3..(IJ_3+IJ_4-1));
+    
+
+    VBlock := submatrix(syzMat, VBlockRows, );
+
+
+    {UBlock, VBlock}   
+    )
+
+--------------------------------------------------------------------
+
+
+UVpair = (f,IJ,aa,p,n) -> (
+--output UV={{U^1,V^1}..{U^n,V^n}} for IJ in idealPairs of UVList
+--each U has IJ_3 many rows and each V has IJ_4 many rows
+
+    syzMats := apply(toList(0..n-1), i -> diSyz(f,IJ,aa,p,i));
+
+    syzMats
+
+    )
+
+--------------------------------------------------------------------
+
+
+UVList = (f,idealList, rList, aa, p, S) -> (
+--output list of UVpair for each IJ in idealPairs
+
+
+    n := numgens S;
+
+    --idealList = {I_{p+aa-1}..I_{p+bb}}
+
+    newIdealList := drop(idealList,1);--don't need first ideal
+
+    --newIdealList = {I_{p+aa}..I_{p+bb}}
+
+    t := #newIdealList;--\geq 2
+
+    idealPairs := apply(toList(0..t-2), i -> {i,newIdealList_i, newIdealList_(i+1),rList_i, rList_(i+1)});--{i,I_i, I_{i+1}, rList_i, rList_(i+1)}
+    
+
+    UVlist := apply(idealPairs, IJ -> UVpair(f,IJ,aa,p,n));
+
+    UVlist
+    )
+
+
+--------------------------------------------------------------------
+
+
+scaleU = (x,A) -> (
+
+    n := numgens A;
+
+    xScaled := apply(toList(0..n-1), i -> {A_i*((x_i)_0), (x_i)_1});
+
+    xScaled
+    )
+
+
+-------------------------------------------------------------------
+
+zeroMat = (A,r,c) -> map(A^r, A^c, (i,j) -> 0_A)
+
+hcat = L -> (
+    if #L == 0 then error "hcat: empty list";
+    M := L_0;
+    for i from 1 to #L-1 do M = M | L_i;
+    M
+    )
+
+vcat = L -> (
+    if #L == 0 then error "vcat: empty list";
+    M := L_0;
+    for i from 1 to #L-1 do M = M || L_i;
+    M
+    )
+
+-------------------------------------------------------------------
+
+putTogether = (UVAscaled, rList) -> (
+-- UVAscaled_k = {{xi_1 U_k^1, V_k^1}, ..., {xi_n U_k^n, V_k^n}}
+-- rList = {r_{p+aa}, ..., r_{p+bb}}
+-- output = the full UV block in staircase form
+
+    numRowss := #rList;
+    numSlots := #UVAscaled;
+
+    if numSlots != numRowss-1 then error "putTogether: wrong number of UV blocks";
+
+    XiUList := apply(UVAscaled, x -> hcat(apply(x, uv -> uv_0)));
+    VList   := apply(UVAscaled, x -> hcat(apply(x, uv -> uv_1)));
+
+    A := ring XiUList_0;
+    cList := apply(XiUList, M -> numcols M);
+
+    rows := for j from 0 to numRowss-1 list (
+        blocks := for s from 0 to numSlots-1 list (
+            if s == j then XiUList_s
+            else if s == j-1 then VList_(j-1)
+            else zeroMat(A, rList_j, cList_s)
+        );
+        hcat(blocks)
+    );
+
+    vcat(rows)
+)
+
+
+    
+
+    
+--------------------------------------------------------------------
+---helper function to encode f^k torsion of local cohomology and IC
+--------------------------------------------------------------------
+
+fTorsion = (f,rList,aa,p) -> (
+
+    diagEntries := {};
+
+    m := #rList;
+
+    for j from 0 to m-1 do (
+	fPowerList := apply(toList(0..rList_j-1), i -> f^(max{0,j+aa+p+1}));
+	diagEntries = append(diagEntries, fPowerList);
+	);
+
+    diagonalMatrix flatten diagEntries
+    )
+
+    
+
+--------------------------------------------------------------------
+---helper function to create koszul complex, tensor with N, and take
+--appropriate graded piece
+--------------------------------------------------------------------   
+    
+    
+koszulSlice = (A,S,p,N) -> (
+--N is a graded A module
+--form the Koszul complex, tensor with N
+--take the p-th graded piece
+--sub back into S
+
+    n := numgens S;
+
+    xigens := ideal( apply(toList(0..n-1), i -> A_(i)));
+    
+    K :=  freeResolution xigens;
+
+    Ktwisted := K**A^{1:{n,0}};
+    
+
+    DRN := Ktwisted**N;
+
+    FF := freeResolution(DRN);
+    
+
+    DRp := part({p,0},FF);--a complex of QQ[e_1..e_n]-modules
+
+    QQe := ring DRp;
+
+    QQeToS := map(S,QQe, gens S);
+
+    DRpS := QQeToS(DRp);
+
+    DRpS
+    )
+
+
+
+--------------------------------------------------------------------
+---Main technical function for de Rham cohomology
+--------------------------------------------------------------------
+
+
+deRhamInterval = method(Options => {InputType => HodgeIdeals})
+
+--HodgeIdeals will give H^1_f(S)
+--WeightedHodgeIdeals will give IC_f
+
+deRhamInterval(RingElement, List, ZZ) := options -> (f,B,p) -> (
+--B={a,b} is a list with -n\leq a\leq b \leq 0
+--p is an integer
+--output is the complex (K\otimes N)_p
+--which gives correct cohomology in degrees a..b
+--if a=-n and b=0, then gives correct cohomology everywhere
+
+--gives as free complex quasi-isomorphic to DR
+
+
+--step 0: initialize information
+     S := ring f;
+     n := numgens S;
+     if #B == 1 then B = append(B,B_0);--take care of the case B is singleton
+     aa := max{B_0-2,-n}+n;--shift so aa>= 0
+     bb := min{B_1,0}+n;--shift so bb<= n
+ 
+
+     -- step 1: calculate necessary ideals and get their numgens
+     --need Gr_{p+j}(M) for all aa <= j <= bb
+     --need I_{p+j} for all aa-1 <= j <= bb
+
+     idealList := {};
+
+     if options.InputType == HodgeIdeals then (
+	 HodgeIdealTemp := (f,k) -> (if k < 0 then ideal(0_S) else hodgeIdeal(f,1,k));
+	 idealList = apply(toList(aa-1..bb), i -> HodgeIdealTemp(f,p+i));
+	 );
+
+     if options.InputType == WeightedHodgeIdeals then (
+	 WHodgeIdealTemp := (f,k) -> (if k <0 then ideal(0_S) else weightedHodgeIdeal(f,1,k,1));
+	 idealList = apply(toList(aa-1..bb), i -> WHodgeIdealTemp(f,p+i));
+	 );
+
+     --idealList = {I_{p+aa-1}..I_{p+bb}}
+     
+     rList := drop( apply(idealList, I -> numgens I), 1);
+     
+     -- step 2: calculate Ematrix
+
+     E := Ematrix(f,idealList);--a matrix with sum rList many rows
+     
+
+     -- step 3: calculate UV matrix
+
+     UV := UVList(f,idealList,rList,aa,p,S);--{UV_(p+aa)..UV_(p+bb-1)}
+     --here, UV_j={{U^1,V^1}..{U^n,V^n}}
+
+
+     -- step 4: calculate f-torsion matrix
+
+     fTors := fTorsion(f,rList,aa,p);--a matrix with sum rList many rows
+
+     -- step 5: create A
+
+
+
+     e := local e;
+     de := local de;
+     eDegs := apply(toList(0..n-1), i-> 0);
+     deDegs := apply(toList(0..n-1), i -> 1);
+     A := QQ[e_1..e_n, Degrees => eDegs][de_1..de_n, Degrees => deDegs];
+
+     StoA := map(A,S, apply(toList(0..n-1), i -> e_(i+1)));
+
+     -- step 6: sub all matrices into A
+     -- scale U matrix approproately
+
+     EA := StoA(E);
+     fTorsA := StoA(fTors);
+
+
+     --UV stuff
+
+     UVA := apply(UV, x -> apply(x, uv -> {StoA(uv_0), StoA(uv_1)}));
+
+
+     UVAscaled := apply(UVA, x -> scaleU(x,A));
+
+
+     UVMatrix := putTogether(UVAscaled, rList);
+
+     presN := EA|UVMatrix|fTorsA;
+
+
+     --step 7: create presentation matrix N
+     --make sure all matrices are stripped of degrees first
+
+     summnds := apply(toList(0..#rList-1), i -> A^{rList_i:{ -aa-p-i,0}});
+     
+
+     freeMod := directSum(summnds);
+
+
+     presNGraded := map(freeMod, ,presN);
+
+
+     N := cokernel presNGraded;
+
+     --step 8: calculate Koszul cohomology and slice
+     --and sub back into S
+
+     GRDRp := koszulSlice(A,S,p,N);
+
+     GRDRp
+     )
+     
+
+
+
+--------------------------------------------------------------------
+-------------------------------------------------------------------- 
+
+gradedDeRhamComplex = method(Options => {InputType => HodgeIdeals})
+--gives the entire de Rham complex
+
+gradedDeRhamComplex(RingElement,ZZ) := options -> (f,p) -> (
+
+    S := ring f;
+    n := numgens S;
+    B := {-n,0};
+
+    DRp := deRhamInterval(f,B,p, InputType => options.InputType);
+
+    DRp
+    )
+
+--------------------------------------------------------------------
+-------------------------------------------------------------------- 
+
+
+gradedDeRhamComplexH1 = (f,p) -> (
+--in *homological* degrees n..0
+--free complex quasi-isomorphic
+
+    DRp := gradedDeRhamComplex(f,p, InputType => HodgeIdeals);
+
+    DRp
+    )
+
+--------------------------------------------------------------------
+-------------------------------------------------------------------- 
+
+intersectionDuBoisComplex = (f,p) -> (
+--gives a free complex
+--interesting homological degrees 0,-1,..,-n
+--our convention makes it the same as gradedDuBoisComplex for RHM
+
+    S := ring f;
+    n := numgens S;
+
+    DRp := gradedDeRhamComplex(f,p-n, InputType => WeightedHodgeIdeals);
+
+    RHomDRp := Hom(DRp, S^1);
+    
+    RHomDRpShift := RHomDRp[-p-1];
+
+    RHomDRpShift
+    )
+
+--------------------------------------------------------------------
+-------------------------------------------------------------------- 
+
+-*
+
+gradedDeRhamCohomology = method(Options => {InputType => HodgeIdeals})
+
+gradedDeRhamCohomology(RingElement,ZZ,ZZ) := options -> (f,p,q) -> (
+--q should be an integer between -n and 0
+
+    DRpq := deRhamInterval(f,{q},p, InputType => options.InputType);
+
+    H := HH_(q)(DRpq);--make sure index is correct
+
+    H
+    )
+
+
+gradedDeRhamCohomologyH1 = (f,p,q) -> (
+
+    H := gradedDeRhamCohomology(f,p,q, InputType => HodgeIdeals);
+
+    H
+    )
+
+
+gradedDeRhamCohomologyIC = (f,p,q) -> (
+
+    H := gradedDeRhamCohomology(f,p,q, InputType => WeightedHodgeIdeals);
+
+    H
+    )
+  
+*-
+
+gradedDuBoisComplex = (f,p) -> (
+--gives Omega^p_D as a free complex
+--interesting homological degrees 0,-1,..,-n
+--Prop 13.1 Mustata--Popa "Hodge filtration on local cohomology..."
+
+    S := ring f;
+    n := numgens S;
+
+    DRk := gradedDeRhamComplexH1(f,p-n);--choose the right k here
+
+    --resDRk := freeResolution(DRk);
+
+    RHomDRk := Hom(DRk, S^1);
+
+    --do the correct cohomological shift
+
+    RHomDRkShift := RHomDRk[-p-1];--1 codim
+
+    RHomDRkShift
+    )
+
+    
+
+    
+
+    
+--export:
+
+--gradedDuBoisComplex
+--intersectionDuBoisComplex
+--gradedDeRhamComplexH1
+     
+     
+
+     
+
+  
+
+
+end
+
+restart
+load "MixedHodgeModules.m2"
+installPackage "MixedHodgeModules"
+load "MixedHodgeModules/deRhamDraft.m2"
+viewHelp MixedHodgeModules
+check "MixedHodgeModules"
+uninstallPackage "MixedHodgeModules"
+
+
+-------------------------------------
+
+
+S=QQ[x,y,z]
+f=y^2-x-z
+p=-2
+DR=gradedDeRhamComplexH1(f,p)
+
+O0=gradedDuBoisComplex(f,0)
+O1=gradedDuBoisComplex(f,1)
+O2=gradedDuBoisComplex(f,2)
+
+HH_(0) O0
+prune HH_(0) O1
+prune HH_(0) O2
+
+
+prune HH_0 DR
+prune HH_1 DR
+prune HH_2 DR
+prune HH_3 DR
+
+p=-3
+IC=intersectionDuBoisComplex(f,p)
+prune HH_0 IC
+prune HH_1 IC
+prune HH_2 IC
+prune HH_3 IC
+
+
+
+
+S=QQ[x,y,z,w]
+f=x*w-y*z
+p=-3
+DR=gradedDeRhamComplexH1(f,p)
+
+
+
+prune HH_0 DR
+prune HH_1 DR
+prune HH_2 DR
+prune HH_3 DR
+prune HH_4 DR
+
+S=QQ[x,y,z,w]
+f=x*w-y*z
+p=1
+IC=intersectionDuBoisComplex(f,p)
+prune HH_0 IC
+prune HH_1 IC
+prune HH_2 IC
+prune HH_3 IC
+prune HH_4 IC
+
+O0=gradedDuBoisComplex(f,0)
+O1=gradedDuBoisComplex(f,1)
+O2=gradedDuBoisComplex(f,2)
+O3=gradedDuBoisComplex(f,3)
+
+IC0=intersectionDuBoisComplex(f,0)
+IC1=intersectionDuBoisComplex(f,1)
+IC2=intersectionDuBoisComplex(f,2)
+IC3=intersectionDuBoisComplex(f,3)
+
+HH_(0) O0
+prune HH_(0) O1
+prune HH_(0) O2
+prune HH_0 O3
+
+
+S=QQ[x,y]
+f=x^2+y^3
+p=-2
+DR=gradedDeRhamComplexH1(f,p)
+prune HH_0 DR
+prune HH_1 DR
+prune HH_2 DR
+
+O0=gradedDuBoisComplex(f,0)
+O1=gradedDuBoisComplex(f,1)
+O2=gradedDuBoisComplex(f,2)
+
+prune HH_(0) O0
+prune HH_(0) O1
+prune HH_0 O2
+
+IC=intersectionDuBoisComplex(f,p)
+KK= S^1/ideal(gens S)
+
+
+
+prune HH_0 IC
+prune HH_1 IC
+prune HH_2 IC
+prune HH_3 IC
+
+
+
+-----------------------------------------------------------------
+
+S=QQ[x,y]
+f=x^2+y^3
+
+for p from -2 to 0 do (
+    for q from 0 to 2 do (
+	print {p,q,GRFdeRhamH1f(f,p,q)}
+	))
+
+for p from -2 to 0 do (
+    for q from 0 to 2 do (
+	print {p,q,GRFdeRhamIC(f,p,q)}
+	))
+
+
+------------------------------------
+
+S=QQ[x,y,z,w]
+f=x*w-y*z
+
+deRhamInterval(f,{-1},-1, InputType => HodgeIdeals)
+GRFdeRhamH1f(f,0,1)
+
+for p from -4 to 0 do (
+    for q from 0 to 4 do (
+	print {p,q,GRFdeRhamH1f(f,p,q)}
+	))
+
+for p from -4 to 0 do (
+    for q from 0 to 4 do (
+	print {p,q,GRFdeRhamIC(f,p,q)}
+	))
+
+------------------------------------
+
+
+S=QQ[x,y,z,w]
+f=x^2+y+z+w
+for p from -4 to 0 do (
+    for q from 0 to 4 do (
+	print {p,q,GRFdeRhamH1f(f,p,q)}
+	))
+
+for p from -4 to 0 do (
+    for q from 0 to 4 do (
+	print {p,q,GRFdeRhamIC(f,p,q)}
+	))
+
+
+---------------------------
+---
+
+S=QQ[x,y,z]
+f=x^2+y+z
+for p from -3 to 4 do (
+    for q from 0 to 3 do (
+	print {p,q,GRFdeRhamH1f(f,p,q)}
+	))
+
+
+S=QQ[x,y,z]
+f=x^2+y+z
+for p from -3 to 4 do (
+    for q from 0 to 3 do (
+	print {p,q,GRFdeRhamSf(f,p,q)}
+	))
+
+
+------------------------------------
+
+S=QQ[x,y,z]
+f=y^2-x*z
+
+
+for p from -3 to 0 do (
+    for q from 0 to 3 do (
+	print {p,q,GRFdeRhamH1f(f,p,q)}
+	))
+
+
+for p from -3 to 0 do (
+    for q from 0 to 3 do (
+	print {p,q,GRFdeRhamIC(f,p,q)}
+	))
+
+
+------------------------------------
+
+
+--3x3 symmetric determinant
+R=QQ[x_1..x_6]
+f=determinant genericSymmetricMatrix(R,x_1,3)
+
+for p from -6 to -3 do (
+    for q from 0 to 6 do (
+	print {p,q,GRFdeRhamH1f(f,p,q)}
+	))
+
+
+for p from -6 to -3 do (
+    for q from 0 to 6 do (
+	print {p,q,GRFdeRhamIC(f,p,q)}
+	))
+
+
+------------------------------------
+
+S=QQ[x,y]
+f=x^2+y
+p=-1
+
+
+DR = GRFdeRhamComplex (f,p)
+
+DRp = part({p+2,0},DR)
+
+
+freeResolution(DRp)
+
+
+
+for p from -2 to 0 do (
+    for q from 0 to 2 do (
+	print {p,q,GRFdeRhamH1f(f,p,q)}
+	))
