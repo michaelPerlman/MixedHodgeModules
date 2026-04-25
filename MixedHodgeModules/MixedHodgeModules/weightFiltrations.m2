@@ -386,6 +386,7 @@ monodromyWeightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,ell) -
 --ell is the monodromy weight index, centered at 0
 --calculates W(N)_ell F_p Gr^alpha_V(B_f), lifted to F_p V^alpha(B_f)
 
+    if ell < 0 then error "expected input weight to be a non-negative integer";
     if (options.UseBasis != dtBasis) and  (options.UseBasis != sBasis) then error "invalid UseBasis";
 
     ------------------------------------------------------------------------
@@ -481,21 +482,19 @@ monodromyWeightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,ell) -
     ------------------------------------------------------------------------
     -- Step 7. Compute W(N)_ell, centered at 0:
     --
-    -- W(N)_ell = sum_{i+j=ell} ker(N^(i+1)) cap im(N^(-j))
-    --
-    -- Equivalently, writing b = -j >= 0:
-    --
     -- W(N)_ell = sum_{b >= 0, ell+b >= 0}
     --            ker(N^(ell+b+1)) cap im(N^b)
     ------------------------------------------------------------------------
 
     Wlift := preVgAlpha + Jp;
 
-    for b from 0 to nilIndex do (
-        i := ell + b;
+    lowerB := max(0,-ell);
+    upperB := nilIndex;
 
-        if i >= 0 then (
-            summand := intersect(kerLift(i+1), imLift(b));
+    if lowerB <= upperB then (
+        for b from lowerB to upperB do (
+            r := ell + b + 1;
+            summand := intersect(kerLift(r), imLift(b));
             Wlift = Wlift + summand;
         );
     );
@@ -527,9 +526,32 @@ monodromyWeightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,ell)
 
 
 S=QQ[x,y,z,w]
-alpha=1
+alpha=1/2
 f=x*w-y*z
 
 for p from 0 to 3 do (
     for ell from 0 to 3 do (
 	print monodromyWeightHodgeOnV(f,alpha,p,ell)))
+
+for p from 0 to 3 do (
+    for ell from 0 to 3 do (
+	print hodgeOnV(f,alpha,p)))
+
+
+
+
+S=QQ[x,y]
+alpha=1
+f=x^2+y^3
+
+for p from 0 to 3 do (
+    for ell from 0 to 3 do (
+	print monodromyWeightHodgeOnV(f,alpha,p,ell)))
+
+for p from 0 to 3 do (
+    for ell from 0 to 3 do (
+	print weightHodgeOnV(f,alpha,p,ell)))
+
+for p from 0 to 3 do (
+    for ell from 0 to 3 do (
+	print hodgeOnV(f,alpha,p)))

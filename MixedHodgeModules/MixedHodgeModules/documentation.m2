@@ -928,10 +928,10 @@ doc ///
   Headline
     compute the monodromy weight filtration on $F_p(\operatorname{Gr}^{\alpha}_V(B_f))$
   Usage
-    L = monodromyWeightHodgeOnV(f,alphaQQ,p,ell)
-    L = monodromyWeightHodgeOnV(f,alphaQQ,p,ell,UseBasis => sBasis)
-    L = monodromyWeightHodgeOnV(f,alphaZZ,p,ell)
-    L = monodromyWeightHodgeOnV(f,alphaZZ,p,ell,UseBasis => sBasis)
+    L = monodromyWeightHodgeOnV(f,alphaQQ,p,m)
+    L = monodromyWeightHodgeOnV(f,alphaQQ,p,m,UseBasis => sBasis)
+    L = monodromyWeightHodgeOnV(f,alphaZZ,p,m)
+    L = monodromyWeightHodgeOnV(f,alphaZZ,p,m,UseBasis => sBasis)
   Inputs
     f: RingElement
      a polynomial with rational coefficients
@@ -941,31 +941,39 @@ doc ///
      the integer $1$.
     p: ZZ
      a non-negative integer
-    ell: ZZ
-     an integer indexing the monodromy weight filtration, centered at $0$
+    m: ZZ
+     a non-negative integer indexing the monodromy weight filtration (centered at $0$)
   Outputs
     L: List
-     a list representing an $S$-basis for a lift of $W(N)_{\ell}F_p(\operatorname{Gr}^{\alpha}_V(B_f))$ to $F_p(V^{\alpha}(B_f))$
+     a list representing an $S$-basis for a lift of $W(N)_m F_p(\operatorname{Gr}^{\alpha}_V(B_f))$ to $F_p(V^{\alpha}(B_f))$
   Description
     Text
-     Let $N=s+\alpha$ denote the nilpotent operator on $\operatorname{Gr}^{\alpha}_V(B_f)$. This function computes the $\ell$-th piece of the monodromy weight filtration
-     on $F_p(\operatorname{Gr}^{\alpha}_V(B_f))$, centered at $0$, and returns a lift to $F_p(V^{\alpha}(B_f))$.
-     The output is written in the $\partial_t$-basis by default.
-
+     Let $s=-\partial_t t$. Multiplication by $(s+\alpha)$ is a nilpotent operator on $\operatorname{Gr}^{\alpha}_V(B_f)$.
+     Writing $N = s+\alpha$, we obtain the monodromy weight filtration $W(N)_\bullet$ on $\operatorname{Gr}^{\alpha}_V(B_f)$,
+     centered at $0$, given by
+    Text
+     $W(N)_m = \sum_{i+j=m} \operatorname{ker}(N^{i+1}) \cap \operatorname{im}(N^{-j})$.
+    Text
+     This is an increasing filtration by $\mathcal{D}$-modules. The function computes a lift of
+     $W(N)_m F_p(\operatorname{Gr}^{\alpha}_V(B_f))$ to a submodule of $F_p(V^{\alpha}(B_f))$.
+     The output is an $S$-basis for a submodule of $F_p(V^{\alpha}(B_f))$ whose image in
+     $\operatorname{Gr}^{\alpha}_V(B_f)$ is equal to $W(N)_m F_p(\operatorname{Gr}^{\alpha}_V(B_f))$.
+     In particular, the output always contains $F_p(V^{>\alpha}(B_f))$, and equality with
+     $F_p(V^{>\alpha}(B_f))$ corresponds to the case when
+     $W(N)_m F_p(\operatorname{Gr}^{\alpha}_V(B_f)) = 0$.
+    Text
      For the $\mathsf{A}_1$ singularity, the output stabilizes immediately.
     Example
      S = QQ[x,y,z];
      f = y^2-x*z;
      monodromyWeightHodgeOnV(f,1,1,0)
-    Example
      monodromyWeightHodgeOnV(f,1,1,1)
     Text
-     For the $2\times 2$ determinant, one sees a jump between $\ell=0$ and $\ell=1$.
+     For the $2\times 2$ determinant, one sees a jump between $m=0$ and $m=1$.
     Example
      S = QQ[x,y,z,w];
      f = x*w-y*z;
      monodromyWeightHodgeOnV(f,1,1,0)
-    Example
      monodromyWeightHodgeOnV(f,1,1,1)
   SeeAlso
      hodgeOnV
