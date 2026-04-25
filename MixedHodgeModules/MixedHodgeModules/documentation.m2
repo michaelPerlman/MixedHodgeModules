@@ -85,6 +85,7 @@ doc ///
 	@TOH "gradedDeRhamCohomologyH1"@
 	@TOH "gradedDuBoisComplex"@
 	@TOH "intersectionDuBoisComplex"@
+	@TOH "isPreDuBois"@
      
      
   References
@@ -136,6 +137,8 @@ doc ///
      [Ola22] S. Olano, Weighted multiplier ideals of reduced divisors, Math. Ann. {\bf 384} (2022), no. 3-4, 1091--1126; MR4498468
 
      [Ola23] S. Olano, Weighted Hodge ideals of reduced divisors, Forum Math. Sigma {\bf 11} (2023), Paper No. e51, 28 pp.; MR4603110
+
+     [PP25] S. G. Park and M. Popa, Hodge symmetry and Lefschetz theorems for singular varieties, arXiv preprint, arXiv:2410.15638 (2025)
 
      [PR21] M. Perlman and C. Raicu, Hodge ideals for the determinant hypersurface, Selecta Math. (N.S.) {\bf 27} (2021), no. 1, Paper No. 1, 22 pp.; MR4198526
 
@@ -786,7 +789,7 @@ doc ///
      true or false
   Description
     Text
-     This function returns true if $\operatorname{HRH}(f)\geq p$, where $\operatorname{HRH}(f)$ is the HRH level of [DOR].
+     This function returns true if $\operatorname{HRH}(f)\geq p$, where $\operatorname{HRH}(f)$ is the HRH level of [DOR, PP25].
 
      The following example shows that the HRH level of the $2\times 2$ determinant is zero.
     Example
@@ -809,7 +812,7 @@ doc ///
     weightCheck
     weightLevel
   References
-    See [DOR] at @TO "Works Cited"@.
+    See [DOR] and [PP25] at @TO "Works Cited"@.
 ///
 
 doc ///
@@ -826,7 +829,7 @@ doc ///
     L: ZZ
   Description
     Text
-     This function determines $\operatorname{HRH}(f)$, the HRH level of [DOR].
+     This function determines $\operatorname{HRH}(f)$, the HRH level of [DOR, PP25].
      If $\operatorname{HRH}(f)=\infty$ then this function outputs the string "rational homology manifold".
 
      The following example shows that the HRH level of the $2\times 2$ determinant is zero.
@@ -844,6 +847,8 @@ doc ///
     hodgeLevel
     HRHCheck
     weightLevel
+  References
+    See [DOR] and [PP25] at @TO "Works Cited"@.
 ///
 
 doc ///
@@ -1584,6 +1589,46 @@ doc ///
      intersectionDuBoisComplex
      gradedDeRhamComplexH1
      gradedDuBoisComplex
+
+///
+
+
+doc ///
+  Key
+    isPreDuBois
+  Headline
+    determine if $f$ is pre $m$-Du Bois for some $m\geq 0$
+  Usage
+    B = isPreDuBois(f,m)
+  Inputs
+    f: RingElement
+     a polynomial with rational coefficients
+    m: ZZ
+     a non-negative integer 
+  Outputs
+    B: Boolean
+  Description
+    Text
+     The divisor $D=V(f)$ is pre $m$-Du Bois if $\mathcal{H}^i(\underline{\Omega}^p_D)=0$ for all $p\leq m$, $i>0$.
+     This notion was studied in [SVV]. It is a necessary condition for $D$ to have $m$-Du Bois singularities.
+
+     The $2\times 2$ generic determinant is pre $m$-Du Bois for all $m\geq 0$:
+    Example
+     S = QQ[x,y,z,w];
+     f = x*w-y*z;
+     isPreDuBois(f,0)
+     isPreDuBois(f,1)
+     isPreDuBois(f,2)
+    Text
+     On the other hand, the cusp is not pre $0$-Du Bois:
+    Example
+     S = QQ[x,y];
+     f = x^2+y^3;
+     isPreDuBois(f,0)
+  SeeAlso
+     gradedDuBoisComplex
+  References
+    See [SVV] at @TO "Works Cited"@.
 
 ///
 

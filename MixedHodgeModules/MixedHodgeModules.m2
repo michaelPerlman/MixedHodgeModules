@@ -82,6 +82,7 @@ export {
 
     "gradedDuBoisComplex",
     "intersectionDuBoisComplex",
+    "isPreDuBois",
     "gradedDeRhamComplexH1",
     "gradedDeRhamCohomologyH1",
 
@@ -173,6 +174,8 @@ uninstallPackage "MixedHodgeModules"
 --smooth case
 R=QQ[x,y]
 f=y^2+x
+isPreDuBois(f,1)
+
 g=1_R
 alpha=6
 weightLevel(f,g,alpha)
@@ -230,6 +233,7 @@ hodgeIdeal(f,alpha,3)
 --2x2 determinant
 S=QQ[x,y,z,w]
 f=x*w-y*z
+isPreDuBois(f,3)
 alpha=1
 hodgeIdeal(f,alpha,0)
 hodgeIdeal(f,alpha,1)
@@ -258,7 +262,7 @@ alpha=1
 generationLevel(f,alpha)
 w={1/3,1/2}
 p=4
-
+isPreDuBois(f,0)
 
 --Davis--Yang page 4
 --Zhang Conjecture E
@@ -329,6 +333,10 @@ time for p from 0 to 1 do print hodgeIdeal(f,alpha,p)
 --3x3 determinant
 R=QQ[x_(1,1)..x_(3,3)]
 f=determinant genericMatrix(R,x_(1,1),3,3)
+HRHCheck(f,1)
+HRHLevel(f)
+isPreDuBois(f,1)
+
 alpha=1
 for p from 0 to 1 do print hodgeIdeal(f,alpha,p)
 
@@ -440,7 +448,8 @@ S=QQ[x,y,z]
 f=x^2+y^3+z^4
 hodgeOnV(f,1) 
 w={1/2,1/3,1/4}
-p=1
+alpha =
+hodgeIdealWeightedHomogIsolated(f,alpha,p,w)
 
 ---------------------------------------------------------------
     
@@ -461,9 +470,9 @@ S=QQ[x,y,z]
 f=x^2+y^3+z^5
 globalBFunction(f)
 factorBFunction oo
-alpha=1
+alpha=1/2
 w={1/2,1/3,1/5}
-p=1
+hodgeIdealWeightedHomogIsolated(f,alpha,3,w)
 
 
 ---------------------------------------------------------------

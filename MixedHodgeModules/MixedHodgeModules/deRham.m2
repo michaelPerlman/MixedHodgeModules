@@ -422,23 +422,10 @@ gradedDeRhamCohomologyH1(RingElement,ZZ,ZZ) := (f,p,q) -> (
     H
     )
 
--*
-gradedDeRhamCohomologyH1 = (f,p,q) -> (
 
-    H := gradedDeRhamCohomology(f,p,q, InputType => HodgeIdeals);
+--------------------------------------------------------------------
+-------------------------------------------------------------------- 
 
-    H
-    )
-
-
-gradedDeRhamCohomologyIC = (f,p,q) -> (
-
-    H := gradedDeRhamCohomology(f,p,q, InputType => WeightedHodgeIdeals);
-
-    H
-    )
-  
-*-
 
 gradedDuBoisComplex = (f,p) -> (
 --gives Omega^p_D as a free complex
@@ -460,19 +447,32 @@ gradedDuBoisComplex = (f,p) -> (
     )
 
     
-
+--------------------------------------------------------------------
+--------------------------------------------------------------------
+--preDB functions
     
 
-    
---export:
+isPreDuBois = (f,m) -> (
+--outputs true if f is pre m-Du Bois. False otherwise.
 
---gradedDuBoisComplex
---intersectionDuBoisComplex
---gradedDeRhamComplexH1
-     
-     
+   S := ring f;
+   n := numgens S;
+   
+   isPre := true;
+   p := 0;
 
-     
+   while isPre and p<=m do (
+
+       DBC := gradedDuBoisComplex(f,p);
+       coho := apply(toList(1..n), i -> prune HH_(-i)(DBC));
+       uniqueCoho := unique coho;
+       if #uniqueCoho > 1 then isPre = false;
+       p = p+1;
+       );
+
+   isPre
+   )
+       
 
   
 
