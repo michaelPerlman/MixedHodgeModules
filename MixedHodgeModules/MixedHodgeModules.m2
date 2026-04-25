@@ -333,9 +333,12 @@ time for p from 0 to 1 do print hodgeIdeal(f,alpha,p)
 --3x3 determinant
 R=QQ[x_(1,1)..x_(3,3)]
 f=determinant genericMatrix(R,x_(1,1),3,3)
+M=genericMatrix(R,x_(1,1),3,3)
+I=minors(2,M)
+
 HRHCheck(f,1)
 HRHLevel(f)
-isPreDuBois(f,1)
+isPreDuBois(f,2)
 
 alpha=1
 for p from 0 to 1 do print hodgeIdeal(f,alpha,p)
