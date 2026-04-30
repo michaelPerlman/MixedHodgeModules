@@ -43,7 +43,7 @@ doc ///
      the weight level of $(g/f^k)\cdot f^{-\alpha}$ in $S_ff^{-\alpha}$,
      as well as the length of the weight filtration on $S_ff^{-\alpha}$.
 
-     As applications, the functionality above is used to calculate the graded Du Bois complexes $\underline{\Omega}^p_{V(f)}$ and
+     As applications, the functionality above is used to calculate the Du Bois complexes $\underline{\Omega}^p_{V(f)}$ and
      the intersection Du Bois complexes $I\underline{\Omega}^p_{V(f)}$.
      
     Tree
@@ -83,7 +83,7 @@ doc ///
       :Graded de Rham and Du Bois Complexes
 	@TOH "gradedDeRhamComplexH1"@
 	@TOH "gradedDeRhamCohomologyH1"@
-	@TOH "gradedDuBoisComplex"@
+	@TOH "duBoisComplex"@
 	@TOH "intersectionDuBoisComplex"@
 	@TOH "isPreDuBois"@
      
@@ -1466,11 +1466,11 @@ doc ///
 
 doc ///
   Key
-    gradedDuBoisComplex
+    duBoisComplex
   Headline
-    compute the graded Du Bois complexes $\underline{\Omega}^p_D$ for a divisor
+    compute the Du Bois complexes $\underline{\Omega}^p_D$ for a divisor
   Usage
-    C = gradedDuBoisComplex(f,p)
+    C = duBoisComplex(f,p)
   Inputs
     f: RingElement
      a polynomial with rational coefficients
@@ -1490,20 +1490,20 @@ doc ///
     Example
      S = QQ[x,y,z];
      f = y^2-x;
-     DB0 = gradedDuBoisComplex(f,0)
+     DB0 = duBoisComplex(f,0)
      prune HH_0(DB0)
-     DB1 = gradedDuBoisComplex(f,1)
+     DB1 = duBoisComplex(f,1)
      prune HH_0(DB1)
-     DB2 = gradedDuBoisComplex(f,2)
+     DB2 = duBoisComplex(f,2)
      prune HH_0(DB2)
     Text
      The following example shows that the cusp does not have Du Bois singularities, as $H^1(\underline{\Omega}^0_D)\neq 0$.
     Example
      S = QQ[x,y];
      f = x^2+y^3;
-     DB0 = gradedDuBoisComplex(f,0)
+     DB0 = duBoisComplex(f,0)
      prune HH_(-1)(DB0)
-     DB1 = gradedDuBoisComplex(f,1)
+     DB1 = duBoisComplex(f,1)
      prune HH_(-1)(DB1)
   SeeAlso
      intersectionDuBoisComplex
@@ -1545,7 +1545,7 @@ doc ///
      prune HH_2(C3)
   SeeAlso
      intersectionDuBoisComplex
-     gradedDuBoisComplex
+     duBoisComplex
      gradedDeRhamCohomologyH1
 
 ///
@@ -1588,7 +1588,7 @@ doc ///
   SeeAlso
      intersectionDuBoisComplex
      gradedDeRhamComplexH1
-     gradedDuBoisComplex
+     duBoisComplex
 
 ///
 
@@ -1626,7 +1626,7 @@ doc ///
      f = x^2+y^3;
      isPreDuBois(f,0)
   SeeAlso
-     gradedDuBoisComplex
+     duBoisComplex
   References
     See [SVV] at @TO "Works Cited"@.
 
@@ -1660,15 +1660,15 @@ doc ///
     Example
      S = QQ[x,y,z];
      f = y^2-x*z;
-     DB0 = gradedDuBoisComplex(f,0)
+     DB0 = duBoisComplex(f,0)
      IDB0 = intersectionDuBoisComplex(f,0)
      prune HH_0(DB0)
      prune HH_0(IDB0)
-     DB1 = gradedDuBoisComplex(f,1)
+     DB1 = duBoisComplex(f,1)
      IDB1 = intersectionDuBoisComplex(f,1)
      prune HH_0(DB1)
      prune HH_0(IDB1)
-     DB2 = gradedDuBoisComplex(f,2)
+     DB2 = duBoisComplex(f,2)
      IDB2 = intersectionDuBoisComplex(f,2)
      prune HH_0(DB2)
      prune HH_0(IDB2)
@@ -1689,7 +1689,7 @@ doc ///
      prune HH_0(IDB2)
      prune HH_(-1)(IDB2)
   SeeAlso
-     gradedDuBoisComplex
+     duBoisComplex
      gradedDeRhamComplexH1
      gradedDeRhamCohomologyH1
   References

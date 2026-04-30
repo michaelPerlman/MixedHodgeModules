@@ -80,7 +80,7 @@ export {
     "weightedHodgeIdeal",
     "weightHodgeOnV",
 
-    "gradedDuBoisComplex",
+    "duBoisComplex",
     "intersectionDuBoisComplex",
     "isPreDuBois",
     "gradedDeRhamComplexH1",

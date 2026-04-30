@@ -342,7 +342,7 @@ deRhamInterval(RingElement, List, ZZ) := options -> (f,B,p) -> (
 
      GRDRp := koszulSlice(A,S,p,N);
 
-     GRDRp
+     prune GRDRp
      )
      
 
@@ -395,7 +395,7 @@ intersectionDuBoisComplex = (f,p) -> (
     
     RHomDRpShift := RHomDRp[-p-1];
 
-    RHomDRpShift
+    prune RHomDRpShift
     )
 
 --------------------------------------------------------------------
@@ -427,7 +427,7 @@ gradedDeRhamCohomologyH1(RingElement,ZZ,ZZ) := (f,p,q) -> (
 -------------------------------------------------------------------- 
 
 
-gradedDuBoisComplex = (f,p) -> (
+duBoisComplex = (f,p) -> (
 --gives Omega^p_D as a free complex
 --interesting homological degrees 0,-1,..,-n
 --Prop 13.1 Mustata--Popa "Hodge filtration on local cohomology..."
@@ -443,7 +443,7 @@ gradedDuBoisComplex = (f,p) -> (
 
     RHomDRkShift := RHomDRk[-p-1];--1 codim
 
-    RHomDRkShift
+    prune RHomDRkShift
     )
 
     
@@ -463,7 +463,7 @@ isPreDuBois = (f,m) -> (
 
    while isPre and p<=m do (
 
-       DBC := gradedDuBoisComplex(f,p);
+       DBC := duBoisComplex(f,p);
        coho := apply(toList(1..n), i -> prune HH_(-i)(DBC));
        uniqueCoho := unique coho;
        if #uniqueCoho > 1 then isPre = false;
