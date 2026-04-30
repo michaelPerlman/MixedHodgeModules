@@ -142,9 +142,9 @@ doc ///
 
      [PR21] M. Perlman and C. Raicu, Hodge ideals for the determinant hypersurface, Selecta Math. (N.S.) {\bf 27} (2021), no. 1, Paper No. 1, 22 pp.; MR4198526
 
-     [SVV] W. Shen, S. Venkatesh, and A. D. Vo, On k-Du Bois and k-rational singularities, Ann. Inst. Fourier, to appear.
-
      [SY25] C. Schnell and R. Yang, Higher multiplier ideals, Journal für die reine und angewandte Mathematik (Crelle's Journal), DOI: 10.1515/crelle-2025-0097
+     
+     [SVV] W. Shen, S. Venkatesh, and A. D. Vo, On k-Du Bois and k-rational singularities, Ann. Inst. Fourier, to appear.
      
      [Zha21] M. Zhang, Hodge filtration and Hodge ideals for $\Bbb Q$-divisors with weighted homogeneous isolated singularities, Asian J. Math. {\bf 25} (2021), no. 5, 641--664; MR4456022
 ///
