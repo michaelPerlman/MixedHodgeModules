@@ -40,10 +40,11 @@
 newPackage(
     "MixedHodgeModules",
     Version => "1.0",
-    Date => "April 24, 2026",
+    Date => "May 7, 2026",
     Headline => "Calculations involving Hodge and weight filtrations on localizations",
     Authors => {{ Name => "András C. Lőrincz",  Email => "lorincz@ou.edu",  HomePage => "https://math.ou.edu/~alorincz/"},
 	        { Name => "Michael Perlman",    Email => "mperlman@ua.edu", HomePage => "https://sites.google.com/view/michaelperlman/home"}},
+    HomePage => "https://github.com/michaelPerlman/MixedHodgeModules",
     Keywords => {"D-modules"},
     AuxiliaryFiles => true,
     DebuggingMode => false,
@@ -549,3 +550,7 @@ needsPackage "Complexes"
 
 
 --------------------------------------------
+
+S = QQ[x,y,z,w]
+f = x*w-y*z
+for p from 0 to 3 do print (prune HH_(-(4-p-1))(intersectionDuBoisComplex(f,p)))

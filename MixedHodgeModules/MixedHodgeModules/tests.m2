@@ -255,7 +255,6 @@ TEST ///
  assert(weightLength(f,alpha,LengthStrategy => ByNuAlpha) == 1);
  assert(weightLength(f,alpha,LengthStrategy => ByNuAlpha, NuMethod => PowerBFunction) == 1);
  assert(weightLength(f,alpha,LengthStrategy => ByNuAlpha, NuMethod => Malgrange) == 1);
- assert(weightLength(f,alpha,LengthStrategy => ByNuAlpha, LengthStrategy => ByWeightLevel) == 1);
  assert(not weightCheck(f,g,alpha,0));
  assert(weightLevel(f,g,alpha) == 1);
  assert(first degree (pFunction(f,g,alpha)) == 1);
@@ -276,7 +275,6 @@ TEST ///
  assert(weightLength(f,alpha,LengthStrategy => ByNuAlpha) == 0);
  assert(weightLength(f,alpha,LengthStrategy => ByNuAlpha, NuMethod => PowerBFunction) == 0);
  assert(weightLength(f,alpha,LengthStrategy => ByNuAlpha, NuMethod => Malgrange) == 0);
- assert(weightLength(f,alpha,LengthStrategy => ByNuAlpha, LengthStrategy => ByWeightLevel) == 0);
  assert(weightLevel(f,g,alpha) == 0);
  assert(pFunction(f,g,alpha) == 1_ZZ);
  assert(pFunction(f,g,alpha, NuMethod => Malgrange) == 1_ZZ);

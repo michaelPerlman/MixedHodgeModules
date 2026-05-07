@@ -644,10 +644,10 @@ doc ///
   Headline
     find the Hodge level of an element in a twisted localization $S_ff^{-\alpha}$
   Usage
-    L = weightLevel(f,g,alphaQQ)
-    L = weightLevel(f,g,alphaZZ)
-    L = weightLevel(f,g,bgfs,alphaQQ)
-    L = weightLevel(f,g,bgfs,alphaZZ)
+    L = hodgeLevel(f,g,alphaQQ)
+    L = hodgeLevel(f,g,alphaZZ)
+    L = hodgeLevel(f,g,bgfs,alphaQQ)
+    L = hodgeLevel(f,g,bgfs,alphaZZ)
   Inputs
     f: RingElement
      a polynomial with rational coefficients
@@ -950,7 +950,7 @@ doc ///
      a non-negative integer indexing the monodromy weight filtration (centered at $0$)
   Outputs
     L: List
-     a list representing an $S$-basis for a lift of $W(N)_m F_p(\operatorname{Gr}^{\alpha}_V(B_f))$ to $F_p(V^{\alpha}(B_f))$
+     a list representing an $S$-basis for a lift of $F_p(W(N)_m(\operatorname{Gr}^{\alpha}_V(B_f)))$ to $F_p(V^{\alpha}(B_f))$
   Description
     Text
      Let $s=-\partial_t t$. Multiplication by $(s+\alpha)$ is a nilpotent operator on $\operatorname{Gr}^{\alpha}_V(B_f)$.
@@ -960,12 +960,12 @@ doc ///
      $W(N)_m = \sum_{i+j=m} \operatorname{ker}(N^{i+1}) \cap \operatorname{im}(N^{-j})$.
     Text
      This is an increasing filtration by $\mathcal{D}$-modules. The function computes a lift of
-     $W(N)_m F_p(\operatorname{Gr}^{\alpha}_V(B_f))$ to a submodule of $F_p(V^{\alpha}(B_f))$.
+     $F_p(W(N)_m(\operatorname{Gr}^{\alpha}_V(B_f)))$ to a submodule of $F_p(V^{\alpha}(B_f))$.
      The output is an $S$-basis for a submodule of $F_p(V^{\alpha}(B_f))$ whose image in
-     $\operatorname{Gr}^{\alpha}_V(B_f)$ is equal to $W(N)_m F_p(\operatorname{Gr}^{\alpha}_V(B_f))$.
+     $\operatorname{Gr}^{\alpha}_V(B_f)$ is equal to $F_p(W(N)_m(\operatorname{Gr}^{\alpha}_V(B_f)))$.
      In particular, the output always contains $F_p(V^{>\alpha}(B_f))$, and equality with
      $F_p(V^{>\alpha}(B_f))$ corresponds to the case when
-     $W(N)_m F_p(\operatorname{Gr}^{\alpha}_V(B_f)) = 0$.
+     $F_p(W(N)_m(\operatorname{Gr}^{\alpha}_V(B_f))) = 0$.
     Text
      For the $\mathsf{A}_1$ singularity, the output stabilizes immediately.
     Example
@@ -1382,6 +1382,7 @@ doc ///
      See [Bla22] and [Ola23] at @TO "Works Cited"@.
 ///
 
+
 doc ///
   Key
     weightHodgeOnV
@@ -1437,6 +1438,7 @@ doc ///
   References
      See [Bla22] and [Ola23] at @TO "Works Cited"@.
 ///
+
 
 doc ///
   Key
@@ -1673,10 +1675,8 @@ doc ///
      prune HH_0(DB2)
      prune HH_0(IDB2)
     Text
-     We see that $D$ is pre $k$-Du Bois for all $k\geq 0$ (see [Proposition E, SVV]).
 
-     The next example shows that, when $f=xw-yz$, the Hodge filtration on $\operatorname{IC}_D$ is
-     generated in the first nonzero level (see [Theorem 3.1, PR21] and [Lemma 10.1, MP22])
+     We carry out another example.
     Example
      S = QQ[x,y,z,w];
      f = x*w-y*z;
@@ -1693,7 +1693,7 @@ doc ///
      gradedDeRhamComplexH1
      gradedDeRhamCohomologyH1
   References
-     See [PR21], [MP22], and [SVV] in @TO "Works Cited"@.
+     See [PR21] in @TO "Works Cited"@.
 /// 
 
 --symbols:
@@ -1730,7 +1730,6 @@ doc ///
       This is the default strategy for weightLength.
   SeeAlso
     weightLength
-    Strategy
     nuAlpha
     ByWeightLevel
 ///
@@ -1748,7 +1747,6 @@ doc ///
       translated exponent determined from the integer translates of roots of the b-function.
   SeeAlso
     weightLength
-    Strategy
     weightLevel
     ByNuAlpha
 ///
