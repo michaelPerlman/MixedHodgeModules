@@ -206,10 +206,10 @@ TEST ///
  assert(hodgeIdealWeightedHomogIsolated(f,alpha,3,w) == sub( ideal(9*x*y^3-8*x^3,x^3*y,x^4,3*y^5-14*x^2*y^2),S));
 ///
 
---to add: BrieskornPham test
+
 
 ---------------------------------------------------------------
---1.3 Semi-invariant examples
+--1.3 Misc. examples
 ---------------------------------------------------------------
 
 
@@ -221,13 +221,6 @@ TEST ///
  alpha = 1;
 
 /// 
-
-
-
----------------------------------------------------------------
---1.4 Misc. examples
----------------------------------------------------------------
-
 
 
 
@@ -373,7 +366,7 @@ TEST ///
 
 
 ---------------------------------------------------------------
---2.3 Semi-invariant examples
+--2.3 Misc. examples
 ---------------------------------------------------------------
 
 
@@ -399,8 +392,24 @@ TEST ///
 
 
 
+
+
 ---------------------------------------------------------------
---2.4 Misc. examples
+--3. Filtrations on graph module
 ---------------------------------------------------------------
 
 
+
+TEST ///
+ R = QQ[x,y];
+ f = y^2+x;
+ assert(keys(hodgeOnV(f,0)) == {1_QQ});
+ m = ((values hodgeOnV(f,0))_0)_0;
+ assert( m == 1_(ring m));
+ assert(keys(hodgeOnV(f,1)) == {1_QQ});
+ assert( #( (values hodgeOnV(f,1))_0 ) == 2);
+ assert(HRHCheck(f,0));
+ assert(HRHCheck(f,1));
+ assert(HRHCheck(f,2));
+ assert(HRHLevel(f) == "rational homology manifold");
+///
