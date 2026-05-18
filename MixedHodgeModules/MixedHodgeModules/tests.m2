@@ -219,12 +219,8 @@ TEST ///
  M = genericMatrix(R,x_(1,1),n,n);
  f = determinant(M);
  alpha = 1;
-
+ assert(hodgeIdeal(f,1,0) == ideal(1_R));
 /// 
-
-
-
-
 
 
 ---------------------------------------------------------------
@@ -278,10 +274,10 @@ TEST ///
 ---------------------------------------------------------------
 
 TEST ///
-  R=QQ[x,y,z]
+  R=QQ[x,y,z];
   f=x*y*z;
   alpha = 1;
-  
+  assert(hodgeIdeal(f,1,2) == sub(ideal(y^2*z^2,x*y*z^2,x^2*z^2,x*y^2*z,x^2*y*z,x^2*y^2),R));
 ///
 
 
