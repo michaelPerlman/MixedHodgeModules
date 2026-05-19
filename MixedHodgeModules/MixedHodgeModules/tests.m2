@@ -26,7 +26,10 @@ TEST ///
  assert(HRHCheck(f,2));
  assert(HRHLevel(f) == "rational homology manifold");
  assert(sub((weightHodgeOnV(f,1,0,0))_0,R) == (R_1^2+R_0));
+ assert(#monodromyWeightHodgeOnV(f,1,1,0) == 2);
 ///
+
+---------------------------------------------------------------
 
 
 TEST ///
@@ -37,7 +40,10 @@ TEST ///
  assert( m == 1_(ring m));
  assert(not HRHCheck(f,0));
  assert(HRHLevel(f) == -1);
+ assert(#monodromyWeightHodgeOnV(f,1,1,0) == 7);
  ///
+
+ ---------------------------------------------------------------
 
 
  TEST ///
@@ -49,13 +55,20 @@ TEST ///
   assert(HRHCheck(f,0));
   assert(not HRHCheck(f,1));
   assert(HRHLevel(f) == 0);
+  assert(#monodromyWeightHodgeOnV(f,1,1,0) == 5);
  ///
 
+---------------------------------------------------------------
 
  TEST ///
   R = QQ[x,y,z];
   f = x*z-y^2;
   assert(keys(hodgeOnV(f,0)) == {1_QQ});
+  assert(keys hodgeOnV(f,1) == {1_QQ,1/2});
+  assert(#monodromyWeightHodgeOnV(f,1/2,1,0) == 2);
+  assert(#monodromyWeightHodgeOnV(f,1,1,0) == 4);
+  assert(HRHCheck(f,2));
+  assert(HRHLevel(f) == "rational homology manifold");
  ///
 
 
@@ -242,6 +255,7 @@ TEST ///
  assert(higherMultiplierIdeal(f,alpha,3)+ideal(f) == hodgeIdeal(f,alpha,3)+ideal(f));
 ///
 
+---------------------------------------------------------------
 
 TEST ///
  S = QQ[x,y];
@@ -413,6 +427,30 @@ TEST ///
  assert(weightLength(f,alpha, LengthStrategy => ByWeightLevel) == 1);
 ///
 
+---------------------------------------------------------------
+
+
+TEST ///
+  L = {2,2,2};
+  alpha = 1/2;
+  I = hodgeIdealBrieskornPham(L,alpha,2);
+  R = ring I;
+  assert(I == ideal gens R);
+///
+
+---------------------------------------------------------------
+
+
+TEST ///
+   L = {1,2};
+   alpha = 1/6;
+   I = hodgeIdealBrieskornPham(L,1/6,2);
+   R = ring I;
+   assert(I == ideal(1_R));
+///
+
+---------------------------------------------------------------
+
 
 
 ---------------------------------------------------------------
@@ -443,6 +481,24 @@ TEST ///
 
 
 
+---------------------------------------------------------------
+--3. de Rham complexes, cohomology, Du Bois complexes, pre-Du Bois tests
+---------------------------------------------------------------
+
+
+TEST ///
+  R = QQ[x];
+  f = x;
+  G = gradedDeRhamComplexH1(f,0)
+  assert(length G == 2);
+  assert(dim HH_0(G) == -1);
+  assert(dim HH_1(G) == -1);
+///
+
+
+    
+      
+        
 
 
 
