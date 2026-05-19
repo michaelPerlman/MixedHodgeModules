@@ -6,12 +6,66 @@
 -* Test section *-
 
 
+
 ---------------------------------------------------------------
---1. Hodge ideal tests
+--1. Filtrations on graph module
+---------------------------------------------------------------
+
+
+
+TEST ///
+ R = QQ[x,y];
+ f = y^2+x;
+ assert(keys(hodgeOnV(f,0)) == {1_QQ});
+ m = ((values hodgeOnV(f,0))_0)_0;
+ assert( m == 1_(ring m));
+ assert(keys(hodgeOnV(f,1)) == {1_QQ});
+ assert( #( (values hodgeOnV(f,1))_0 ) == 2);
+ assert(HRHCheck(f,0));
+ assert(HRHCheck(f,1));
+ assert(HRHCheck(f,2));
+ assert(HRHLevel(f) == "rational homology manifold");
+ assert(sub((weightHodgeOnV(f,1,0,0))_0,R) == (R_1^2+R_0));
+///
+
+
+TEST ///
+ R = QQ[x,y,z];
+ f = x*y*z;
+ assert(keys(hodgeOnV(f,0)) == {1_QQ});
+ m = ((values hodgeOnV(f,0))_0)_0;
+ assert( m == 1_(ring m));
+ assert(not HRHCheck(f,0));
+ assert(HRHLevel(f) == -1);
+ ///
+
+
+ TEST ///
+  R = QQ[x,y,z,w];
+  f = x*y-z*w;
+  assert(keys(hodgeOnV(f,0)) == {1_QQ});
+  m = ((values hodgeOnV(f,0))_0)_0;
+  assert( m == 1_(ring m));
+  assert(HRHCheck(f,0));
+  assert(not HRHCheck(f,1));
+  assert(HRHLevel(f) == 0);
+ ///
+
+
+ TEST ///
+  R = QQ[x,y,z];
+  f = x*z-y^2;
+  assert(keys(hodgeOnV(f,0)) == {1_QQ});
+ ///
+
+
+
+---------------------------------------------------------------
+--2. Hodge ideal, weighted Hodge ideal, higher multiplier ideal tests
 ---------------------------------------------------------------
 
 ---------------------------------------------------------------
---1.1 Smooth and normal crossing examples
+--2.1 Smooth and normal crossing examples
 ---------------------------------------------------------------
 
 TEST ///
@@ -90,7 +144,7 @@ TEST ///
 
 
 ---------------------------------------------------------------
---1.2 Weighted homogeneous isolated examples
+--2.2 Weighted homogeneous isolated examples
 ---------------------------------------------------------------
 
 TEST ///
@@ -209,7 +263,7 @@ TEST ///
 
 
 ---------------------------------------------------------------
---1.3 Misc. examples
+--2.3 Misc. examples
 ---------------------------------------------------------------
 
 
@@ -226,11 +280,11 @@ TEST ///
 ---------------------------------------------------------------
 
 ---------------------------------------------------------------
---2. nuAlpha, pFunction, weightLevel tests
+--3. nuAlpha, pFunction, weightLevel tests
 ---------------------------------------------------------------
 
 ---------------------------------------------------------------
---2.1 Smooth and normal crossing examples
+--3.1 Smooth and normal crossing examples
 ---------------------------------------------------------------
 
 TEST ///
@@ -284,7 +338,7 @@ TEST ///
 
 
 ---------------------------------------------------------------
---2.2 Weighted homogeneous isolated examples
+--3.2 Weighted homogeneous isolated examples
 ---------------------------------------------------------------
 
 TEST ///
@@ -362,7 +416,7 @@ TEST ///
 
 
 ---------------------------------------------------------------
---2.3 Misc. examples
+--3.3 Misc. examples
 ---------------------------------------------------------------
 
 
@@ -390,22 +444,5 @@ TEST ///
 
 
 
----------------------------------------------------------------
---3. Filtrations on graph module
----------------------------------------------------------------
 
 
-
-TEST ///
- R = QQ[x,y];
- f = y^2+x;
- assert(keys(hodgeOnV(f,0)) == {1_QQ});
- m = ((values hodgeOnV(f,0))_0)_0;
- assert( m == 1_(ring m));
- assert(keys(hodgeOnV(f,1)) == {1_QQ});
- assert( #( (values hodgeOnV(f,1))_0 ) == 2);
- assert(HRHCheck(f,0));
- assert(HRHCheck(f,1));
- assert(HRHCheck(f,2));
- assert(HRHLevel(f) == "rational homology manifold");
-///
