@@ -86,8 +86,11 @@ doc ///
 	@TOH "duBoisComplex"@
 	@TOH "intersectionDuBoisComplex"@
 	@TOH "isPreDuBois"@
-     
-     
+
+
+  Caveat
+    Throughout this package, the input polynomial $f$ is assumed to be reduced
+    and to lie in a polynomial ring over $\mathbb{Q}$.
   References
     See the bibliography at @TO "Works Cited"@.
   Acknowledgement
