@@ -4,6 +4,21 @@
 
 ---------------------------------------------------------------
 ---------------------------------------------------------------
+--internal helpers for input validation
+
+
+checkAlpha = alpha -> (
+    if sub(alpha,QQ) <= 0 or sub(alpha,QQ) > 1 then
+        error "expected alpha to be a rational number in (0,1]";
+    )
+
+checkP = p -> (
+    if p < 0 then error "expected p to be a non-negative integer";
+    )
+
+
+---------------------------------------------------------------
+---------------------------------------------------------------
 --helper functions
 
 
@@ -224,7 +239,7 @@ hodgeOnV = method(Options => {UseBasis => dtBasis});
 --use "UseBasis => sBasis" to get s-basis (will have denominators) in R_f[s]f^s
 
 hodgeOnV(RingElement,ZZ,ZZ) :=
-hodgeOnV(RingElement,QQ,ZZ) := options -> (f,alpha,p) -> (    
+hodgeOnV(RingElement,QQ,ZZ) := options -> (f,alpha,p) -> (
 -- f is a polynomial in polynomial ring R
 -- alpha is a rational number in (0,1]
 -- p is a non-negative integer
@@ -234,6 +249,8 @@ hodgeOnV(RingElement,QQ,ZZ) := options -> (f,alpha,p) -> (
 --(1) uses (p+1)-st generalized b-function instead of shifts of b-function,
 --(2) only calculates for one alpha instead of all
 
+    checkAlpha alpha;
+    checkP p;
     if (options.UseBasis != dtBasis) and  (options.UseBasis != sBasis) then error "invalid UseBasis";
 
     ------------------------------------------------------------------------
@@ -304,7 +321,7 @@ hodgeOnV(RingElement,QQ,ZZ) := options -> (f,alpha,p) -> (
 
 ---------------------------------------------------------------
 
-hodgeOnV(RingElement,ZZ) := options -> (f,p) -> (    
+hodgeOnV(RingElement,ZZ) := options -> (f,p) -> (
 -- f is a polynomial in polynomial ring R
 -- p is a non-negative integer
 -- outputs a hash table with keys alpha,
@@ -315,6 +332,7 @@ hodgeOnV(RingElement,ZZ) := options -> (f,p) -> (
 --This is closer to Blanco because it does all alpha\in (0,1]
 --but still uses (p+1)-st generalized b-function
 
+    checkP p;
     if (options.UseBasis != dtBasis) and  (options.UseBasis != sBasis) then error "invalid UseBasis";
 
     ------------------------------------------------------------------------
@@ -404,6 +422,8 @@ hodgeIdeal(RingElement,QQ,ZZ) := options -> (f,alpha,p) -> (
 -- p is a non-negative integer
 -- outputs the Hodge ideal I_p(alpha f)
 
+    checkAlpha alpha;
+    checkP p;
     R := ring f;
     n := numgens R;
     I := ideal(1_R);
@@ -446,7 +466,8 @@ generateNext(RingElement, QQ, ZZ) := (f,alpha,p) -> (
 --the output will be a subset of I_(p+1)(alpha*f)
 --alpha should be in (0,1]
 
-
+    checkAlpha alpha;
+    checkP p;
     R := ring f;
     n := numgens R;
     
@@ -473,6 +494,8 @@ doesGenerateNext(RingElement, ZZ, ZZ) :=
 doesGenerateNext(RingElement, QQ, ZZ) := (f,alpha,p) -> (
 --tests if F_p(R_f*f^{-alpha}) generates F_(p+1)(R_f*f^{-alpha})
 
+    checkAlpha alpha;
+    checkP p;
     Ip1 :=  hodgeIdeal(f,alpha,p+1);
     J := generateNext(f,alpha,p);
     J == Ip1
@@ -495,6 +518,7 @@ generationLevel(RingElement) := f -> (
 generationLevel(RingElement,ZZ) :=
 generationLevel(RingElement,QQ) := (f,alpha) -> (
 
+    checkAlpha alpha;
     R := ring f;
     n := numgens R;
     
@@ -560,6 +584,34 @@ weightGeqAlpha = (R,w,alpha) -> (
 
 ---------------------------------------------------------------
 
+--private recursive helper: assumes inputs already validated
+hodgeIdealWeightedHomogIsolatedHelper = (f,alpha,p,w) -> (
+
+  R := ring f;
+  hodgeI := ideal(1_R);
+
+  if p == 0 then hodgeI = weightGeqAlpha(R, w, alpha)
+
+      else  (
+	  RgeqPplusAlpha := weightGeqAlpha(R,w,p+alpha);--the first summand of Zheng's formula
+	  if RgeqPplusAlpha == ideal(1_R) then hodgeI = ideal(1_R)
+
+                 else (
+
+	               hodgeMinusOne := hodgeIdealWeightedHomogIsolatedHelper(f,alpha,p-1,w);
+	               hodgeMinusOneGens := flatten entries gens gb hodgeMinusOne;
+	               n := numgens R;
+	               diffSummand := for i from 0 to n-1 list (
+		       for a in hodgeMinusOneGens list f*diff(R_i,a)-(alpha+p-1)*a*diff(R_i,f));--the second summand
+	               hodgeI = ideal mingens (RgeqPplusAlpha + ideal(flatten diffSummand) + f*hodgeMinusOne);
+
+                 );
+           );
+
+  hodgeI
+  )
+
+
 hodgeIdealWeightedHomogIsolated = method();
 
 --ref: Corollary B of Zhang "HODGE FILTRATION AND HODGE IDEALS FOR Q-DIVISORS WITH WEIGHTED HOMOGENEOUS ISOLATED SINGULARITIES"
@@ -573,28 +625,15 @@ hodgeIdealWeightedHomogIsolated(RingElement, QQ, ZZ, List) := (f,alpha,p,w) -> (
 -- p is a non-negative integer
 -- outputs the Hodge ideal I_p(alpha f)
 
+  checkAlpha alpha;
+  checkP p;
   R := ring f;
-  hodgeI := ideal(1_R);
-  
-  if p == 0 then hodgeI = weightGeqAlpha(R, w, alpha)
-  
-      else  (
-	  RgeqPplusAlpha := weightGeqAlpha(R,w,p+alpha);--the first summand of Zheng's formula
-	  if RgeqPplusAlpha == ideal(1_R) then hodgeI = ideal(1_R)
-	  
-                 else (
-		       
-	               hodgeMinusOne := hodgeIdealWeightedHomogIsolated(f,alpha,p-1,w);
-	               hodgeMinusOneGens := flatten entries gens gb hodgeMinusOne;
-	               n := numgens R;
-	               diffSummand := for i from 0 to n-1 list (
-		       for a in hodgeMinusOneGens list f*diff(R_i,a)-(alpha+p-1)*a*diff(R_i,f));--the second summand
-	               hodgeI = ideal mingens (RgeqPplusAlpha + ideal(flatten diffSummand) + f*hodgeMinusOne);
-		      
-                 );
-           );
+  if #w != numgens R then
+      error "expected length of w to equal numgens(ring f)";
+  if not all(exponents f, e -> sum apply(#e, i -> e_i * w_i) == 1) then
+      error "expected f to be weighted homogeneous of weight 1 with respect to w";
 
-  hodgeI
+  hodgeIdealWeightedHomogIsolatedHelper(f,alpha,p,w)
   )
 
 
@@ -610,6 +649,11 @@ hodgeIdealBrieskornPham(List, QQ, ZZ) := (L,alpha,p) -> (
 --the b_i's should all be positive
 --p is a non-negative integer
 
+    if #L == 0 then error "expected L to be non-empty";
+    if not all(L, b -> instance(b,ZZ) and b >= 1) then
+        error "expected entries of L to be positive integers";
+    checkAlpha alpha;
+    checkP p;
     n := #L;
     x := local x;
     R := QQ[x_1..x_n];
@@ -627,6 +671,8 @@ higherMultiplierIdeal = method();
 
 higherMultiplierIdeal(RingElement, ZZ, ZZ) :=
 higherMultiplierIdeal(RingElement, QQ, ZZ) := (f,alpha,p) -> (
+    checkAlpha alpha;
+    checkP p;
     FpV := hodgeOnV(f,alpha,p);
     R := ring f;
     RDt := ring (FpV_0);
@@ -658,6 +704,8 @@ hodgeCheck(RingElement,RingElement,QQ,ZZ) := (f,g,alpha,p) -> (
 --if beta\in (0,1] and k\in ZZ  with alpha = k + beta then
 --checks if (g/f^k)*f^(-beta) is in F_p(S_f*f^(-beta))
 
+    if sub(alpha,QQ) <= 0 then error "expected alpha to be a positive rational number";
+    checkP p;
     betaQQ := if (denominator(sub(alpha,QQ)) == 1) then 1_QQ else alpha-floor(alpha);
     poleOrder := if (denominator(sub(alpha,QQ)) == 1) then floor(alpha)-1 else floor(alpha);
 
@@ -685,6 +733,7 @@ hodgeLevel(RingElement,RingElement,QQ) := (f,g,alpha) -> (
 --If beta\in (0,1] and k\in ZZ  with alpha = k + beta then finds the minimal p
 --for which (g/f^k)*f^(-beta) is in F_p(S_f*f^(-beta))
 
+   if sub(alpha,QQ) <= 0 then error "expected alpha to be a positive rational number";
    pNow := 0;
    isMemberFp := hodgeCheck(f,g,alpha,pNow);
  
@@ -702,7 +751,9 @@ hodgeLevel(RingElement,RingElement,QQ) := (f,g,alpha) -> (
 
 
 
-HRHCheck =  (f,p) -> (
+HRHCheck = method();
+
+HRHCheck(RingElement, ZZ) := (f,p) -> (
 
     ------------------------------------------------------------------------
     -- Step 1. Basic setup and annihilator data for f^s
@@ -759,7 +810,9 @@ HRHCheck =  (f,p) -> (
 -------------------------------------------------------------
 
 
-HRHLevel = f -> (
+HRHLevel = method();
+
+HRHLevel(RingElement) := f -> (
 
     n := numgens ring f;
     p := 0;

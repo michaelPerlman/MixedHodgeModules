@@ -369,7 +369,9 @@ gradedDeRhamComplex(RingElement,ZZ) := options -> (f,p) -> (
 -------------------------------------------------------------------- 
 
 
-gradedDeRhamComplexH1 = (f,p) -> (
+gradedDeRhamComplexH1 = method();
+
+gradedDeRhamComplexH1(RingElement, ZZ) := (f,p) -> (
 --in *homological* degrees n..0
 --free complex quasi-isomorphic
 
@@ -381,7 +383,9 @@ gradedDeRhamComplexH1 = (f,p) -> (
 --------------------------------------------------------------------
 -------------------------------------------------------------------- 
 
-intersectionDuBoisComplex = (f,p) -> (
+intersectionDuBoisComplex = method();
+
+intersectionDuBoisComplex(RingElement, ZZ) := (f,p) -> (
 --gives a free complex
 --interesting homological degrees 0,-1,..,-n
 --our convention makes it the same as gradedDuBoisComplex for RHM
@@ -427,7 +431,9 @@ gradedDeRhamCohomologyH1(RingElement,ZZ,ZZ) := (f,p,q) -> (
 -------------------------------------------------------------------- 
 
 
-duBoisComplex = (f,p) -> (
+duBoisComplex = method();
+
+duBoisComplex(RingElement, ZZ) := (f,p) -> (
 --gives Omega^p_D as a free complex
 --interesting homological degrees 0,-1,..,-n
 --Prop 13.1 Mustata--Popa "Hodge filtration on local cohomology..."
@@ -452,7 +458,9 @@ duBoisComplex = (f,p) -> (
 --preDB functions
     
 
-isPreDuBois = (f,m) -> (
+isPreDuBois = method();
+
+isPreDuBois(RingElement, ZZ) := (f,m) -> (
 --outputs true if f is pre m-Du Bois. False otherwise.
 
    S := ring f;

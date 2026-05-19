@@ -496,9 +496,126 @@ TEST ///
 ///
 
 
-    
-      
-        
+---------------------------------------------------------------
+--4. Input validation tests
+---------------------------------------------------------------
+
+TEST ///
+  R = QQ[x,y];
+  f = y^2 + x;
+
+  -- alpha out of (0,1]: each call should error
+  assert(try (hodgeOnV(f,0,0);             false) else true);
+  assert(try (hodgeOnV(f,-1/2,0);          false) else true);
+  assert(try (hodgeOnV(f,3/2,0);           false) else true);
+  assert(try (hodgeOnV(f,2,0);             false) else true);
+  assert(try (hodgeIdeal(f,0,0);           false) else true);
+  assert(try (hodgeIdeal(f,3/2,0);         false) else true);
+  assert(try (weightedHodgeIdeal(f,0,0,0); false) else true);
+  assert(try (weightedHodgeIdeal(f,2,0,0); false) else true);
+  assert(try (weightHodgeOnV(f,0,0,0);     false) else true);
+  assert(try (weightHodgeOnV(f,3/2,0,0);   false) else true);
+  assert(try (generateNext(f,0,0);         false) else true);
+  assert(try (generateNext(f,3/2,0);       false) else true);
+  assert(try (doesGenerateNext(f,-1,0);    false) else true);
+  assert(try (generationLevel(f,0);        false) else true);
+  assert(try (generationLevel(f,3/2);      false) else true);
+  assert(try (higherMultiplierIdeal(f,0,0);   false) else true);
+  assert(try (higherMultiplierIdeal(f,3/2,0); false) else true);
+
+  -- p negative: each call should error
+  assert(try (hodgeOnV(f,1,-1);             false) else true);
+  assert(try (hodgeOnV(f,-1);               false) else true);
+  assert(try (hodgeIdeal(f,1,-1);           false) else true);
+  assert(try (weightedHodgeIdeal(f,1,-1,0); false) else true);
+  assert(try (weightHodgeOnV(f,1,-1,0);     false) else true);
+  assert(try (generateNext(f,1,-1);         false) else true);
+  assert(try (doesGenerateNext(f,1,-1);     false) else true);
+  assert(try (higherMultiplierIdeal(f,1,-1);false) else true);
+
+  -- m negative: should error
+  assert(try (weightedHodgeIdeal(f,1,0,-1); false) else true);
+  assert(try (weightHodgeOnV(f,1,0,-1);     false) else true);
+
+  -- boundary values are accepted (alpha = 1, alpha = 1/2, p = 0, m = 0)
+  assert(hodgeIdeal(f,1,0)             == ideal(1_R));
+  assert(hodgeIdeal(f,1/2,0)           == ideal(1_R));
+  assert(weightedHodgeIdeal(f,1,0,0)   == ideal(f));
+  assert(higherMultiplierIdeal(f,1,0)  == ideal(1_R));
+///
 
 
+TEST ///
+  R = QQ[x,y];
+  f = y^2 + x;
+
+  -- hodgeIdealBrieskornPham bad inputs
+  assert(try (hodgeIdealBrieskornPham({},1,0);       false) else true);   -- empty L
+  assert(try (hodgeIdealBrieskornPham({0,2},1,0);    false) else true);   -- b_i = 0
+  assert(try (hodgeIdealBrieskornPham({-1,2},1,0);   false) else true);   -- b_i < 0
+  assert(try (hodgeIdealBrieskornPham({1/2,2},1,0);  false) else true);   -- non-integer b_i
+  assert(try (hodgeIdealBrieskornPham({2},3/2,0);    false) else true);   -- alpha out of range
+  assert(try (hodgeIdealBrieskornPham({2},1,-1);     false) else true);   -- p < 0
+
+  -- hodgeIdealWeightedHomogIsolated bad inputs
+  assert(try (hodgeIdealWeightedHomogIsolated(f,1,0,{1});        false) else true); -- #w mismatch
+  assert(try (hodgeIdealWeightedHomogIsolated(f,1,0,{1/2,1/2});  false) else true); -- f not w-homog
+  assert(try (hodgeIdealWeightedHomogIsolated(f,3/2,0,{1,1/2});  false) else true); -- alpha
+  assert(try (hodgeIdealWeightedHomogIsolated(f,1,-1,{1,1/2});   false) else true); -- p
+
+  -- hodgeCheck bad inputs
+  assert(try (hodgeCheck(f,1_R,1,-1);  false) else true);    -- p < 0
+  assert(try (hodgeCheck(f,1_R,0,0);   false) else true);    -- alpha = 0
+  assert(try (hodgeCheck(f,1_R,-1,0);  false) else true);    -- alpha < 0
+
+  -- hodgeLevel bad inputs
+  assert(try (hodgeLevel(f,1_R,0);   false) else true);      -- alpha = 0
+  assert(try (hodgeLevel(f,1_R,-1);  false) else true);      -- alpha < 0
+
+  -- alpha > 1 is accepted for hodgeCheck and hodgeLevel
+  assert(instance(hodgeCheck(f,1_R,3/2,0), Boolean));
+  assert(instance(hodgeLevel(f,1_R,3/2), ZZ));
+///
+
+
+TEST ///
+  R = QQ[x,y];
+  f = y^2 + x;
+  g = 1_R;
+
+  -- monodromyWeightHodgeOnV: alpha and p validation
+  assert(try (monodromyWeightHodgeOnV(f,0,0,0);   false) else true);  -- alpha = 0
+  assert(try (monodromyWeightHodgeOnV(f,3/2,0,0); false) else true);  -- alpha > 1
+  assert(try (monodromyWeightHodgeOnV(f,1,-1,0);  false) else true);  -- p < 0
+
+  -- nuAlpha: alpha > 0
+  assert(try (nuAlpha(f,g,0);  false) else true);
+  assert(try (nuAlpha(f,g,-1); false) else true);
+
+  -- pFunction: alpha > 0
+  assert(try (pFunction(f,g,0);  false) else true);
+  assert(try (pFunction(f,g,-1); false) else true);
+
+  -- weightCheck: alpha > 0, w >= 0
+  assert(try (weightCheck(f,g,0,0);   false) else true);
+  assert(try (weightCheck(f,g,-1,0);  false) else true);
+  assert(try (weightCheck(f,g,1,-1);  false) else true);
+
+  -- weightLevel: alpha > 0 (both 3-arg and 4-arg overloads)
+  assert(try (weightLevel(f,g,0);  false) else true);
+  assert(try (weightLevel(f,g,-1); false) else true);
+  bfs = globalBFunction f;
+  assert(try (weightLevel(f,g,bfs,0);  false) else true);
+  assert(try (weightLevel(f,g,bfs,-1); false) else true);
+
+  -- weightLength: alpha in (0,1]
+  assert(try (weightLength(f,0);   false) else true);
+  assert(try (weightLength(f,3/2); false) else true);
+  assert(try (weightLength(f,-1);  false) else true);
+
+  -- alpha > 1 is accepted for nuAlpha, weightCheck, weightLevel
+  assert(instance(nuAlpha(f,g,3/2),       ZZ));
+  assert(instance(weightCheck(f,g,3/2,0), Boolean));
+  assert(instance(weightLevel(f,g,3/2),   ZZ));
+///
 

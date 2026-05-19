@@ -159,6 +159,7 @@ doc ///
 doc ///
   Key
     adjointIdeal
+    (adjointIdeal, RingElement)
   Headline
     compute the adjoint ideal of a reduced divisor
   Usage
@@ -775,6 +776,7 @@ doc ///
 doc ///
   Key
     HRHCheck
+    (HRHCheck, RingElement, ZZ)
   Headline
     check if the HRH level of $f$ is at least some number
   Usage
@@ -818,6 +820,7 @@ doc ///
 doc ///
   Key
     HRHLevel
+    (HRHLevel, RingElement)
   Headline
     determine the HRH level of $f$
   Usage
@@ -854,6 +857,7 @@ doc ///
 doc ///
   Key
     IHmoduleAdjoint
+    (IHmoduleAdjoint, RingElement)
   Headline
     construct a presentation of the intersection cohomology $\mathcal{D}$-module using the adjoint ideal
   Usage
@@ -886,6 +890,7 @@ doc ///
 doc ///
   Key
     localCohomFW
+    (localCohomFW, Ideal, ZZ, ZZ, ZZ)
   Headline
     compute the Hodge filtration on the weight filtration on local cohomology
   Usage
@@ -1469,6 +1474,7 @@ doc ///
 doc ///
   Key
     duBoisComplex
+    (duBoisComplex, RingElement, ZZ)
   Headline
     compute the Du Bois complexes $\underline{\Omega}^p_D$ for a divisor
   Usage
@@ -1517,6 +1523,7 @@ doc ///
 doc ///
   Key
     gradedDeRhamComplexH1
+    (gradedDeRhamComplexH1, RingElement, ZZ)
   Headline
     compute the complexes $\operatorname{Gr}^F_p(\operatorname{DR}(H^1_f(S)))$
   Usage
@@ -1598,6 +1605,7 @@ doc ///
 doc ///
   Key
     isPreDuBois
+    (isPreDuBois, RingElement, ZZ)
   Headline
     determine if $f$ is pre $m$-Du Bois for some $m\geq 0$
   Usage
@@ -1639,6 +1647,7 @@ doc ///
 doc ///
   Key
     intersectionDuBoisComplex
+    (intersectionDuBoisComplex, RingElement, ZZ)
   Headline
     compute the intersection Du Bois complexes $I\underline{\Omega}^p_D$ for a divisor
   Usage

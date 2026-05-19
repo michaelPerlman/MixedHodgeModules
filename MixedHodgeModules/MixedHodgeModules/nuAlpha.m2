@@ -15,6 +15,7 @@ nuAlpha = method(Options => {NuMethod => ByAnnFs})
 
 nuAlpha(RingElement,RingElement,ZZ) :=
 nuAlpha(RingElement,RingElement,QQ) := options -> (f,g,alpha) -> (
+    if sub(alpha,QQ) <= 0 then error "expected alpha to be a positive rational number";
     if not (ring g) === (ring f) then error "Expected g to belong to same ring as f"
     else if options.NuMethod == PowerBFunction then (
 	nuAlphaPowerBFunction(f,g,alpha))
@@ -27,6 +28,7 @@ nuAlpha(RingElement,RingElement,QQ) := options -> (f,g,alpha) -> (
 
 nuAlpha(RingElement,RingElement,RingElement,ZZ) :=
 nuAlpha(RingElement,RingElement,RingElement,QQ) := options -> (f,g,bgfs,alpha) -> (
+    if sub(alpha,QQ) <= 0 then error "expected alpha to be a positive rational number";
     if not (ring g) === (ring f) then error "Expected g to belong to same ring as f"
     else if options.NuMethod == PowerBFunction then (
 	nuAlphaPowerBFunction(f,g,bgfs,alpha))
@@ -328,6 +330,7 @@ pFunction = method(Options => {NuMethod => ByAnnFs});
 
 pFunction(RingElement,RingElement,ZZ) :=
 pFunction(RingElement,RingElement,QQ) := options -> (f,g,alpha) -> (
+    if sub(alpha,QQ) <= 0 then error "expected alpha to be a positive rational number";
     if (options.NuMethod == Malgrange) and (g != 1_(ring f)) then (
 	error "This strategy requires that g is 1 in the ring of f");
     W := makeWeylAlgebra ring f;

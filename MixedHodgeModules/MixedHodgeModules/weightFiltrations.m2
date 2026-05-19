@@ -17,6 +17,9 @@ weightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,m) -> (
 --calculates K^{\alpha}_m, the lift of ker(N^m)
 --see Olano weighted Hodge ideals, proof of Theorem A
 
+     checkAlpha alpha;
+     checkP p;
+     if m < 0 then error "expected weight m to be a non-negative integer";
      if (options.UseBasis != dtBasis) and  (options.UseBasis != sBasis) then error "invalid UseBasis";
 
     ------------------------------------------------------------------------
@@ -113,6 +116,9 @@ weightedHodgeIdeal(RingElement, QQ, ZZ, ZZ) := (f,alpha,p,m) -> (
 --p and m and non-negative integers
 --calculates the weighted Hodge ideal I^m_p(alpha*f)
 
+     checkAlpha alpha;
+     checkP p;
+     if m < 0 then error "expected weight m to be a non-negative integer";
      R := ring f;
      WF := weightHodgeOnV(f,alpha,p,m);
      I := ideal mingens ideal malgrangeEval(WF, f, alpha, p);
@@ -126,7 +132,9 @@ weightedHodgeIdeal(RingElement, QQ, ZZ, ZZ) := (f,alpha,p,m) -> (
 
 --ref: Theorem A of Olano WEIGHTED MULTIPLIER IDEALS OF REDUCED DIVISORS
 
-adjointIdeal = f -> (
+adjointIdeal = method();
+
+adjointIdeal(RingElement) := f -> (
 --gives the adjoint ideal of f
 --see Lazarsfeld Positivity II, Section 9.3E
 --the divisor f has rat sing iff = ideal(1_R)
@@ -139,7 +147,9 @@ adjointIdeal = f -> (
 ---------------------------------------------------------------
 
 --the following could be added as a new strategy for IHmodule in BernsteinSato
-IHmoduleAdjoint = f -> (
+IHmoduleAdjoint = method();
+
+IHmoduleAdjoint(RingElement) := f -> (
 --gives presentation of IH using F_0(IC_f)
 --useful for calculating b-functions on singular ambient varieties as in the recent
 --work of Dirks (and my ongoing collaboration with Dirks).
@@ -201,7 +211,9 @@ weightCheck=method();
 
 weightCheck(RingElement,RingElement,ZZ,ZZ) :=
 weightCheck(RingElement,RingElement,QQ,ZZ) := (f,g,alpha,w)-> (
-  b := globalBFunction f;  
+  if sub(alpha,QQ) <= 0 then error "expected alpha to be a positive rational number";
+  if w < 0 then error "expected weight w to be a non-negative integer";
+  b := globalBFunction f;
   bMM := bMinMax(b,alpha);
   k1 := floor bMM_0;
   k2 := floor bMM_1;
@@ -232,13 +244,15 @@ weightLevel= method();
 
 weightLevel(RingElement, RingElement, ZZ) :=
 weightLevel(RingElement, RingElement, QQ) := (f,g,alpha) -> (
+    if sub(alpha,QQ) <= 0 then error "expected alpha to be a positive rational number";
     bfs := globalBFunction f;
     weightLevel(f,g,bfs,alpha)
     )
-    
+
 
 weightLevel(RingElement, RingElement, RingElement, ZZ) :=
 weightLevel(RingElement, RingElement, RingElement, QQ) := (f,g,bfs,alpha) -> (
+    if sub(alpha,QQ) <= 0 then error "expected alpha to be a positive rational number";
     bMM := bMinMax(bfs,alpha);
     k1 := floor bMM_0;
     w := -1;
@@ -284,6 +298,7 @@ weightLength = method(Options => {LengthStrategy => ByNuAlpha, NuMethod => ByAnn
 
 weightLength(RingElement, ZZ) :=
 weightLength(RingElement, QQ) := options -> (f,alpha) -> (
+    checkAlpha alpha;
     if options.LengthStrategy == ByWeightLevel then (
         weightLengthByLevel(f,alpha))
     else weightLengthByNu(f,alpha, NuMethod => options.NuMethod)
@@ -341,7 +356,9 @@ weightLengthByNu(RingElement, QQ) := options -> (f,alpha) -> (
 ----------------------------------------------------------------
 ----------------------------------------------------------------
 
-localCohomFW = (I,q,p,m) -> (
+localCohomFW = method();
+
+localCohomFW(Ideal, ZZ, ZZ, ZZ) := (I,q,p,m) -> (
     
     S := ring I;
     n := numgens S;
@@ -386,6 +403,8 @@ monodromyWeightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,ell) -
 --ell is the monodromy weight index, centered at 0
 --calculates W(N)_ell F_p Gr^alpha_V(B_f), lifted to F_p V^alpha(B_f)
 
+    checkAlpha alpha;
+    checkP p;
     if ell < 0 then error "expected input weight to be a non-negative integer";
     if (options.UseBasis != dtBasis) and  (options.UseBasis != sBasis) then error "invalid UseBasis";
 
