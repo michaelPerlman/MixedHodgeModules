@@ -180,7 +180,7 @@ nuAlphaAnnFs(RingElement,RingElement,QQ) := (f,g,alpha) -> (
     W := makeWeylAlgebra ring f;
     newF := sub(f,W);
     if g == 1_(ring f) then (
-       	bf = globalBFunction f;
+       	bf = cachedGlobalBFunction f;
 	)
     else (
 	newG = sub(g,W);
@@ -250,7 +250,7 @@ nuAlphaMalgrange=method();
 
 nuAlphaMalgrange(RingElement, ZZ) :=
 nuAlphaMalgrange(RingElement, QQ) := (f, alpha) -> (
-    bf := globalBFunction f;
+    bf := cachedGlobalBFunction f;
     nuAlphaMalgrange(f,bf,alpha)
     )
     

@@ -27,7 +27,7 @@ weightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,m) -> (
     ------------------------------------------------------------------------
 
     negAlphaQQ := -sub(alpha,QQ);
-    AnnFsf := AnnFs f;
+    AnnFsf := cachedAnnFs f;
     Ds := ring AnnFsf;
     G := gens gb AnnFsf;
     numGensDs := numgens Ds;
@@ -213,17 +213,17 @@ weightCheck(RingElement,RingElement,ZZ,ZZ) :=
 weightCheck(RingElement,RingElement,QQ,ZZ) := (f,g,alpha,w)-> (
   if sub(alpha,QQ) <= 0 then error "expected alpha to be a positive rational number";
   if w < 0 then error "expected weight w to be a non-negative integer";
-  b := globalBFunction f;
+  b := cachedGlobalBFunction f;
   bMM := bMinMax(b,alpha);
   k1 := floor bMM_0;
   k2 := floor bMM_1;
-  If := AnnFs(f);
+  If := cachedAnnFs f;
   varDsFs := flatten entries vars ring If;
   s := varDsFs_(#varDsFs-1);
   newf := substitute(f, ring If);
   newg := substitute(g, ring If);
   use ring If;
-  J := If + ideal((s + alpha + k1)^(w + 1), newf^(k1 + k2));--possible bug here, use percent instead?
+  J := If + ideal((s + alpha + k1)^(w + 1), newf^(k1 + k2));
   isMember((((s + alpha + k1)^w) * newg * newf^(k1))_(ring If),J)
   )
 
@@ -245,7 +245,7 @@ weightLevel= method();
 weightLevel(RingElement, RingElement, ZZ) :=
 weightLevel(RingElement, RingElement, QQ) := (f,g,alpha) -> (
     if sub(alpha,QQ) <= 0 then error "expected alpha to be a positive rational number";
-    bfs := globalBFunction f;
+    bfs := cachedGlobalBFunction f;
     weightLevel(f,g,bfs,alpha)
     )
 
@@ -267,7 +267,7 @@ weightLevel(RingElement, RingElement, RingElement, QQ) := (f,g,bfs,alpha) -> (
 	   -- if ((alpha > 1) and (denominator(sub(alpha,QQ)) == 1) and (sub(g,ring f) == 1_(ring f))) then w = w+1);----Prop 1.6
 	   );
     	k2 := floor bMM_1;
-    	If := AnnFs(f);-----hard part
+    	If := cachedAnnFs f;-----hard part
     	varDsFs := flatten entries vars ring If;
     	s := varDsFs_(#varDsFs-1);
     	newf := substitute(f, ring If);
@@ -316,7 +316,7 @@ weightLengthByLevel= method();
 
 weightLengthByLevel(RingElement, ZZ) :=
 weightLengthByLevel(RingElement, QQ) := (f,alpha) -> (
-    bfs := globalBFunction f;
+    bfs := cachedGlobalBFunction f;
     w := 0;
     Roots := bFunctionRoots(bfs);
     alphaInts := sort select(Roots, i-> denominator(sub(i+alpha,QQ))==1);
@@ -340,7 +340,7 @@ weightLengthByNu=method(Options => {NuMethod => ByAnnFs});
 
 weightLengthByNu(RingElement, ZZ) := 
 weightLengthByNu(RingElement, QQ) := options -> (f,alpha) -> (
-     bfs := globalBFunction f;
+     bfs := cachedGlobalBFunction f;
      w := 0;
      Roots := bFunctionRoots(bfs);
      alphaInts :=sort select(Roots, i-> denominator(sub(i+alpha,QQ))==1);
@@ -413,7 +413,7 @@ monodromyWeightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,ell) -
     ------------------------------------------------------------------------
 
     negAlphaQQ := -sub(alpha,QQ);
-    AnnFsf := AnnFs f;
+    AnnFsf := cachedAnnFs f;
     Ds := ring AnnFsf;
     G := gens gb AnnFsf;
     numGensDs := numgens Ds;

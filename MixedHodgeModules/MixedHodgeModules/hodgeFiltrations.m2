@@ -19,6 +19,27 @@ checkP = p -> (
 
 ---------------------------------------------------------------
 ---------------------------------------------------------------
+--internal cache helper
+
+cachedAnnFs = f -> (
+    R := ring f;
+    if not R.cache#?AnnFsCache then R.cache#AnnFsCache = new MutableHashTable;
+    tbl := R.cache#AnnFsCache;
+    if tbl#?f then tbl#f
+    else tbl#f = AnnFs f
+    )
+
+cachedGlobalBFunction = f -> (
+    R := ring f;
+    if not R.cache#?GlobalBCache then R.cache#GlobalBCache = new MutableHashTable;
+    tbl := R.cache#GlobalBCache;
+    if tbl#?f then tbl#f
+    else tbl#f = globalBFunction f
+    )
+
+
+---------------------------------------------------------------
+---------------------------------------------------------------
 --helper functions
 
 
@@ -201,36 +222,6 @@ malgrangeEval = (L,f,alpha,p) -> (
 
 
 ---------------------------------------------------------------
-
-
---this will be standard change of basis from s-basis to dt-basis given by Malgrange isom
--*
-sBasisToDtBasisStandard = (sPolyList, f, Rs, p) -> (
-    -- Input: list in Frac(R)[s] deg_s<=p that already represents elements of B_f
-    -- Output: list in Frac(R)[dt] representing the same elements via Malgrange.
-
-    sPolyMat := matrix{sPolyList};
-    monomCoeffs := (coefficients(sPolyMat, Variables => {Rs_0}))_1;
-
-    -- express in standard Q-basis
-    Qdesc := stdQpolysDesc(Rs, p);
-    QpolysDesc := matrix{Qdesc};                 -- [Q_p,...,Q_0]
-    ch := (coefficients(QpolysDesc, Variables => {Rs_0}))_1;
-    qCoeffs := (inverse ch) * monomCoeffs;       -- coefficients of Q_p,...,Q_0
-
-    dt := local dt;
-    gensR := drop(gens Rs, 1);
-    RDt := (coefficientRing Rs)(monoid[append(gensR, dt)]); -- keep same coeff ring
-    fRDt := sub(f, RDt);
-
-    -- Q_p maps to f^p dt^p, ..., Q_0 maps to 1
-    dtMonomsDesc := matrix{apply(toList(0..p), k -> (fRDt^(p-k)) * (dt^(p-k)))};
-
-    flatten entries (dtMonomsDesc * sub(qCoeffs, RDt))
-)
-*-
-
----------------------------------------------------------------
 ---------------------------------------------------------------
 
 
@@ -258,7 +249,7 @@ hodgeOnV(RingElement,QQ,ZZ) := options -> (f,alpha,p) -> (
     ------------------------------------------------------------------------
 
     negAlphaQQ := -substitute(alpha,QQ);
-    AnnFsf := AnnFs f;
+    AnnFsf := cachedAnnFs f;
     Ds := ring AnnFsf;
     G := gens gb AnnFsf;
     numGensDs := numgens Ds;
@@ -339,7 +330,7 @@ hodgeOnV(RingElement,ZZ) := options -> (f,p) -> (
     -- Step 1. Basic setup and annihilator data for f^s
     ------------------------------------------------------------------------
     
-    AnnFsf := AnnFs f;
+    AnnFsf := cachedAnnFs f;
     Ds := ring AnnFsf;
     G := gens gb AnnFsf;
     numGensDs := numgens Ds;
@@ -758,7 +749,7 @@ HRHCheck(RingElement, ZZ) := (f,p) -> (
     ------------------------------------------------------------------------
     -- Step 1. Basic setup and annihilator data for f^s
     ------------------------------------------------------------------------
-    AnnFsf := AnnFs f;
+    AnnFsf := cachedAnnFs f;
     Ds := ring AnnFsf;
     G := gens gb AnnFsf;
     numGensDs := numgens Ds;

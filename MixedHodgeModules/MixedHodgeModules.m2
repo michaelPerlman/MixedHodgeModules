@@ -11,10 +11,6 @@
 --(1) fill in descriptions and examples in documentation for nuAlpha, pFunction (and their strategies)
 --(2) add examples in doc of other strategies for weightLength
 --(3) create tests for every function and add to tests.m2
---(4) determine which strategy for weightLength should be default.
---(5) There is an old comment on pFunction "to do: modify so don't compute high nus". Action needed?
---(6) There is an old comment on weightCheck "possible bug here, use percent instead?". Action needed?
---(7) un-export weightHodgeOnV once monodromy is implemented?
 
 
 
@@ -23,6 +19,9 @@
 --same for weightLength? Same for hodgeLevel, hodgeCheck?
 --(2) allow alpha as a parameter in hodgeIdeal (work over QQ(alpha) where alpha is variable)?
 --(3) weighted Homogeneous isolated option in de Rham and Du Bois functions?
+--(4) There is an old comment on pFunction "to do: modify so don't compute high nus". 
+--(5) cache generalized b-functions for speed.
+
 
 
 --to add eventually?:
@@ -109,6 +108,12 @@ export {
 protect symbol InputType;
 protect symbol WeightedHodgeIdeals;
 protect symbol HodgeIdeals;
+
+--internal symbol for caching AnnFs on a RingElement
+protect symbol AnnFsCache;
+
+--internal symbol for caching globalBFunction on a RingElement
+protect symbol GlobalBCache;
 
 
 --Convention: dt^p \in F_p(B_f)
