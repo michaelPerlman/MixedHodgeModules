@@ -299,15 +299,12 @@ hodgeOnV(RingElement,QQ,ZZ) := options -> (f,alpha,p) -> (
     -- Step 4. Compute kernels and form W_alpha (Blanco 6 - 11)
     ------------------------------------------------------------------------
 
-     sLamMaps := apply(rhoFpAlpha, i -> (
-        lam := sub(i_0, Ds);
-        mult := i_1;
-        a := (ss - lam)^mult;
-        map(M, M, matrix{{a}})
-    ));
-   
-    
-    Klams := apply(sLamMaps, i -> flatten entries gens kernel i);--hard step
+     sLamMaps := apply(rhoFpAlpha, i -> (ss - sub(i_0, Ds))^(i_1));
+     -- stores (ss - lam)^mult directly; kernel of multiplication by this on
+     -- M = Ds/Jp is (Jp : ideal((ss - lam)^mult)) since ss is central
+
+
+    Klams := apply(sLamMaps, a -> flatten entries gens (Jp : ideal a));--hard step
     Walpha := trim ideal(flatten Klams);
 
     ------------------------------------------------------------------------
@@ -362,12 +359,13 @@ hodgeOnV(RingElement,ZZ) := options -> (f,p) -> (
         lam := sub(i_0, Ds);
         mult := i_1;
         a := (ss - lam)^mult;
-	if i_0 < -p-1 then sLamMapsLessNegOne = append(sLamMapsLessNegOne,  {i_0,map(M, M, matrix{{a}})})
-	else if i_0 < -p then sLamMapsAlpha = append(sLamMapsAlpha, {i_0,map(M, M, matrix{{a}})});
+	if i_0 < -p-1 then sLamMapsLessNegOne = append(sLamMapsLessNegOne,  {i_0, a})
+	else if i_0 < -p then sLamMapsAlpha = append(sLamMapsAlpha, {i_0, a});
 	);
+    -- second entries store (ss - lam)^mult; kernels computed via colon ideal
 
-    Galpha := ideal flatten apply( sLamMapsLessNegOne , i -> flatten entries gens kernel (i_1));--hard step
-    Klams := apply(sLamMapsAlpha, i -> {i_0, flatten entries gens kernel (i_1)});--hard step
+    Galpha := ideal flatten apply( sLamMapsLessNegOne , i -> flatten entries gens (Jp : ideal(i_1)));--hard step
+    Klams := apply(sLamMapsAlpha, i -> {i_0, flatten entries gens (Jp : ideal(i_1))});--hard step
    
     ------------------------------------------------------------------------
     -- Step 5. Eliminate differential variables, truncate, and (possibly) change basis (Blanco 14 - 21)
@@ -758,12 +756,13 @@ HRHCheck(RingElement, ZZ) := (f,p) -> (
         lam := sub(i_0, Ds);
         mult := i_1;
         a := (ss - lam)^mult;
-	if i_0 < -1-p then sLamMapsLess = append(sLamMapsLess, map(M, M, matrix{{a}}))
-	else if i_0 == -1-p then sLamMapsAlpha = append(sLamMapsAlpha, map(M, M, matrix{{a}}));
+	if i_0 < -1-p then sLamMapsLess = append(sLamMapsLess, a)
+	else if i_0 == -1-p then sLamMapsAlpha = append(sLamMapsAlpha, a);
 	);
+    -- entries store (ss - lam)^mult; kernels via colon ideal
 
-    G1 := ideal flatten apply( sLamMapsLess, i -> flatten entries gens kernel i);--hard step
-    Klams := ideal flatten apply(sLamMapsAlpha, i -> flatten entries gens kernel i);--hard step
+    G1 := ideal flatten apply( sLamMapsLess, a -> flatten entries gens (Jp : ideal a));--hard step
+    Klams := ideal flatten apply(sLamMapsAlpha, a -> flatten entries gens (Jp : ideal a));--hard step
 
     preVg1 := G1;--this corresponds to V^(>alpha)
     preV1 :=  (G1 + Klams);--this corresponds to V^alpha

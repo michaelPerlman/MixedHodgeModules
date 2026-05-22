@@ -40,12 +40,13 @@ weightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,m) -> (
         lam := sub(i_0, Ds);
         mult := i_1;
         a := (ss - lam)^mult;
-	if i_0 < negAlphaQQ-p then sLamMapsLess = append(sLamMapsLess, map(M, M, matrix{{a}}))
-	else if i_0 == negAlphaQQ-p then sLamMapsAlpha = append(sLamMapsAlpha, map(M, M, matrix{{a}}));
+	if i_0 < negAlphaQQ-p then sLamMapsLess = append(sLamMapsLess, a)
+	else if i_0 == negAlphaQQ-p then sLamMapsAlpha = append(sLamMapsAlpha, a);
 	);
+    -- entries store (ss - lam)^mult; kernels via colon ideal
 
-    Galpha := ideal flatten apply( sLamMapsLess, i -> flatten entries gens kernel i);--hard step
-    Klams := ideal flatten apply(sLamMapsAlpha, i -> flatten entries gens kernel i);--hard step
+    Galpha := ideal flatten apply( sLamMapsLess, a -> flatten entries gens (Jp : ideal a));--hard step
+    Klams := ideal flatten apply(sLamMapsAlpha, a -> flatten entries gens (Jp : ideal a));--hard step
 
     preVgAlpha := Galpha;--this corresponds to V^(>alpha)
     preVAlpha :=  (Galpha + Klams);--this corresponds to V^alpha
@@ -409,15 +410,16 @@ monodromyWeightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,ell) -
         a := (ss - lam)^mult;
 
         if i_0 < negAlphaQQ-p then (
-            sLamMapsLess = append(sLamMapsLess, map(M, M, matrix{{a}}))
+            sLamMapsLess = append(sLamMapsLess, a)
         )
         else if i_0 == negAlphaQQ-p then (
-            sLamMapsAlpha = append(sLamMapsAlpha, map(M, M, matrix{{a}}))
+            sLamMapsAlpha = append(sLamMapsAlpha, a)
         );
     );
+    -- entries store (ss - lam)^mult; kernels via colon ideal
 
-    Galpha := ideal flatten apply(sLamMapsLess, i -> flatten entries gens kernel i);
-    Klams := ideal flatten apply(sLamMapsAlpha, i -> flatten entries gens kernel i);
+    Galpha := ideal flatten apply(sLamMapsLess, a -> flatten entries gens (Jp : ideal a));
+    Klams := ideal flatten apply(sLamMapsAlpha, a -> flatten entries gens (Jp : ideal a));
 
     preVgAlpha := Galpha;              -- corresponds to V^(>alpha)
     preVAlpha := Galpha + Klams;       -- corresponds to V^alpha
