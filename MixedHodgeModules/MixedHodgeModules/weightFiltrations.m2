@@ -23,33 +23,14 @@ weightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,m) -> (
      if (options.UseBasis != dtBasis) and  (options.UseBasis != sBasis) then error "invalid UseBasis";
 
     ------------------------------------------------------------------------
-    -- Step 1. Basic setup and annihilator data for f^s
+    -- Steps 1-3. Shared V-filtration setup: Ds, ss, DsF, rhoFp, Jp, M
     ------------------------------------------------------------------------
 
     negAlphaQQ := -sub(alpha,QQ);
-    AnnFsf := cachedAnnFs f;
-    Ds := ring AnnFsf;
-    G := gens gb AnnFsf;
-    numGensDs := numgens Ds;
-    ss := Ds_(numGensDs-1);
-    DsF := substitute(f,Ds);
-
-    bs := generalB({f},1_(ring f), Exponent => p+1);
-    bsFac := factorBFunction bs;
-    rhoFp := sort apply(toList(0..(#bsFac-1)), i -> {sub((ring bs)_0-(bsFac#i#0),QQ),bsFac#i#1});--{(root,mult)}
-    --the roots are rational numbers
+    (Ds, ss, DsF, rhoFp, Jp, M) := prepareVfilt(f, p);
 
     ------------------------------------------------------------------------
-    -- Step 3. Build J_p and the module M = D/J_p
-    --(Blanco step 5 (with a different shift on Jp, consistent with b^(p+1)_f))
-    ------------------------------------------------------------------------
-
-    Gp := flatten entries G;
-    Jp := ideal(Gp) + ideal(DsF^(p+1));
-    M := Ds^1 / Jp;
-   
-    ------------------------------------------------------------------------
-    -- Step 4. Compute kernels 
+    -- Step 4. Compute kernels
     ------------------------------------------------------------------------
 
     sLamMapsLess := {};
@@ -409,29 +390,11 @@ monodromyWeightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,ell) -
     if (options.UseBasis != dtBasis) and  (options.UseBasis != sBasis) then error "invalid UseBasis";
 
     ------------------------------------------------------------------------
-    -- Step 1. Basic setup and annihilator data for f^s
+    -- Steps 1-2. Shared V-filtration setup: Ds, ss, DsF, rhoFp, Jp, M
     ------------------------------------------------------------------------
 
     negAlphaQQ := -sub(alpha,QQ);
-    AnnFsf := cachedAnnFs f;
-    Ds := ring AnnFsf;
-    G := gens gb AnnFsf;
-    numGensDs := numgens Ds;
-    ss := Ds_(numGensDs-1);
-    DsF := substitute(f,Ds);
-
-    bs := generalB({f},1_(ring f), Exponent => p+1);
-    bsFac := factorBFunction bs;
-    rhoFp := sort apply(toList(0..(#bsFac-1)), i -> {sub((ring bs)_0-(bsFac#i#0),QQ),bsFac#i#1});
-    --the roots are rational numbers
-
-    ------------------------------------------------------------------------
-    -- Step 2. Build J_p and the module M = D/J_p
-    ------------------------------------------------------------------------
-
-    Gp := flatten entries G;
-    Jp := ideal(Gp) + ideal(DsF^(p+1));
-    M := Ds^1 / Jp;
+    (Ds, ss, DsF, rhoFp, Jp, M) := prepareVfilt(f, p);
 
     ------------------------------------------------------------------------
     -- Step 3. Compute eigenspace kernels for V^>alpha and V^alpha

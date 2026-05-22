@@ -37,6 +37,48 @@ cachedGlobalBFunction = f -> (
     else tbl#f = globalBFunction f
     )
 
+--cache the sorted {root, multiplicity} list from the (p+1)-st generalized
+--b-function of f.  Keyed on (f, p).  Roots are coerced to QQ.
+cachedRhoFp = (f, p) -> (
+    R := ring f;
+    if not R.cache#?RhoFpCache then R.cache#RhoFpCache = new MutableHashTable;
+    tbl := R.cache#RhoFpCache;
+    key := (f, p);
+    if tbl#?key then tbl#key
+    else (
+        bs := generalB({f}, 1_(ring f), Exponent => p+1);
+        bsFac := factorBFunction bs;
+        tbl#key = sort apply(toList(0..(#bsFac-1)), i ->
+            {sub((ring bs)_0 - (bsFac#i#0), QQ), bsFac#i#1})
+        )
+    )
+
+
+---------------------------------------------------------------
+---------------------------------------------------------------
+--shared V-filtration setup used by hodgeOnV, weightHodgeOnV,
+--monodromyWeightHodgeOnV, and HRHCheck.
+--Returns the common quantities derived from f and p:
+--  Ds    : Weyl algebra D[s] containing AnnFs(f)
+--  ss    : the s-variable, Ds_(numgens Ds - 1)
+--  DsF   : sub(f, Ds)
+--  rhoFp : sorted list of {root, multiplicity} pairs from the (p+1)-st
+--          generalized b-function (roots coerced to QQ; sorted increasing)
+--  Jp    : ideal(gens gb AnnFsf) + ideal(DsF^(p+1))
+--  M     : Ds^1 / Jp
+
+prepareVfilt = (f, p) -> (
+    AnnFsf := cachedAnnFs f;
+    Ds := ring AnnFsf;
+    Gp := flatten entries gens gb AnnFsf;
+    ss := Ds_(numgens Ds - 1);
+    DsF := substitute(f, Ds);
+    rhoFp := cachedRhoFp(f, p);
+    Jp := ideal(Gp) + ideal(DsF^(p+1));
+    M := Ds^1 / Jp;
+    (Ds, ss, DsF, rhoFp, Jp, M)
+    )
+
 
 ---------------------------------------------------------------
 ---------------------------------------------------------------
@@ -245,42 +287,18 @@ hodgeOnV(RingElement,QQ,ZZ) := options -> (f,alpha,p) -> (
     if (options.UseBasis != dtBasis) and  (options.UseBasis != sBasis) then error "invalid UseBasis";
 
     ------------------------------------------------------------------------
-    -- Step 1. Basic setup and annihilator data for f^s
+    -- Steps 1-3. Shared V-filtration setup: Ds, ss, DsF, rhoFp, Jp, M
+    -- (see prepareVfilt; this corresponds to Blanco step 5 with shifted Jp)
     ------------------------------------------------------------------------
 
     negAlphaQQ := -substitute(alpha,QQ);
-    AnnFsf := cachedAnnFs f;
-    Ds := ring AnnFsf;
-    G := gens gb AnnFsf;
-    numGensDs := numgens Ds;
-    ss := Ds_(numGensDs-1);
-    DsF := substitute(f,Ds);
-
-    ------------------------------------------------------------------------
-    -- Step 2. Compute the (p+1)-st generalized b-function and
-    -- keep only the roots relevant for V^{alpha}
-    ------------------------------------------------------------------------
-
-    bs := generalB({f},1_(ring f), Exponent => p+1);
-    bsFac := factorBFunction bs;
-    rhoFp := apply(toList(0..(#bsFac-1)), i -> {sub((ring bs)_0-(bsFac#i#0),QQ),bsFac#i#1});--{(root,mult)}
-     --the roots are rational numbers
+    (Ds, ss, DsF, rhoFp, Jp, M) := prepareVfilt(f, p);
     rhoFpAlpha := select(rhoFp, i -> ((i_0) <= negAlphaQQ-p));
 
-    ------------------------------------------------------------------------
-    -- Step 3. Build J_p and the module M = D/J_p
-    --(Blanco step 5 (with a different shift on Jp, consistent with b^(p+1)_f))
-    ------------------------------------------------------------------------
-
-    Gp := flatten entries G;
-    Jp := ideal(Gp) + ideal(DsF^(p+1));
-    M := Ds^1 / Jp;
-   
     ------------------------------------------------------------------------
     -- Step 4. Compute kernels and form W_alpha (Blanco 6 - 11)
     ------------------------------------------------------------------------
 
-    
      sLamMaps := apply(rhoFpAlpha, i -> (
         lam := sub(i_0, Ds);
         mult := i_1;
@@ -327,34 +345,11 @@ hodgeOnV(RingElement,ZZ) := options -> (f,p) -> (
     if (options.UseBasis != dtBasis) and  (options.UseBasis != sBasis) then error "invalid UseBasis";
 
     ------------------------------------------------------------------------
-    -- Step 1. Basic setup and annihilator data for f^s
-    ------------------------------------------------------------------------
-    
-    AnnFsf := cachedAnnFs f;
-    Ds := ring AnnFsf;
-    G := gens gb AnnFsf;
-    numGensDs := numgens Ds;
-    ss := Ds_(numGensDs-1);
-    DsF := substitute(f,Ds);
-
-    ------------------------------------------------------------------------
-    -- Step 2. Compute the (p+1)-st generalized b-function 
+    -- Steps 1-3. Shared V-filtration setup: Ds, ss, DsF, rhoFp, Jp, M
+    -- (see prepareVfilt; this corresponds to Blanco step 5 with shifted Jp)
     ------------------------------------------------------------------------
 
-    bs := generalB({f},1_(ring f), Exponent => p+1);
-    bsFac := factorBFunction bs;
-    rhoFp := sort apply(toList(0..(#bsFac-1)), i -> {sub((ring bs)_0-(bsFac#i#0),QQ),bsFac#i#1});--{(root,mult)}
-    --important: increasing order
-    --the roots are rational numbers
-    
-    ------------------------------------------------------------------------
-    -- Step 3. Build J_p and the module M = D/J_p
-    --(Blanco step 5 (with a different shift on Jp, consistent with b^(p+1)_f))
-    ------------------------------------------------------------------------
-
-    Gp := flatten entries G;
-    Jp := ideal(Gp) + ideal(DsF^(p+1));
-    M := Ds^1 / Jp;
+    (Ds, ss, DsF, rhoFp, Jp, M) := prepareVfilt(f, p);
 
     ------------------------------------------------------------------------
     -- Step 4. Compute kernels (Blanco 6 - 11)
@@ -747,31 +742,13 @@ HRHCheck = method();
 HRHCheck(RingElement, ZZ) := (f,p) -> (
 
     ------------------------------------------------------------------------
-    -- Step 1. Basic setup and annihilator data for f^s
-    ------------------------------------------------------------------------
-    AnnFsf := cachedAnnFs f;
-    Ds := ring AnnFsf;
-    G := gens gb AnnFsf;
-    numGensDs := numgens Ds;
-    ss := Ds_(numGensDs-1);
-    DsF := substitute(f,Ds);
-
-    bs := generalB({f},1_(ring f), Exponent => p+1);
-    bsFac := factorBFunction bs;
-    rhoFp := sort apply(toList(0..(#bsFac-1)), i -> {sub((ring bs)_0-(bsFac#i#0),QQ),bsFac#i#1});--{(root,mult)}
-    --the roots are rational numbers
-
-    ------------------------------------------------------------------------
-    -- Step 3. Build J_p and the module M = D/J_p
-    --(Blanco step 5 (with a different shift on Jp, consistent with b^(p+1)_f))
+    -- Steps 1-3. Shared V-filtration setup: Ds, ss, DsF, rhoFp, Jp, M
     ------------------------------------------------------------------------
 
-    Gp := flatten entries G;
-    Jp := ideal(Gp) + ideal(DsF^(p+1));
-    M := Ds^1 / Jp;
-   
+    (Ds, ss, DsF, rhoFp, Jp, M) := prepareVfilt(f, p);
+
     ------------------------------------------------------------------------
-    -- Step 4. Compute kernels 
+    -- Step 4. Compute kernels
     ------------------------------------------------------------------------
 
     sLamMapsLess := {};

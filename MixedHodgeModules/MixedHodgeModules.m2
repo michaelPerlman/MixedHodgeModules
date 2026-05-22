@@ -115,6 +115,9 @@ protect symbol AnnFsCache;
 --internal symbol for caching globalBFunction on a RingElement
 protect symbol GlobalBCache;
 
+--internal symbol for caching rhoFp (roots of generalized b-function with multiplicities) keyed by (f,p)
+protect symbol RhoFpCache;
+
 
 --Convention: dt^p \in F_p(B_f)
 -- f should be reduced
