@@ -109,9 +109,14 @@ weightedHodgeIdeal(RingElement, QQ, ZZ, ZZ) := (f,alpha,p,m) -> (
      checkP p;
      if m < 0 then error "expected weight m to be a non-negative integer";
      R := ring f;
+     if not R.cache#?WeightedHodgeIdealCache then R.cache#WeightedHodgeIdealCache = new MutableHashTable;
+     tbl := R.cache#WeightedHodgeIdealCache;
+     key := (f, sub(alpha,QQ), p, m);
+     if tbl#?key then return tbl#key;
      WF := weightHodgeOnV(f,alpha,p,m);
      I := ideal mingens ideal malgrangeEval(WF, f, alpha, p);
 
+     tbl#key = I;
      I
      )
 

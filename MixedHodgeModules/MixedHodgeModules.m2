@@ -39,7 +39,7 @@
 newPackage(
     "MixedHodgeModules",
     Version => "1.0",
-    Date => "May 18, 2026",
+    Date => "May 22, 2026",
     Headline => "Calculations involving Hodge and weight filtrations on localizations",
     Authors => {{ Name => "András C. Lőrincz",  Email => "lorincz@ou.edu",  HomePage => "https://math.ou.edu/~alorincz/"},
 	        { Name => "Michael Perlman",    Email => "mperlman@ua.edu", HomePage => "https://sites.google.com/view/michaelperlman/home"}},
@@ -102,6 +102,9 @@ export {
      "UseGenLevel",
     }
 
+--Convention: dt^p \in F_p(B_f)
+-- f should be reduced    
+
 
 
 --internal symbols for deRham
@@ -124,9 +127,20 @@ protect symbol HodgeOnVCache;
 --internal symbol for caching weightHodgeOnV outputs keyed by (f, alpha, p, m, UseBasis)
 protect symbol WeightHodgeOnVCache;
 
+--internal symbol for caching hodgeIdeal outputs keyed by (f, alpha, p, UseGenLevel)
+protect symbol HodgeIdealCache;
 
---Convention: dt^p \in F_p(B_f)
--- f should be reduced
+--internal symbol for caching weightedHodgeIdeal outputs keyed by (f, alpha, p, m)
+protect symbol WeightedHodgeIdealCache;
+
+--internal symbol for caching makeWeylAlgebra on a polynomial ring
+protect symbol WeylAlgebraCache;
+
+--internal symbol for caching polynomialAnnihilator g on a RingElement (with W from cachedWeylAlgebra)
+protect symbol PolyAnnCache;
+
+
+
 
 
 ---------------------------------------------------------------
@@ -181,6 +195,17 @@ uninstallPackage "MixedHodgeModules"
 
 
 --tests/ examples
+restart
+S = QQ[x_(1,1)..x_(3,2)]
+M = transpose genericMatrix(S,x_(1,1),2,3)
+I= minors(2,M)
+time localCohom(2,I)
+
+time localCohomFW(I,2,0,8)
+time localCohomFW(I,3,1,9)
+prune oo
+
+for i from 3 to 5 do print hilbertFunction(i,oo)
 
 S=QQ[x,y,z]
 f=x^2+y^3+y*z^2

@@ -1,6 +1,33 @@
 --Copyright 2026 Andras Lorincz and Michael Perlman
 
 
+---------------------------------------------------------------
+---------------------------------------------------------------
+--internal cache helpers (used only in this file)
+
+--cache the Weyl algebra makeWeylAlgebra(R) per polynomial ring R, so subsequent
+--callers share the same W object (and elements sub'd into W are interoperable).
+cachedWeylAlgebra = R -> (
+    if not R.cache#?WeylAlgebraCache then R.cache#WeylAlgebraCache = makeWeylAlgebra R;
+    R.cache#WeylAlgebraCache
+    )
+
+--cache polynomialAnnihilator g, with the result living in cachedWeylAlgebra(ring g).
+--Callers should derive their W via cachedWeylAlgebra(ring g) or cachedWeylAlgebra(ring f)
+--to ensure newF and Anng are in the same ring.
+cachedPolynomialAnnihilator = g -> (
+    R := ring g;
+    if not R.cache#?PolyAnnCache then R.cache#PolyAnnCache = new MutableHashTable;
+    tbl := R.cache#PolyAnnCache;
+    if tbl#?g then tbl#g
+    else (
+        W := cachedWeylAlgebra R;
+        tbl#g = polynomialAnnihilator substitute(g, W)
+        )
+    )
+
+---------------------------------------------------------------
+---------------------------------------------------------------
 
 
 nuAlpha = method(Options => {NuMethod => ByAnnFs})
@@ -48,8 +75,7 @@ nuAlphaPowerBFunction=method();
 
 nuAlphaPowerBFunction(RingElement,RingElement,RingElement,ZZ) :=
 nuAlphaPowerBFunction(RingElement,RingElement,RingElement,QQ) := (f,g,bgfs,alpha) -> (
-    W:=makeWeylAlgebra ring f;
-    newG := substitute(g,W);
+    W := cachedWeylAlgebra ring f;
     newF := substitute(f,W);
     bg := bgfs;
     Roots := bFunctionRoots(bg);
@@ -60,7 +86,7 @@ nuAlphaPowerBFunction(RingElement,RingElement,RingElement,QQ) := (f,g,bgfs,alpha
             k0 =floor(AlphaInts_0 + alpha + 1)));
     PowerB := bg;
     if k0 > 1 then (
-	 Anng := polynomialAnnihilator newG;
+	 Anng := cachedPolynomialAnnihilator g;
 	 PowerB = (globalB(Anng, newF^(k0))).Bpolynomial);
     facPowerB := factorBFunction PowerB;
     goodFactor := ((ring(PowerB))_0)+(alpha/k0);
@@ -76,10 +102,9 @@ nuAlphaPowerBFunction(RingElement,RingElement,RingElement,QQ) := (f,g,bgfs,alpha
 
 nuAlphaPowerBFunction(RingElement,RingElement,ZZ) :=
 nuAlphaPowerBFunction(RingElement,RingElement,QQ) := (f,g,alpha) -> (
-    W:=makeWeylAlgebra ring f;
-    newG := substitute(g,W);
+    W := cachedWeylAlgebra ring f;
     newF := substitute(f,W);
-    Anng := polynomialAnnihilator newG;
+    Anng := cachedPolynomialAnnihilator g;
     bg := (globalB(Anng, newF)).Bpolynomial;
     Roots := bFunctionRoots(bg);
     AlphaInts := reverse sort select(Roots, i-> denominator(sub(i+alpha,QQ))==1);
@@ -113,8 +138,7 @@ nuAlphaAnnFs(RingElement,RingElement,RingElement,QQ) := (f,g,bgfs,alpha) -> (
     B := local B;
     goodFactor := local goodFactor;
     Anng :=local Anng;
-    newG := local newG;
-    W := makeWeylAlgebra ring f;
+    W := cachedWeylAlgebra ring f;
     newF := sub(f,W);
     bg := bgfs;
     Roots := bFunctionRoots bg;
@@ -132,11 +156,10 @@ nuAlphaAnnFs(RingElement,RingElement,RingElement,QQ) := (f,g,bgfs,alpha) -> (
 	)
     else (
     	if g == 1_(ring f) then (
-	    Annfs = AnnFs newF;	
+	    Annfs = AnnFs newF;
 	    )
     	else (
-	    newG = sub(g,W);
-	    Anng = polynomialAnnihilator newG;
+	    Anng = cachedPolynomialAnnihilator g;
 	    Annfs = AnnIFs(Anng,newF);
 	    );
    	newerF := sub(newF, ring(Annfs));
@@ -176,15 +199,13 @@ nuAlphaAnnFs(RingElement,RingElement,QQ) := (f,g,alpha) -> (
     goodFactor := local goodFactor;
     bf := local bf;
     Anng := local Anng;
-    newG := local newG;
-    W := makeWeylAlgebra ring f;
+    W := cachedWeylAlgebra ring f;
     newF := sub(f,W);
     if g == 1_(ring f) then (
        	bf = cachedGlobalBFunction f;
 	)
     else (
-	newG = sub(g,W);
-	Anng = polynomialAnnihilator newG;
+	Anng = cachedPolynomialAnnihilator g;
 	bf = (globalB(Anng, newF)).Bpolynomial;
 	);
     Roots := bFunctionRoots bf;
@@ -257,7 +278,7 @@ nuAlphaMalgrange(RingElement, QQ) := (f, alpha) -> (
 
 nuAlphaMalgrange(RingElement,RingElement,ZZ) :=
 nuAlphaMalgrange(RingElement,RingElement,QQ) := (f,bf,alpha) -> (
-    W := makeWeylAlgebra ring f;
+    W := cachedWeylAlgebra ring f;
     Roots := bFunctionRoots bf;
     AlphaInts := reverse sort select(Roots, i-> denominator(sub(i+alpha,QQ))==1);
     k0 := 1;
@@ -333,10 +354,9 @@ pFunction(RingElement,RingElement,QQ) := options -> (f,g,alpha) -> (
     if sub(alpha,QQ) <= 0 then error "expected alpha to be a positive rational number";
     if (options.NuMethod == Malgrange) and (g != 1_(ring f)) then (
 	error "This strategy requires that g is 1 in the ring of f");
-    W := makeWeylAlgebra ring f;
-    newG := substitute(g,W);
+    W := cachedWeylAlgebra ring f;
     newF := substitute(f,W);
-    Anng := polynomialAnnihilator newG;
+    Anng := cachedPolynomialAnnihilator g;
     bgfs := (globalB(Anng, newF)).Bpolynomial;
     Roots := bFunctionRoots bgfs;
     translatesRoots := unique flatten apply(Roots, i-> translateToAlpha(alpha,i));

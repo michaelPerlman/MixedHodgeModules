@@ -450,10 +450,14 @@ hodgeIdeal(RingElement,QQ,ZZ) := options -> (f,alpha,p) -> (
     checkAlpha alpha;
     checkP p;
     R := ring f;
+    if not R.cache#?HodgeIdealCache then R.cache#HodgeIdealCache = new MutableHashTable;
+    tbl := R.cache#HodgeIdealCache;
+    key := (f, sub(alpha,QQ), p, options.UseGenLevel);
+    if tbl#?key then return tbl#key;
     n := numgens R;
     I := ideal(1_R);
     FpValpha := {};
-    
+
     if options.UseGenLevel == False then (
        FpValpha = hodgeOnV(f,alpha,p);
        I = ideal mingens ideal malgrangeEval(FpValpha, f, alpha, p);
@@ -472,6 +476,7 @@ hodgeIdeal(RingElement,QQ,ZZ) := options -> (f,alpha,p) -> (
 	            );
 		);
 
+    tbl#key = I;
     I
     )
 	
