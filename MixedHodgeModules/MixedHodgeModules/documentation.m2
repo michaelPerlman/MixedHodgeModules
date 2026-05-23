@@ -94,7 +94,7 @@ doc ///
   References
     See the bibliography at @TO "Works Cited"@.
   Acknowledgement
-    We thank Guillem Blanco, Bradley Dirks, Timothy Duff, and Ruijie Yang for helpful conversations. Work on this package began as part of the {\it Macaulay2 Workshop and Mini-School} held at University of Minnesota - Twin Cities,
+    We thank Guillem Blanco, Bradley Dirks, Timothy Duff, Mahrud Sayrafi, and Ruijie Yang for helpful conversations. Work on this package began as part of the {\it Macaulay2 Workshop and Mini-School} held at University of Minnesota - Twin Cities,
     funded by NSF Award DMS 2302476.
   SeeAlso
     "Dmodules :: Dmodules"
