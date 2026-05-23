@@ -191,40 +191,159 @@ fTorsion = (f,rList,aa,p) -> (
     
 
 --------------------------------------------------------------------
----helper function to create koszul complex, tensor with N, and take
+---helper functions to create koszul complex, tensor with N, and take
 --appropriate graded piece
---------------------------------------------------------------------   
-    
-    
+--------------------------------------------------------------------
+
+
+
 koszulSlice = (A,S,p,N) -> (
---N is a graded A module
---form the Koszul complex, tensor with N
---take the p-th graded piece
---sub back into S
+--N is a bigraded A-module with bigrade {*,0}
+--Form the Koszul complex, tensor with N, slice the {p,0}-graded piece term-by-
+--term as S-modules, and assemble.  Avoids freeResolution(DRN) over A.
+--
+--Optimization: slice presN ONCE per needed de-degree (cached), then
+--  (i)  (DRN_i)_{(p,0)} = directSum_k N_{(p-d_{i,k}, 0)} for d_{i,k} the gen
+--       degrees of Ktwisted_i;
+--  (ii) the differential DRN.dd_i has matrix Ktwisted.dd_i (a small matrix
+--       in A); each (l,k) entry a is converted to an S-block by multByASlice.
+--Output: complex of S-modules (cokernels).  Callers needing RHom semantics
+--should freeResolution before Hom.
 
     n := numgens S;
+    QQe := coefficientRing A;
+    QQeToS := map(S, QQe, gens S);
+    nA := numgens A;
+    AtoQQe := map(QQe, A, apply(nA, i -> 0_QQe));
 
-    xigens := ideal( apply(toList(0..n-1), i -> A_(i)));
-    
-    K :=  freeResolution xigens;
+    xigens := ideal apply(toList(0..n-1), i -> A_i);
+    K := freeResolution xigens;
+    Ktwisted := K ** A^{1:{n,0}};
 
-    Ktwisted := K**A^{1:{n,0}};
-    
+    (lo, hi) := concentration Ktwisted;
 
-    DRN := Ktwisted**N;
+    presN := presentation N;
+    F0N := target presN;
+    F0Degs := apply(degrees F0N, d -> first d);
 
-    FF := freeResolution(DRN);
-    
+    --basis cache: q -> 1xr matrix of de-monomials of degree q
+    basisCache := new MutableHashTable;
+    monsAt := q -> (
+	if q < 0 then map(A^1, A^0, 0)
+	else basisCache#q ??= basis({q,0}, A^1)
+	);
 
-    DRp := part({p,0},FF);--a complex of QQ[e_1..e_n]-modules
+    --rank of (A^1)_{(q,0)} as QQe-module (number of de-monomials of degree q)
+    monoRkAt := q -> if q < 0 then 0 else numcols monsAt q;
 
-    QQe := ring DRp;
+    --slice presN at de-degree q, returning a QQe-matrix.
+    presNSrcDegs := apply(degrees source presN, d -> first d);
+    presNTgtDegs := apply(degrees target presN, d -> first d);
 
-    QQeToS := map(S,QQe, gens S);
+    slicePresNAt := q -> (
+	srcMonos := apply(presNSrcDegs, d -> monsAt(q-d));
+	tgtMonos := apply(presNTgtDegs, d -> monsAt(q-d));
+	srcRks := apply(srcMonos, numcols);
+	tgtRks := apply(tgtMonos, numcols);
+	aS := sum srcRks;
+	bS := sum tgtRks;
+	b := #presNTgtDegs;
+	a := #presNSrcDegs;
 
-    DRpS := QQeToS(DRp);
+	if aS == 0 then return map(QQe^bS, QQe^0, 0);
+	if bS == 0 then return map(QQe^0, QQe^aS, 0);
 
-    DRpS
+	rowBlocks := for i from 0 to b-1 list (
+	    if tgtRks_i == 0 then map(QQe^0, QQe^aS, 0)
+	    else (
+		entries := for j from 0 to a-1 list (
+		    if srcRks_j == 0 then map(A^1, A^0, 0)
+		    else presN_(i,j) * srcMonos_j
+		    );
+		rowi := matrix {entries};
+		(mns, cfs) := coefficients(rowi,
+		    Variables => gens A,
+		    Monomials => tgtMonos_i);
+		AtoQQe cfs
+		)
+	    );
+	matrix apply(rowBlocks, b1 -> {b1})
+	);
+
+    --cache of N_{(q,0)} as QQe-module
+    NSliceCache := new MutableHashTable;
+    NSlice := q -> NSliceCache#q ??= cokernel slicePresNAt(q);
+
+    --For an A-element a, the QQe-matrix representing multiplication by a on
+    --F_0^N covers sliced at (qSrc, qTgt):
+    --  (F_0^N)_{(qSrc, 0)} -> (F_0^N)_{(qTgt, 0)}.
+    --Block-diagonal across gens of F_0^N (multBy commutes with the gen index).
+    --When a is nonzero, qTgt must equal qSrc + (de-degree of a).
+    multByASlice := (a, qSrc, qTgt) -> (
+	srcRks := apply(F0Degs, δ -> monoRkAt(qSrc - δ));
+	tgtRks := apply(F0Degs, δ -> monoRkAt(qTgt - δ));
+	aS := sum srcRks;
+	bS := sum tgtRks;
+
+	if a == 0 or aS == 0 or bS == 0 then return map(QQe^bS, QQe^aS, 0);
+
+	rowBlocks := for j from 0 to #F0Degs - 1 list (
+	    leftPad := if j == 0 then 0 else sum (srcRks_{0..j-1});
+	    rightPad := aS - leftPad - srcRks#j;
+	    if tgtRks#j == 0 then map(QQe^0, QQe^aS, 0)
+	    else if srcRks#j == 0 then map(QQe^(tgtRks#j), QQe^aS, 0)
+	    else (
+		rowi := a * monsAt(qSrc - F0Degs#j);
+		(mns, cfs) := coefficients(rowi,
+		    Variables => gens A,
+		    Monomials => monsAt(qTgt - F0Degs#j));
+		coreBlock := AtoQQe cfs;
+		leftZeros := map(QQe^(tgtRks#j), QQe^leftPad, 0);
+		rightZeros := map(QQe^(tgtRks#j), QQe^rightPad, 0);
+		leftZeros | coreBlock | rightZeros
+		)
+	    );
+	matrix apply(rowBlocks, b1 -> {b1})
+	);
+
+    --gen degrees of Ktwisted_i (cached)
+    KGenDegsCache := new MutableHashTable;
+    KGenDegs := i -> KGenDegsCache#i ??= apply(degrees Ktwisted_i, d -> first d);
+
+    --(DRN_i)_{(p,0)} as a QQe-module
+    DRSliceCache := new MutableHashTable;
+    DRSlice := i -> DRSliceCache#i ??= (
+	degs := KGenDegs i;
+	if #degs == 0 then QQe^0
+	else directSum apply(degs, d -> NSlice(p - d))
+	);
+
+    --sliced differential DRSlice(i) -> DRSlice(i-1) from Ktwisted.dd_i
+    sliceDiff := i -> (
+	ddi := Ktwisted.dd_i;       --c_{i-1} x c_i matrix over A
+	srcDegs := KGenDegs i;
+	tgtDegs := KGenDegs (i-1);
+	ci := #srcDegs;
+	cim1 := #tgtDegs;
+
+	src := DRSlice i;
+	tgt := DRSlice (i-1);
+
+	if ci == 0 or cim1 == 0 then return map(tgt, src, 0);
+
+	--build the (l,k) block matrix in one shot via matrix(BlockMatrix)
+	blockMat := for l from 0 to cim1 - 1 list (
+	    for k from 0 to ci - 1 list
+		multByASlice(ddi_(l,k), p - srcDegs#k, p - tgtDegs#l)
+	    );
+	map(tgt, src, matrix blockMat)
+	);
+
+    if lo == hi then return QQeToS ** complex(DRSlice lo, Base => lo);
+
+    diffs := apply(toList(lo+1..hi), i -> sliceDiff i);
+
+    QQeToS ** complex(diffs, Base => lo)
     )
 
 
@@ -234,10 +353,11 @@ koszulSlice = (A,S,p,N) -> (
 --------------------------------------------------------------------
 
 
-deRhamInterval = method(Options => {InputType => HodgeIdeals})
+deRhamInterval = method(Options => {InputType => HodgeIdeals, Weights => null})
 
 --HodgeIdeals will give H^1_f(S)
 --WeightedHodgeIdeals will give IC_f
+--WeightedHomogIsolated will use hodgeIdealWeightedHomogIsolated with Weights => w
 
 deRhamInterval(RingElement, List, ZZ) := options -> (f,B,p) -> (
 --B={a,b} is a list with -n\leq a\leq b \leq 0
@@ -270,6 +390,14 @@ deRhamInterval(RingElement, List, ZZ) := options -> (f,B,p) -> (
      if options.InputType == WeightedHodgeIdeals then (
 	 WHodgeIdealTemp := (f,k) -> (if k <0 then ideal(0_S) else weightedHodgeIdeal(f,1,k,1));
 	 idealList = apply(toList(aa-1..bb), i -> WHodgeIdealTemp(f,p+i));
+	 );
+
+     if options.InputType == WeightedHomogIsolated then (
+	 w := options.Weights;
+	 if w === null then error "deRhamInterval: InputType => WeightedHomogIsolated requires a Weights option";
+	 if #w != n then error("deRhamInterval: Weights must have length ", toString n);
+	 WHIHodgeIdealTemp := (f,k) -> (if k < 0 then ideal(0_S) else hodgeIdealWeightedHomogIsolated(f,1,k,w));
+	 idealList = apply(toList(aa-1..bb), i -> WHIHodgeIdealTemp(f,p+i));
 	 );
 
      --idealList = {I_{p+aa-1}..I_{p+bb}}
@@ -351,7 +479,7 @@ deRhamInterval(RingElement, List, ZZ) := options -> (f,B,p) -> (
 --------------------------------------------------------------------
 -------------------------------------------------------------------- 
 
-gradedDeRhamComplex = method(Options => {InputType => HodgeIdeals})
+gradedDeRhamComplex = method(Options => {InputType => HodgeIdeals, Weights => null})
 --gives the entire de Rham complex
 
 gradedDeRhamComplex(RingElement,ZZ) := options -> (f,p) -> (
@@ -360,7 +488,9 @@ gradedDeRhamComplex(RingElement,ZZ) := options -> (f,p) -> (
     n := numgens S;
     B := {-n,0};
 
-    DRp := deRhamInterval(f,B,p, InputType => options.InputType);
+    DRp := deRhamInterval(f,B,p,
+	InputType => options.InputType,
+	Weights => options.Weights);
 
     DRp
     )
@@ -380,13 +510,22 @@ gradedDeRhamComplexH1(RingElement, ZZ) := (f,p) -> (
     DRp
     )
 
+gradedDeRhamComplexH1(RingElement, ZZ, List) := (f,p,w) -> (
+--WeightedHomogIsolated variant: f is weighted homogeneous of weight 1 with
+--respect to w with an isolated singularity at the origin.
+
+    gradedDeRhamComplex(f, p,
+	InputType => WeightedHomogIsolated,
+	Weights => w)
+    )
+
 --------------------------------------------------------------------
 -------------------------------------------------------------------- 
 
 intersectionDuBoisComplex = method();
 
 intersectionDuBoisComplex(RingElement, ZZ) := (f,p) -> (
---gives a free complex
+--gives a complex of finitely generated S-modules
 --interesting homological degrees 0,-1,..,-n
 --our convention makes it the same as gradedDuBoisComplex for RHM
 
@@ -395,8 +534,10 @@ intersectionDuBoisComplex(RingElement, ZZ) := (f,p) -> (
 
     DRp := gradedDeRhamComplex(f,p-n, InputType => WeightedHodgeIdeals);
 
-    RHomDRp := Hom(DRp, S^1);
-    
+    --koszulSlice returns a complex of S-cokernels, so resolve before Hom
+    --to keep this an RHom computation
+    RHomDRp := Hom(freeResolution DRp, S^1);
+
     RHomDRpShift := RHomDRp[-p-1];
 
     prune RHomDRpShift
@@ -414,7 +555,7 @@ gradedDeRhamCohomologyH1(RingElement,ZZ,ZZ) := (f,p,q) -> (
 
     S := ring f;
     n := numgens S;
-    
+
     B := {q-1,q+1};
     if q == -n then B={-n,-n+1};
     if q == 0 then B={-1,0};
@@ -424,6 +565,23 @@ gradedDeRhamCohomologyH1(RingElement,ZZ,ZZ) := (f,p,q) -> (
     H := prune HH_(-q)(DRpq);
 
     H
+    )
+
+gradedDeRhamCohomologyH1(RingElement,ZZ,ZZ,List) := (f,p,q,w) -> (
+--WeightedHomogIsolated variant.
+
+    S := ring f;
+    n := numgens S;
+
+    B := {q-1,q+1};
+    if q == -n then B={-n,-n+1};
+    if q == 0 then B={-1,0};
+
+    DRpq := deRhamInterval(f,B,p,
+	InputType => WeightedHomogIsolated,
+	Weights => w);
+
+    prune HH_(-q)(DRpq)
     )
 
 
@@ -443,11 +601,28 @@ duBoisComplex(RingElement, ZZ) := (f,p) -> (
 
     DRk := gradedDeRhamComplexH1(f,p-n);
 
-    RHomDRk := Hom(DRk, S^1);
+    --koszulSlice now returns a complex of S-cokernels, so resolve before Hom
+    --to keep this an RHom computation
+    RHomDRk := Hom(freeResolution DRk, S^1);
 
     --do the correct cohomological shift
 
     RHomDRkShift := RHomDRk[-p-1];--1 codim
+
+    prune RHomDRkShift
+    )
+
+duBoisComplex(RingElement, ZZ, List) := (f,p,w) -> (
+--WeightedHomogIsolated variant.
+
+    S := ring f;
+    n := numgens S;
+
+    DRk := gradedDeRhamComplexH1(f,p-n,w);
+
+    RHomDRk := Hom(freeResolution DRk, S^1);
+
+    RHomDRkShift := RHomDRk[-p-1];
 
     prune RHomDRkShift
     )
@@ -465,7 +640,7 @@ isPreDuBois(RingElement, ZZ) := (f,m) -> (
 
    S := ring f;
    n := numgens S;
-   
+
    isPre := true;
    p := 0;
 
@@ -480,6 +655,26 @@ isPreDuBois(RingElement, ZZ) := (f,m) -> (
 
    isPre
    )
+
+isPreDuBois(RingElement, ZZ, List) := (f,m,w) -> (
+--WeightedHomogIsolated variant.
+
+   S := ring f;
+   n := numgens S;
+
+   isPre := true;
+   p := 0;
+
+   while isPre and p<=m do (
+
+       DBC := duBoisComplex(f,p,w);
+       coho := apply(toList(1..n), i -> prune HH_(-i)(DBC));
+       if #(unique coho) > 1 then isPre = false;
+       p = p+1;
+       );
+
+   isPre
+   )
        
 
   
@@ -487,262 +682,3 @@ isPreDuBois(RingElement, ZZ) := (f,m) -> (
 
 end
 
-restart
-load "MixedHodgeModules.m2"
-installPackage "MixedHodgeModules"
-load "MixedHodgeModules/deRhamDraft.m2"
-viewHelp MixedHodgeModules
-check "MixedHodgeModules"
-uninstallPackage "MixedHodgeModules"
-
-
--------------------------------------
-
-
-S=QQ[x,y,z]
-f=y^2-x-z
-p=-3
-DR=gradedDeRhamComplexH1(f,p)
-
-O0=gradedDuBoisComplex(f,0)
-O1=gradedDuBoisComplex(f,1)
-O2=gradedDuBoisComplex(f,2)
-
-HH_(0) O0
-prune HH_(0) O1
-prune HH_(0) O2
-
-
-prune HH_0 DR
-prune HH_1 DR
-prune HH_2 DR
-prune HH_3 DR
-
-p=-3
-IC=intersectionDuBoisComplex(f,p)
-prune HH_0 IC
-prune HH_1 IC
-prune HH_2 IC
-prune HH_3 IC
-
-
-
-
-S=QQ[x,y,z,w]
-f=x*w-y*z
-p=-3
-DR=gradedDeRhamComplexH1(f,p)
-
-
-
-prune HH_0 DR
-prune HH_1 DR
-prune HH_2 DR
-prune HH_3 DR
-prune HH_4 DR
-
-S=QQ[x,y,z,w]
-f=x*w-y*z
-p=1
-IC=intersectionDuBoisComplex(f,p)
-prune HH_0 IC
-prune HH_1 IC
-prune HH_2 IC
-prune HH_3 IC
-prune HH_4 IC
-
-O0=gradedDuBoisComplex(f,0)
-O1=gradedDuBoisComplex(f,1)
-O2=gradedDuBoisComplex(f,2)
-O3=gradedDuBoisComplex(f,3)
-
-IC0=intersectionDuBoisComplex(f,0)
-IC1=intersectionDuBoisComplex(f,1)
-IC2=intersectionDuBoisComplex(f,2)
-IC3=intersectionDuBoisComplex(f,3)
-
-HH_(0) O0
-prune HH_(0) O1
-prune HH_(0) O2
-prune HH_0 O3
-
-
-S=QQ[x,y]
-f=x^2+y^3
-p=-2
-DR=gradedDeRhamComplexH1(f,p)
-prune HH_0 DR
-prune HH_1 DR
-prune HH_2 DR
-
-O0=gradedDuBoisComplex(f,0)
-O1=gradedDuBoisComplex(f,1)
-O2=gradedDuBoisComplex(f,2)
-
-prune HH_(0) O0
-prune HH_(0) O1
-prune HH_0 O2
-
-IC=intersectionDuBoisComplex(f,p)
-KK= S^1/ideal(gens S)
-
-
-
-prune HH_0 IC
-prune HH_1 IC
-prune HH_2 IC
-prune HH_3 IC
-
-
-
------------------------------------------------------------------
-
-S=QQ[x,y]
-f=x^2+y^3
-
-for p from -2 to 0 do (
-    for q from 0 to 2 do (
-	print {p,q,GRFdeRhamH1f(f,p,q)}
-	))
-
-for p from -2 to 0 do (
-    for q from 0 to 2 do (
-	print {p,q,GRFdeRhamIC(f,p,q)}
-	))
-
-
-------------------------------------
-
-S=QQ[x,y,z,w]
-f=x*w-y*z
-
-deRhamInterval(f,{-1},-1, InputType => HodgeIdeals)
-GRFdeRhamH1f(f,0,1)
-
-for p from -4 to 0 do (
-    for q from 0 to 4 do (
-	print {p,q,GRFdeRhamH1f(f,p,q)}
-	))
-
-for p from -4 to 0 do (
-    for q from 0 to 4 do (
-	print {p,q,GRFdeRhamIC(f,p,q)}
-	))
-
-------------------------------------
-
-
-S=QQ[x,y,z,w]
-f=x^2+y+z+w
-for p from -4 to 0 do (
-    for q from 0 to 4 do (
-	print {p,q,GRFdeRhamH1f(f,p,q)}
-	))
-
-for p from -4 to 0 do (
-    for q from 0 to 4 do (
-	print {p,q,GRFdeRhamIC(f,p,q)}
-	))
-
-
----------------------------
----
-
-S=QQ[x,y,z]
-f=x^2+y+z
-for p from -3 to 4 do (
-    for q from 0 to 3 do (
-	print {p,q,GRFdeRhamH1f(f,p,q)}
-	))
-
-
-S=QQ[x,y,z]
-f=x^2+y+z
-for p from -3 to 4 do (
-    for q from 0 to 3 do (
-	print {p,q,GRFdeRhamSf(f,p,q)}
-	))
-
-
-------------------------------------
-
-S=QQ[x,y,z]
-f=y^2-x*z
-
-
-for p from -3 to 0 do (
-    for q from 0 to 3 do (
-	print {p,q,GRFdeRhamH1f(f,p,q)}
-	))
-
-
-for p from -3 to 0 do (
-    for q from 0 to 3 do (
-	print {p,q,GRFdeRhamIC(f,p,q)}
-	))
-
-
-------------------------------------
-
-
---3x3 symmetric determinant
-R=QQ[x_1..x_6]
-f=determinant genericSymmetricMatrix(R,x_1,3)
-
-for p from -6 to -3 do (
-    for q from 0 to 6 do (
-	print {p,q,GRFdeRhamH1f(f,p,q)}
-	))
-
-
-for p from -6 to -3 do (
-    for q from 0 to 6 do (
-	print {p,q,GRFdeRhamIC(f,p,q)}
-	))
-
-
-------------------------------------
-
-S=QQ[x,y]
-f=x^2+y
-p=-1
-
-
-DR = GRFdeRhamComplex (f,p)
-
-DRp = part({p+2,0},DR)
-
-
-freeResolution(DRp)
-
-
-
-for p from -2 to 0 do (
-    for q from 0 to 2 do (
-	print {p,q,GRFdeRhamH1f(f,p,q)}
-	))
-
-
-
-
-
-
-
-S=QQ[x,y,z]
-f=y^2-x
-for q from -3 to 0 do print gradedDeRhamCohomologyH1(f,-3,q)
-for q from  -3 to 0 do print prune gradedDeRhamCohomologyH1(f,-2,q)
-for q from  -3 to 0 do print prune gradedDeRhamCohomologyH1(f,-1,q)
-
-prune gradedDeRhamCohomologyH1(f,-2,1)
-prune gradedDeRhamCohomologyH1(f,-1,1)
-
-gradedDeRhamComplexH1(f,-3)
-gradedDeRhamComplexH1(f,-2)
-gradedDeRhamComplexH1(f,-1)
-gradedDeRhamComplexH1(f,0)
-
-for i from 0 to 1 do print prune HH_i(o22)
-for i from 0 to 2 do print prune HH_i(o23)
-for i from 0 to 3 do print prune HH_i(o24)
-for i from 0 to 4 do print prune HH_i(o25)

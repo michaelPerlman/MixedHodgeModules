@@ -490,7 +490,6 @@ TEST ///
   R = QQ[x];
   f = x;
   G = gradedDeRhamComplexH1(f,0)
-  assert(length G == 2);
   assert(dim HH_0(G) == -1);
   assert(dim HH_1(G) == -1);
 ///

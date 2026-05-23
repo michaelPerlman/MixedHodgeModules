@@ -15,24 +15,19 @@
 
 
 --change/add soon:
---(1) change weightCheck and weightLevel to input alpha\in [0,1) and k\in ZZ? (instead of beta=alpha+k)
---same for weightLength? Same for hodgeLevel, hodgeCheck?
---(2) allow alpha as a parameter in hodgeIdeal (work over QQ(alpha) where alpha is variable)?
---(3) weighted Homogeneous isolated option in de Rham and Du Bois functions?
---(4) There is an old comment on pFunction "to do: modify so don't compute high nus". 
---(5) cache generalized b-functions for speed.
+--(1) allow alpha as a parameter in hodgeIdeal (work over QQ(alpha) where alpha is variable)?
+--(2) There is an old comment on pFunction "to do: modify so don't compute high nus". 
 
 
 
 --to add eventually?:
---(1) determinantal code (GLmnReps on my website can calculate I_{lambda})?
---(2) use minimal exponent formula for generation level as optional strategy
+--(1) use minimal exponent formula for generation level as optional strategy
 --in Hodge ideal?
---(3) allow user to input generation level as optional strategy?
---(4) get generation level on IC_f using weighted Hodge ideal?
---(5) Bernstein--Sato polynomials on singular ambient varieties X (Dirks) and microlocal b-functions on
+--(2) allow user to input generation level as optional strategy?
+--(3) get generation level on IC_f using weighted Hodge ideal?
+--(4) Bernstein--Sato polynomials on singular ambient varieties X (Dirks) and microlocal b-functions on
 -- singular ambient varieties?
---(8) nearby cycles and vanishing cycles? vanishing cycles are implicitly calculated in HRHCheck
+--(5) nearby cycles and vanishing cycles? vanishing cycles are implicitly calculated in HRHCheck
 
 
 
@@ -47,7 +42,7 @@ newPackage(
     Keywords => {"D-modules"},
     AuxiliaryFiles => true,
     DebuggingMode => false,
-    PackageImports => {"Polyhedra"},
+    PackageImports => {"Polyhedra", "SchurRings"},
     PackageExports => {"BernsteinSato", "Complexes"}
     )
 
@@ -64,6 +59,7 @@ export {
     "hodgeCheck",
     "hodgeIdeal",
     "hodgeIdealBrieskornPham",
+    "hodgeIdealDet",
     "hodgeIdealWeightedHomogIsolated",
     "hodgeLevel",
     "hodgeOnV",
@@ -111,6 +107,7 @@ export {
 protect symbol InputType;
 protect symbol WeightedHodgeIdeals;
 protect symbol HodgeIdeals;
+protect symbol WeightedHomogIsolated;
 
 --internal symbol for caching AnnFs on a RingElement
 protect symbol AnnFsCache;
@@ -188,44 +185,20 @@ viewHelp hodgeIdeal
 viewHelp higherMultiplierIdeal
 
 restart
-installPackage "MixedHodgeModules"
+installPackage ("MixedHodgeModules", RemakeAllDocumentation => true)
 viewHelp MixedHodgeModules
 check "MixedHodgeModules"
 uninstallPackage "MixedHodgeModules"
 
 
 --tests/ examples
-restart
-S = QQ[x_(1,1)..x_(3,2)]
-M = transpose genericMatrix(S,x_(1,1),2,3)
-I= minors(2,M)
-time localCohom(2,I)
 
-time localCohomFW(I,2,0,8)
-time localCohomFW(I,3,1,9)
-prune oo
-
-for i from 3 to 5 do print hilbertFunction(i,oo)
-
-S=QQ[x,y,z]
-f=x^2+y^3+y*z^2
-time hodgeOnV(f,2)
-
-time hodgeOnV(f,3/4,2)
-
-
-R=QQ[x,y,z,w]
-f=x*w-y*z
-g=1_R
-alpha=1+1
-weightCheck(f,g,alpha,1)
+for p from 0 to 3 do hodgeIdealDet(4,p);
 
 --------------------------------------------------------------
 --smooth case
 R=QQ[x,y]
 f=y^2+x
-isPreDuBois(f,1)
-
 g=1_R
 alpha=6
 weightLevel(f,g,alpha)
@@ -236,19 +209,14 @@ for p from 0 to 4 do print doesGenerateNext(f,1,p)
 generationLevel(f)
 p=5
 u={1,1/2}
-testHodgeIdealforWeightedHomog(f,p,u, UseGenLevel => False)
-testHodgeIdealforWeightedHomog(f,p,u)
+
+elapsedTime for i from 0 to 5 do print hodgeIdeal(f,1,i)
+elapsedTime for i from 0 to 5 do print hodgeIdealWeightedHomogIsolated(f,1,i,u)
+
 
 p=3
 m=1
-testWeightedHodge(f,p,m)
 adjointIdeal(f)
-
-
-p=3
-compareHodgeIequalHigherMultI(f,p)
-
-testHodgeIhigherMultImodf(f,p)
 
 
 
@@ -265,11 +233,10 @@ for p from 0 to 5 do print hodgeIdeal(f,1,p)
 
 p=2
 m=n
-testWeightedHodge(f,p,m)
 adjointIdeal(f)
 
 
-
+p=3
 S=QQ[x,y,z,w]
 f=x*y*z
 alpha=1
@@ -283,13 +250,20 @@ hodgeIdeal(f,alpha,3)
 --2x2 determinant
 S=QQ[x,y,z,w]
 f=x*w-y*z
-isPreDuBois(f,3)
 alpha=1
 hodgeIdeal(f,alpha,0)
 hodgeIdeal(f,alpha,1)
 hodgeIdeal(f,alpha,2)
 hodgeIdeal(f,alpha,3)
 hodgeIdeal(f,alpha,4)
+
+for p from 0 to 4 do print doesGenerateNext(f,1,p)
+generationLevel(f)
+p=5
+u={1/2,1/2,1/2,1/2}
+for p from 0 to 4 do print hodgeIdealWeightedHomogIsolated(f,alpha,p,u)
+
+adjointIdeal(f)
 
 
 hodgeOnV(f,2, UseBasis => sBasis)
@@ -298,8 +272,6 @@ ideal mingens ideal apply(apply(oo, g -> (sub(f,ring g))^2*sub(g, {(ring g)_0 =>
 weightHodgeOnV(f,1,2,1)
 weightHodgeOnV(f,1,2,1, UseBasis => dtBasis)
 hodgeOnV(f,1,1)
-
-
 
 ---------------------------------------------------------------
 
@@ -312,7 +284,19 @@ alpha=1
 generationLevel(f,alpha)
 w={1/3,1/2}
 p=4
-isPreDuBois(f,0)
+testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
+testHodgeIdealforWeightedHomog(f,p,w)
+testBrieskornPham({2,3},p)
+p=3
+m=1
+testWeightedHodge(f,p,m)
+adjointIdeal(f)
+
+
+p=3
+compareHodgeIequalHigherMultI(f,p)
+
+testHodgeIhigherMultImodf(f,p)
 
 --Davis--Yang page 4
 --Zhang Conjecture E
@@ -332,7 +316,28 @@ f=y^2-x*z
 hodgeOnV(f,1)
 w={1/2,1/2,1/2}
 p=5
+testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
+testHodgeIdealforWeightedHomog(f,p,w)
 
+p=3
+m=1
+testWeightedHodge(f,p,m)
+adjointIdeal(f)
+
+p=3
+compareHodgeIequalHigherMultI(f,p)--equal by Lorincz--Yang
+--see also Zhang Conjecture E
+
+testHodgeIhigherMultImodf(f,p)
+
+---------------------------------------------------------------
+
+
+--Brieskorn Pham
+L={2,2,2,2,2}
+p=2
+testBrieskornPham(L,p, UseGenLevel => False)
+testBrieskornPham(L,p)
 
 
 ---------------------------------------------------------------
@@ -346,9 +351,14 @@ for p from 0 to 2 do print hodgeIdeal(f,1,p)
 ll=weightLength(f,1)
 p=1
 m=ll
+testWeightedHodge(f,p,m)
 adjointIdeal(f)
 
 
+p=2
+compareHodgeIequalHigherMultI(f,p)
+
+testHodgeIhigherMultImodf(f,p)
 
 ---------------------------------------------------------------
 
@@ -362,8 +372,13 @@ for p from 0 to 2 do print hodgeIdeal(f,alpha,p)
 
 p=0
 m=1
+testWeightedHodge(f,p,m)
 adjointIdeal(f)
 
+p=2
+compareHodgeIequalHigherMultI(f,p)
+
+testHodgeIhigherMultImodf(f,p)
 
 ---------------------------------------------------------------
 
@@ -383,19 +398,17 @@ time for p from 0 to 1 do print hodgeIdeal(f,alpha,p)
 --3x3 determinant
 R=QQ[x_(1,1)..x_(3,3)]
 f=determinant genericMatrix(R,x_(1,1),3,3)
-M=genericMatrix(R,x_(1,1),3,3)
-I=minors(2,M)
-
-HRHCheck(f,1)
-HRHLevel(f)
-isPreDuBois(f,2)
-
 alpha=1
-for p from 0 to 1 do print hodgeIdeal(f,alpha,p)
+for p from 0 to 2 do print hodgeIdeal(f,alpha,p)
+hodgeIdeal(f,alpha,3)
 
 p=0
 m=1
+testWeightedHodge(f,p,m)--slow
+adjointIdeal(f)
 
+p=1
+compareHodgeIequalHigherMultI(f,p)--equal by Lorincz--Yang
 
 DB=gradedDuBoisComplex(f,1)
 dd^DB
@@ -413,9 +426,13 @@ time for p from 0 to 1 do print hodgeIdeal(f,alpha,p)
 
 p=0
 m=1
+testWeightedHodge(f,p,m)--slow, but runs
 adjointIdeal(f)
 
+p=1
+compareHodgeIequalHigherMultI(f,p)--equal by Lorincz--Yang
 
+testHodgeIhigherMultImodf(f,p)
 ---------------------------------------------------------------
 
 --Blanco example 1
@@ -429,6 +446,7 @@ for a in keys V do (
  
 p=0
 m=1
+testWeightedHodge(f,p,m)
 adjointIdeal(f)
 
 
@@ -439,12 +457,13 @@ adjointIdeal(f)
 R=QQ[x,y]
 lambda=1/2
 f=(y^2-x^3)*(y^2+lambda*x^3)
-V=hodgeOnV(f,0) 
+V=hodgeOnV(f,1) 
 for a in keys V do (
      for p from 0 to 0 do print {a,hodgeIdeal(f,a,p)})
 
 p=0
 m=1
+testWeightedHodge(f,p,m)
 adjointIdeal(f)
 
 
@@ -455,11 +474,12 @@ adjointIdeal(f)
 --Blanco example 3
 R=QQ[x,y,z]
 f=x^3+y^3+z^3+x*y*z
-hodgeOnV(f,0)--doesnt finish on my computer
+hodgeOnV(f,1)
 
 w={1/3,1/3,1/3}
 p=0
-
+testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
+testHodgeIdealforWeightedHomog(f,p,w)
 
 adjointIdeal(f)
 
@@ -474,8 +494,22 @@ f=x^2+y^2+z^(n+1);
 hodgeOnV(f,1)
 w={1/2,1/2,1/(n+1)}
 p=2
+testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
+testHodgeIdealforWeightedHomog(f,p,w)
+testBrieskornPham({2,2,n+1},p)
 
 
+p=0
+m=1
+testWeightedHodge(f,p,m)
+adjointIdeal(f)
+
+
+p=2
+compareHodgeIequalHigherMultI(f,p)
+--see also Zhang Conjecture E
+
+testHodgeIhigherMultImodf(f,p)
 
 ---------------------------------------------------------------
 
@@ -490,7 +524,19 @@ factorBFunction generalB({f},1_S,Exponent => 2)
 hodgeOnV(f,1)
 w={1/2,1/(n-1),(n-2)/(2*(n-1))}
 p=1
+testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
+testHodgeIdealforWeightedHomog(f,p,w)
 
+p=0
+m=1
+testWeightedHodge(f,p,m)
+adjointIdeal(f)
+
+p=2
+compareHodgeIequalHigherMultI(f,p)
+--see also Zhang Conjecture E
+
+testHodgeIhigherMultImodf(f,p)
 
 ---------------------------------------------------------------
     
@@ -501,9 +547,16 @@ S=QQ[x,y,z]
 f=x^2+y^3+z^4
 hodgeOnV(f,1) 
 w={1/2,1/3,1/4}
-alpha =
-hodgeIdealWeightedHomogIsolated(f,alpha,p,w)
+p=1
+testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
+testHodgeIdealforWeightedHomog(f,p,w)
 
+p=0
+m=1
+testWeightedHodge(f,p,m)
+adjointIdeal(f)
+
+testHodgeIhigherMultImodf(f,p)
 ---------------------------------------------------------------
     
 
@@ -515,7 +568,15 @@ factorBFunction oo
 alpha=1
 w={1/2,1/3,2/9}
 p=1
+testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
+testHodgeIdealforWeightedHomog(f,p,w)
 
+p=0
+m=1
+testWeightedHodge(f,p,m)
+adjointIdeal(f)
+
+testHodgeIhigherMultImodf(f,p)
 ---------------------------------------------------------------
 
 --E8 singularity
@@ -523,10 +584,18 @@ S=QQ[x,y,z]
 f=x^2+y^3+z^5
 globalBFunction(f)
 factorBFunction oo
-alpha=1/2
+alpha=1
 w={1/2,1/3,1/5}
-hodgeIdealWeightedHomogIsolated(f,alpha,3,w)
+p=1
+testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
+testHodgeIdealforWeightedHomog(f,p,w)
 
+p=1
+m=1
+testWeightedHodge(f,p,m)
+adjointIdeal(f)
+
+testHodgeIhigherMultImodf(f,p)
 
 ---------------------------------------------------------------
 
@@ -559,6 +628,8 @@ for i from 0 to p do (
     )
 
 
+testHodgeIhigherMultImodf(f,p)
+
 
 --------------------------------------------------------------
 S=QQ[x_(1,1)..x_(3,2)]
@@ -589,17 +660,261 @@ codim I
 
 localCohomFW(I,2,0,2+4)
 
-
-
---------------------------------------------------
-
 restart
 load "MixedHodgeModules.m2"
-needsPackage "Complexes"
+installPackage "MixedHodgeModules"
+viewHelp MixedHodgeModules
+check "MixedHodgeModules"
+uninstallPackage "MixedHodgeModules"
 
 
---------------------------------------------
+-------------------------------------
 
-S = QQ[x,y,z,w]
-f = x*w-y*z
-for p from 0 to 3 do print (prune HH_(-(4-p-1))(intersectionDuBoisComplex(f,p)))
+
+S=QQ[x,y,z]
+f=y^2-x-z
+p=-3
+DR=gradedDeRhamComplexH1(f,p)
+
+O0=gradedDuBoisComplex(f,0)
+O1=gradedDuBoisComplex(f,1)
+O2=gradedDuBoisComplex(f,2)
+
+HH_(0) O0
+prune HH_(0) O1
+prune HH_(0) O2
+
+
+prune HH_0 DR
+prune HH_1 DR
+prune HH_2 DR
+prune HH_3 DR
+
+p=-3
+IC=intersectionDuBoisComplex(f,p)
+prune HH_0 IC
+prune HH_1 IC
+prune HH_2 IC
+prune HH_3 IC
+
+
+
+
+S=QQ[x,y,z,w]
+f=x*w-y*z
+p=-3
+DR=gradedDeRhamComplexH1(f,p)
+
+
+
+prune HH_0 DR
+prune HH_1 DR
+prune HH_2 DR
+prune HH_3 DR
+prune HH_4 DR
+
+S=QQ[x,y,z,w]
+f=x*w-y*z
+p=1
+IC=intersectionDuBoisComplex(f,p)
+prune HH_0 IC
+prune HH_1 IC
+prune HH_2 IC
+prune HH_3 IC
+prune HH_4 IC
+
+O0=gradedDuBoisComplex(f,0)
+O1=gradedDuBoisComplex(f,1)
+O2=gradedDuBoisComplex(f,2)
+O3=gradedDuBoisComplex(f,3)
+
+IC0=intersectionDuBoisComplex(f,0)
+IC1=intersectionDuBoisComplex(f,1)
+IC2=intersectionDuBoisComplex(f,2)
+IC3=intersectionDuBoisComplex(f,3)
+
+HH_(0) O0
+prune HH_(0) O1
+prune HH_(0) O2
+prune HH_0 O3
+
+
+S=QQ[x,y]
+f=x^2+y^3
+p=-2
+DR=gradedDeRhamComplexH1(f,p)
+prune HH_0 DR
+prune HH_1 DR
+prune HH_2 DR
+
+O0=gradedDuBoisComplex(f,0)
+O1=gradedDuBoisComplex(f,1)
+O2=gradedDuBoisComplex(f,2)
+
+prune HH_(0) O0
+prune HH_(0) O1
+prune HH_0 O2
+
+IC=intersectionDuBoisComplex(f,p)
+KK= S^1/ideal(gens S)
+
+
+
+prune HH_0 IC
+prune HH_1 IC
+prune HH_2 IC
+prune HH_3 IC
+
+
+
+-----------------------------------------------------------------
+
+S=QQ[x,y]
+f=x^2+y^3
+
+for p from -2 to 0 do (
+    for q from 0 to 2 do (
+	print {p,q,GRFdeRhamH1f(f,p,q)}
+	))
+
+for p from -2 to 0 do (
+    for q from 0 to 2 do (
+	print {p,q,GRFdeRhamIC(f,p,q)}
+	))
+
+
+------------------------------------
+
+S=QQ[x,y,z,w]
+f=x*w-y*z
+
+deRhamInterval(f,{-1},-1, InputType => HodgeIdeals)
+GRFdeRhamH1f(f,0,1)
+
+for p from -4 to 0 do (
+    for q from 0 to 4 do (
+	print {p,q,GRFdeRhamH1f(f,p,q)}
+	))
+
+for p from -4 to 0 do (
+    for q from 0 to 4 do (
+	print {p,q,GRFdeRhamIC(f,p,q)}
+	))
+
+------------------------------------
+
+
+S=QQ[x,y,z,w]
+f=x^2+y+z+w
+for p from -4 to 0 do (
+    for q from 0 to 4 do (
+	print {p,q,GRFdeRhamH1f(f,p,q)}
+	))
+
+for p from -4 to 0 do (
+    for q from 0 to 4 do (
+	print {p,q,GRFdeRhamIC(f,p,q)}
+	))
+
+
+---------------------------
+---
+
+S=QQ[x,y,z]
+f=x^2+y+z
+for p from -3 to 4 do (
+    for q from 0 to 3 do (
+	print {p,q,GRFdeRhamH1f(f,p,q)}
+	))
+
+
+S=QQ[x,y,z]
+f=x^2+y+z
+for p from -3 to 4 do (
+    for q from 0 to 3 do (
+	print {p,q,GRFdeRhamSf(f,p,q)}
+	))
+
+
+------------------------------------
+
+S=QQ[x,y,z]
+f=y^2-x*z
+
+
+for p from -3 to 0 do (
+    for q from 0 to 3 do (
+	print {p,q,GRFdeRhamH1f(f,p,q)}
+	))
+
+
+for p from -3 to 0 do (
+    for q from 0 to 3 do (
+	print {p,q,GRFdeRhamIC(f,p,q)}
+	))
+
+
+------------------------------------
+
+
+--3x3 symmetric determinant
+R=QQ[x_1..x_6]
+f=determinant genericSymmetricMatrix(R,x_1,3)
+
+for p from -6 to -3 do (
+    for q from 0 to 6 do (
+	print {p,q,GRFdeRhamH1f(f,p,q)}
+	))
+
+
+for p from -6 to -3 do (
+    for q from 0 to 6 do (
+	print {p,q,GRFdeRhamIC(f,p,q)}
+	))
+
+
+------------------------------------
+
+S=QQ[x,y]
+f=x^2+y
+p=-1
+
+
+DR = GRFdeRhamComplex (f,p)
+
+DRp = part({p+2,0},DR)
+
+
+freeResolution(DRp)
+
+
+
+for p from -2 to 0 do (
+    for q from 0 to 2 do (
+	print {p,q,GRFdeRhamH1f(f,p,q)}
+	))
+
+
+
+
+
+
+
+S=QQ[x,y,z]
+f=y^2-x
+for q from -3 to 0 do print gradedDeRhamCohomologyH1(f,-3,q)
+for q from  -3 to 0 do print prune gradedDeRhamCohomologyH1(f,-2,q)
+for q from  -3 to 0 do print prune gradedDeRhamCohomologyH1(f,-1,q)
+
+prune gradedDeRhamCohomologyH1(f,-2,1)
+prune gradedDeRhamCohomologyH1(f,-1,1)
+
+gradedDeRhamComplexH1(f,-3)
+gradedDeRhamComplexH1(f,-2)
+gradedDeRhamComplexH1(f,-1)
+gradedDeRhamComplexH1(f,0)
+
+for i from 0 to 1 do print prune HH_i(o22)
+for i from 0 to 2 do print prune HH_i(o23)
+for i from 0 to 3 do print prune HH_i(o24)
+for i from 0 to 4 do print prune HH_i(o25)

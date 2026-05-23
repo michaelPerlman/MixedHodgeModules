@@ -518,36 +518,3 @@ monodromyWeightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,ell) -
 
 end
 
-monodromyWeightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,ell)
-
-
-S=QQ[x,y,z,w]
-alpha=1/2
-f=x*w-y*z
-
-for p from 0 to 3 do (
-    for ell from 0 to 3 do (
-	print monodromyWeightHodgeOnV(f,alpha,p,ell)))
-
-for p from 0 to 3 do (
-    for ell from 0 to 3 do (
-	print hodgeOnV(f,alpha,p)))
-
-
-
-
-S=QQ[x,y]
-alpha=1
-f=x^2+y^3
-
-for p from 0 to 3 do (
-    for ell from 0 to 3 do (
-	print monodromyWeightHodgeOnV(f,alpha,p,ell)))
-
-for p from 0 to 3 do (
-    for ell from 0 to 3 do (
-	print weightHodgeOnV(f,alpha,p,ell)))
-
-for p from 0 to 3 do (
-    for ell from 0 to 3 do (
-	print hodgeOnV(f,alpha,p)))

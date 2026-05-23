@@ -844,3 +844,82 @@ HRHLevel(RingElement) := f -> (
     )
 
 
+---------------------------------------------------------------
+---------------------------------------------------------------
+-- Hodge ideals for the determinant hypersurface.
+--
+-- For each n, set S_n = (ZZ/32003)[x_(1,1)..x_(n,n)] and f_n = det of
+-- the generic n x n matrix.  hodgeIdealDet(n, p) returns the p-th
+-- Hodge ideal I_p(f_n) as an ideal in S_n.
+--
+-- Computation is done over ZZ/32003 throughout (no lift to QQ, no
+-- mingens) so that the cost stays in characteristic-p Groebner work.
+-- ILambda and the final ideal are cached within a session.
+---------------------------------------------------------------
+---------------------------------------------------------------
+
+DetGenericMatrixRingCache = new MutableHashTable;
+ILambdaDetCache = new MutableHashTable;
+HodgeIdealDetCache = new MutableHashTable;
+
+--Returns Skk = (ZZ/32003)[x_(1,1)..x_(n,n)], cached per n.
+detGenericMatrixRing = n -> DetGenericMatrixRingCache#n ??= (
+    x := getSymbol "x";
+    (ZZ/32003)[x_(1,1)..x_(n,n)]
+    );
+
+detPadZeros = (L, n) -> L | apply(toList(1..n - #L), i -> 0);
+
+--Partitions whose top p parts are equal (used for symbolic powers of (p x p minors)^d).
+detSymbolicPowerParts = (p, d, n) -> (
+    if d <= 0 then return {};
+    partsList := {};
+    for a from ceiling(d/(n - p + 1)) to d do (
+	tailSum := d - a;
+	tails := if n == p then (
+	    if tailSum == 0 then {{}} else {}
+	    )
+	    else select(partitions(tailSum, n - p), mu ->
+		#mu <= n - p and (#mu == 0 or mu_0 <= a));
+	partsList = partsList | apply(tails, mu ->
+	    join(apply(toList(1..p), i -> a), detPadZeros(toList mu, n - p)));
+	);
+    partsList
+    );
+
+--ILambda for partition lam (over ZZ/32003), cached by (lam, n).
+ILambdaDet = (lam, n) -> ILambdaDetCache#(lam, n) ??= (
+    Skk := detGenericMatrixRing n;
+    kk := coefficientRing Skk;
+    r := local r;
+    R := schurRing(r, n);
+    conjlam := toList conjugate(new Partition from lam);
+    e := dim r_lam;
+    M := genericMatrix(Skk, n, n);
+    ideal for i from 0 to e*e - 1 list (
+	A := random(kk^n, kk^n);
+	B := random(kk^n, kk^n);
+	N := A * M * B;
+	product for j from 0 to #conjlam - 1 list
+	    det(N_{0..conjlam_j - 1}^{0..conjlam_j - 1})
+	)
+    );
+
+--symbolic power (p x p minors)^(d) over ZZ/32003.
+detSymbolicPower = (p, d, n) -> (
+    Skk := detGenericMatrixRing n;
+    if d <= 0 then return ideal(1_Skk);
+    M := genericMatrix(Skk, n, n);
+    if d == 1 then return minors(p, M);
+    if p == 1 then return (minors(1, M))^d;
+    sum apply(detSymbolicPowerParts(p, d, n), lam -> ILambdaDet(lam, n))
+    );
+
+hodgeIdealDet = method();
+hodgeIdealDet(ZZ, ZZ) := (n, p) -> HodgeIdealDetCache#(n, p) ??= (
+    powers := apply(toList(1..n - 1), q ->
+	{q, (n - q)*(p - 1) - binomial(n - q, 2)});
+    ideals := apply(powers, g -> detSymbolicPower(g_0, g_1, n));
+    if #ideals == 1 then ideals_0 else intersect ideals
+    );
+
