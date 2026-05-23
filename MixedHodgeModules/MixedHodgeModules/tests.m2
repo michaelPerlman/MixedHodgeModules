@@ -618,3 +618,254 @@ TEST ///
   assert(instance(weightLevel(f,g,3/2),   ZZ));
 ///
 
+
+---------------------------------------------------------------
+--5. Small coverage tests for previously under-tested functions.
+--   Values were obtained by running each function on
+--   the listed input and locking in the observed output.
+---------------------------------------------------------------
+
+-- isPreDuBois: smooth in 1 variable
+TEST ///
+  R = QQ[x];
+  assert(isPreDuBois(x, 0));
+  assert(isPreDuBois(x, 1));
+///
+
+-- isPreDuBois: smooth in 2 variables
+TEST ///
+  R = QQ[x,y];
+  assert(isPreDuBois(x, 0));
+///
+
+TEST ///
+  R = QQ[x,y];
+  assert(isPreDuBois(y^2 - x, 0));
+///
+
+TEST ///
+  R = QQ[x,y];
+  assert(isPreDuBois(y^2 - x, 1));
+///
+
+-- isPreDuBois: cusp is NOT pre-0-Du Bois
+TEST ///
+  R = QQ[a,b];
+  assert(not isPreDuBois(a^2 + b^3, 0));
+  assert(not isPreDuBois(a^2 + b^3, 1));
+///
+
+
+-- hodgeIdealDet
+TEST ///
+  -- output is over ZZ/32003
+  assert(char ring hodgeIdealDet(2, 0) == 32003);
+  -- trivial cases p = 0, 1
+  I20 = hodgeIdealDet(2, 0);
+  assert(I20 == ideal(1_(ring I20)));
+  I21 = hodgeIdealDet(2, 1);
+  assert(I21 == ideal(1_(ring I21)));
+  -- p = 2 on 2x2: ideal of all 1x1 minors (the matrix entries)
+  I22 = hodgeIdealDet(2, 2);
+  assert(I22 == ideal vars ring I22);
+  -- p = 2 on 3x3: ideal of 2x2 minors (9 generators)
+  assert(numgens hodgeIdealDet(3, 2) == 9);
+  -- caching returns the same object
+  assert(hodgeIdealDet(2, 2) === I22);
+///
+
+
+-- gradedDeRhamCohomologyH1: smooth f, supports only at certain (p, q)
+TEST ///
+  R = QQ[x,y];
+  f = y^2 - x;
+  assert(dim prune gradedDeRhamCohomologyH1(f, -2, 0) == 1);
+  assert(dim prune gradedDeRhamCohomologyH1(f, -1, -1) == 1);
+  assert(prune gradedDeRhamCohomologyH1(f, -2, -1) == 0);
+  assert(prune gradedDeRhamCohomologyH1(f, -1, 0) == 0);
+  assert(prune gradedDeRhamCohomologyH1(f, 0, 0) == 0);
+///
+
+
+-- gradedDeRhamComplexH1 on a smooth f (extra coverage beyond test #21)
+TEST ///
+  R = QQ[x,y];
+  f = y^2 - x;
+  G = gradedDeRhamComplexH1(f, -2);
+  assert(concentration G == (0, 0));
+  assert(dim prune HH_0(G) == 1);
+///
+
+-- gradedDeRhamComplexH1 on a smooth f at a different p
+TEST ///
+  R = QQ[x,y];
+  f = y^2 - x;
+  G = gradedDeRhamComplexH1(f, -1);
+  assert(concentration G == (0, 1));
+  assert(prune HH_0(G) == 0);
+  assert(dim prune HH_1(G) == 1);
+///
+
+-- gradedDeRhamComplexH1 on the cusp
+TEST ///
+  R = QQ[a,b];
+  f = a^2 + b^3;
+  G = gradedDeRhamComplexH1(f, -1);
+  assert(concentration G == (0, 1));
+  assert(prune HH_0(G) == 0);
+  assert(prune HH_1(G) != 0);
+///
+
+
+-- duBoisComplex on a smooth curve
+TEST ///
+  R = QQ[x,y];
+  f = y^2 - x;
+  DB = duBoisComplex(f, 0);
+  assert(dim prune HH_0(DB) == 1);    -- structure sheaf of V(f)
+  assert(prune HH_(-1)(DB) == 0);     -- Du Bois (smooth)
+///
+
+-- duBoisComplex on the cusp: not Du Bois (HH_{-1} nonzero)
+TEST ///
+  R = QQ[a,b];
+  f = a^2 + b^3;
+  DB = duBoisComplex(f, 0);
+  assert(prune HH_(-1)(DB) != 0);
+  assert(dim prune HH_(-1)(DB) == 0);  -- 0-dimensional (finite-length) module
+///
+
+
+-- intersectionDuBoisComplex on a smooth curve: IDB^0 is Du Bois
+TEST ///
+  R = QQ[x,y];
+  f = y^2 - x;
+  IDB = intersectionDuBoisComplex(f, 0);
+  assert(dim prune HH_0(IDB) == 1);
+  assert(prune HH_(-1)(IDB) == 0);
+///
+
+-- intersectionDuBoisComplex on the cusp
+TEST ///
+  R = QQ[a,b];
+  f = a^2 + b^3;
+  IDB = intersectionDuBoisComplex(f, 0);
+  -- HH_(-1) is nonzero (0-dimensional)
+  assert(prune HH_(-1)(IDB) != 0);
+  assert(dim prune HH_0(IDB) == 1);
+///
+
+
+-- localCohomFW: documentation example
+TEST ///
+  S = QQ[x,y,z];
+  I = ideal(x, y, z);
+  M0 = localCohomFW(I, 3, 0, 6);
+  -- M0 is isomorphic to the residue field of the origin
+  assert(numgens M0 == 1);
+  assert(dim M0 == 0);
+  M1 = localCohomFW(I, 3, 1, 6);
+  assert(M1 != 0);
+  assert(dim M1 == 0);
+///
+
+
+-- generateNext on smooth f = x: trivial
+TEST ///
+  R = QQ[x,y];
+  assert(generateNext(x, 1, 0) == ideal(1_R));
+///
+
+-- generateNext on smooth f = y^2 - x: trivial
+TEST ///
+  R = QQ[x,y];
+  assert(generateNext(y^2 - x, 1, 0) == ideal(1_R));
+///
+
+-- generateNext on the cusp at the doc example (alpha = 5/6, p = 1)
+-- Use R_0, R_1 because after the function call the symbol `a`/`b` may
+-- be rebound to a different (Weyl-algebra) ring.
+TEST ///
+  R = QQ[a,b];
+  J = generateNext(R_0^2 + R_1^3, 5/6, 1);
+  assert(J == ideal(3*R_1^3 - 8*R_0^2, R_0*R_1^2, R_0^2*R_1));
+///
+
+
+-- adjointIdeal on smooth f: trivial
+TEST ///
+  R = QQ[x,y];
+  assert(adjointIdeal x == ideal(1_R));
+///
+
+-- adjointIdeal on the smooth curve y^2 - x: still trivial
+TEST ///
+  R = QQ[x,y];
+  assert(adjointIdeal(y^2 - x) == ideal(1_R));
+///
+
+-- adjointIdeal on the cusp: the maximal ideal of the origin
+TEST ///
+  R = QQ[a,b];
+  J = adjointIdeal(R_0^2 + R_1^3);
+  assert(J == ideal(R_1, R_0));
+///
+
+
+-- HRHLevel: small plane-curve cases
+TEST ///
+  R = QQ[x,y];
+  assert(HRHLevel x == "rational homology manifold");
+///
+
+TEST ///
+  R = QQ[x,y];
+  assert(HRHLevel(y^2 - x) == "rational homology manifold");
+///
+
+TEST ///
+  R = QQ[a,b];
+  assert(HRHLevel(a^2 + b^3) == "rational homology manifold");
+///
+
+
+-- hodgeLevel on smooth f
+TEST ///
+  R = QQ[x,y];
+  assert(hodgeLevel(x, 1_R, 1) == 0);
+///
+
+-- hodgeCheck on smooth f (own block to avoid state contamination
+-- from prior hodgeLevel/hodgeIdeal calls)
+TEST ///
+  R = QQ[x,y];
+  assert(hodgeCheck(x, 1_R, 1, 0));
+///
+
+-- hodgeLevel on smooth y^2 - x
+TEST ///
+  R = QQ[x,y];
+  assert(hodgeLevel(y^2 - x, 1_R, 1) == 0);
+///
+
+-- hodgeLevel on the cusp
+TEST ///
+  R = QQ[a,b];
+  assert(hodgeLevel(a^2 + b^3, 1_R, 1) == 0);
+///
+
+
+-- weightHodgeOnV on smooth f
+TEST ///
+  R = QQ[x,y];
+  L = weightHodgeOnV(x, 1, 0, 1);
+  assert(instance(L, List));
+  assert(#L >= 1);
+///
+
+TEST ///
+  R = QQ[x,y];
+  L = weightHodgeOnV(y^2 - x, 1, 0, 1);
+  assert(instance(L, List));
+  assert(#L == 1);
+///

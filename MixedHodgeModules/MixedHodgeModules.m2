@@ -130,6 +130,9 @@ protect symbol HodgeIdealCache;
 --internal symbol for caching weightedHodgeIdeal outputs keyed by (f, alpha, p, m)
 protect symbol WeightedHodgeIdealCache;
 
+--internal symbol for caching hodgeIdealWeightedHomogIsolated outputs keyed by (f, alpha, p, w)
+protect symbol HodgeIdealWeightedHomogIsolatedCache;
+
 --internal symbol for caching makeWeylAlgebra on a polynomial ring
 protect symbol WeylAlgebraCache;
 

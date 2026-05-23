@@ -1550,10 +1550,10 @@ doc ///
      $f$ is weighted-homogeneous of weight $1$ with an isolated singularity
   Outputs
     C: Complex
-     a complex of finitely generated $S$-modules quasi-isomorphic to $\underline{\Omega}^p_D$
+     a free complex quasi-isomorphic to $\underline{\Omega}^p_D$
   Description
     Text
-     Given a reduced polynomial $f\in S=\mathbb{Q}[x_1,\cdots,x_n]$ and $0\leq p\leq n-1$, this function computes a complex of finitely generated $S$-modules
+     Given a reduced polynomial $f\in S=\mathbb{Q}[x_1,\cdots,x_n]$ and $0\leq p\leq n-1$, this function computes a free complex
      quasi-isomorphic to $\underline{\Omega}^p_D$, where $D=V(f)$. As complexes in Macaulay2
      are homologically graded, the $-i$-th homology of this complex is the $i$-th
      cohomology of $\underline{\Omega}^p_D$. The homology of this complex lives in non-positive degrees.
@@ -1785,10 +1785,10 @@ doc ///
      a non-negative integer 
   Outputs
     C: Complex
-     a complex of finitely generated $S$-modules quasi-isomorphic to $I\underline{\Omega}^p_D$
+     a free complex quasi-isomorphic to $I\underline{\Omega}^p_D$
   Description
     Text
-     Given a reduced polynomial $f\in S=\mathbb{Q}[x_1,\cdots,x_n]$ and $0\leq p\leq n-1$, this function computes a complex of finitely generated $S$-modules
+     Given a reduced polynomial $f\in S=\mathbb{Q}[x_1,\cdots,x_n]$ and $0\leq p\leq n-1$, this function computes a free complex
      quasi-isomorphic to $I\underline{\Omega}^p_D$, where $D=V(f)$. As complexes in Macaulay2
      are homologically graded, the $-i$-th homology of this complex is the $i$-th
      cohomology of $I\underline{\Omega}^p_D$. The homology of this complex lives in non-positive degrees.

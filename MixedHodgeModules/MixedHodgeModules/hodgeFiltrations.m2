@@ -614,10 +614,18 @@ weightGeqAlpha = (R,w,alpha) -> (
 
 ---------------------------------------------------------------
 
---private recursive helper: assumes inputs already validated
+--private recursive helper: assumes inputs already validated.  Cached on
+--R.cache#HodgeIdealWeightedHomogIsolatedCache keyed by (f, alpha, p, w), so
+--recursive calls and surrounding loops (e.g. deRhamInterval) reuse work.
 hodgeIdealWeightedHomogIsolatedHelper = (f,alpha,p,w) -> (
 
   R := ring f;
+  if not R.cache#?HodgeIdealWeightedHomogIsolatedCache then
+      R.cache#HodgeIdealWeightedHomogIsolatedCache = new MutableHashTable;
+  tbl := R.cache#HodgeIdealWeightedHomogIsolatedCache;
+  key := (f, sub(alpha, QQ), p, w);
+  if tbl#?key then return tbl#key;
+
   hodgeI := ideal(1_R);
 
   if p == 0 then hodgeI = weightGeqAlpha(R, w, alpha)
@@ -638,6 +646,7 @@ hodgeIdealWeightedHomogIsolatedHelper = (f,alpha,p,w) -> (
                  );
            );
 
+  tbl#key = hodgeI;
   hodgeI
   )
 

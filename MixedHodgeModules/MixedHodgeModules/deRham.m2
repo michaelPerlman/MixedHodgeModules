@@ -366,7 +366,7 @@ deRhamInterval(RingElement, List, ZZ) := options -> (f,B,p) -> (
 --which gives correct cohomology in degrees a..b
 --if a=-n and b=0, then gives correct cohomology everywhere
 
---gives as free complex quasi-isomorphic to DR
+--gives a complex of finitely generated S-modules quasi-isomorphic to DR
 
 
 --step 0: initialize information
@@ -503,7 +503,7 @@ gradedDeRhamComplexH1 = method();
 
 gradedDeRhamComplexH1(RingElement, ZZ) := (f,p) -> (
 --in *homological* degrees n..0
---free complex quasi-isomorphic
+--complex of finitely generated S-modules quasi-isomorphic to Gr^F_p DR(H^1_f(S))
 
     DRp := gradedDeRhamComplex(f,p, InputType => HodgeIdeals);
 
@@ -525,7 +525,7 @@ gradedDeRhamComplexH1(RingElement, ZZ, List) := (f,p,w) -> (
 intersectionDuBoisComplex = method();
 
 intersectionDuBoisComplex(RingElement, ZZ) := (f,p) -> (
---gives a complex of finitely generated S-modules
+--gives a free complex
 --interesting homological degrees 0,-1,..,-n
 --our convention makes it the same as gradedDuBoisComplex for RHM
 
