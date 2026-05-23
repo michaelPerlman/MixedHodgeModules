@@ -22,6 +22,12 @@ weightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,m) -> (
      if m < 0 then error "expected weight m to be a non-negative integer";
      if (options.UseBasis != dtBasis) and  (options.UseBasis != sBasis) then error "invalid UseBasis";
 
+    R := ring f;
+    if not R.cache#?WeightHodgeOnVCache then R.cache#WeightHodgeOnVCache = new MutableHashTable;
+    tbl := R.cache#WeightHodgeOnVCache;
+    key := (f, sub(alpha,QQ), p, m, options.UseBasis);
+    if tbl#?key then return tbl#key;
+
     ------------------------------------------------------------------------
     -- Steps 1-3. Shared V-filtration setup: Ds, ss, DsF, rhoFp, Jp, M
     ------------------------------------------------------------------------
@@ -80,11 +86,12 @@ weightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,m) -> (
     if options.UseBasis == sBasis then WFVpBf = fromMRsToBf(WFVpBf, f, Rs,p);--twist to get B_f
     if options.UseBasis == dtBasis then WFVpBf = convertMStoDtBasisBf(WFVpBf, f, Rs, p);
 
+    tbl#key = WFVpBf;
     WFVpBf
     )
-   
 
-	
+
+
 ---------------------------------------------------------------
 ---------------------------------------------------------------
 

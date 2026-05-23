@@ -118,6 +118,12 @@ protect symbol GlobalBCache;
 --internal symbol for caching rhoFp (roots of generalized b-function with multiplicities) keyed by (f,p)
 protect symbol RhoFpCache;
 
+--internal symbol for caching hodgeOnV outputs keyed by (f, alpha, p, UseBasis) or (f, p, UseBasis)
+protect symbol HodgeOnVCache;
+
+--internal symbol for caching weightHodgeOnV outputs keyed by (f, alpha, p, m, UseBasis)
+protect symbol WeightHodgeOnVCache;
+
 
 --Convention: dt^p \in F_p(B_f)
 -- f should be reduced
@@ -176,8 +182,18 @@ uninstallPackage "MixedHodgeModules"
 
 --tests/ examples
 
+S=QQ[x,y,z]
+f=x^2+y^3+y*z^2
+time hodgeOnV(f,2)
+
+time hodgeOnV(f,3/4,2)
 
 
+R=QQ[x,y,z,w]
+f=x*w-y*z
+g=1_R
+alpha=1+1
+weightCheck(f,g,alpha,1)
 
 --------------------------------------------------------------
 --smooth case

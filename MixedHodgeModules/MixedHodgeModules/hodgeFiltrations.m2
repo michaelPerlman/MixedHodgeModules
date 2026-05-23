@@ -53,6 +53,25 @@ cachedRhoFp = (f, p) -> (
         )
     )
 
+--internal: given alpha in (0,1] and p, return the upper endpoint of alpha's
+--equivalence class under semi-continuity of F_p(V^α(B_f)) in α.  Two values
+--of alpha that lie in the same interval (α_{i+1}, α_i] produce identical
+--hodgeOnV(f, α, p) output, so they share the same canonical representative.
+--Breakpoints {α_1, ..., α_{k-1}} ∪ {1} come from roots of the (p+1)-st
+--generalized b-function via -root - p; rhoFp is already cached.
+canonicalAlpha = (f, alpha, p) -> (
+    alphaQQ := sub(alpha, QQ);
+    rhoFp := cachedRhoFp(f, p);
+    breakpoints := unique select(apply(rhoFp, i -> -i_0 - p), b -> b > 0 and b <= 1);
+    if not member(1_QQ, breakpoints) then breakpoints = append(breakpoints, 1_QQ);
+    breakpoints = sort breakpoints;
+    canonical := 1_QQ;
+    for b in breakpoints do (
+        if b >= alphaQQ then (canonical = b; break);
+        );
+    canonical
+    )
+
 
 ---------------------------------------------------------------
 ---------------------------------------------------------------
@@ -286,6 +305,20 @@ hodgeOnV(RingElement,QQ,ZZ) := options -> (f,alpha,p) -> (
     checkP p;
     if (options.UseBasis != dtBasis) and  (options.UseBasis != sBasis) then error "invalid UseBasis";
 
+    R := ring f;
+    if not R.cache#?HodgeOnVCache then R.cache#HodgeOnVCache = new MutableHashTable;
+    tbl := R.cache#HodgeOnVCache;
+    cAlpha := canonicalAlpha(f, alpha, p);
+    key := (f, cAlpha, p, options.UseBasis);
+    if tbl#?key then return tbl#key;
+    -- if hodgeOnV(f, p) HashTable was cached, reuse its entry for cAlpha
+    hashKey := (f, p, options.UseBasis);
+    if tbl#?hashKey and (tbl#hashKey)#?cAlpha then (
+        result := (tbl#hashKey)#cAlpha;
+        tbl#key = result;
+        return result;
+        );
+
     ------------------------------------------------------------------------
     -- Steps 1-3. Shared V-filtration setup: Ds, ss, DsF, rhoFp, Jp, M
     -- (see prepareVfilt; this corresponds to Blanco step 5 with shifted Jp)
@@ -318,9 +351,10 @@ hodgeOnV(RingElement,QQ,ZZ) := options -> (f,alpha,p) -> (
     VFiltpBf := VFiltpM;
 
     if options.UseBasis == sBasis then VFiltpBf = fromMRsToBf(VFiltpBf, f, Rs, p);--twist to get Bf
-    
+
     if options.UseBasis == dtBasis then VFiltpBf = convertMStoDtBasisBf(VFiltpBf, f, Rs, p);
-   
+
+    tbl#key = VFiltpBf;
     VFiltpBf
 )
 
@@ -340,6 +374,12 @@ hodgeOnV(RingElement,ZZ) := options -> (f,p) -> (
 
     checkP p;
     if (options.UseBasis != dtBasis) and  (options.UseBasis != sBasis) then error "invalid UseBasis";
+
+    R := ring f;
+    if not R.cache#?HodgeOnVCache then R.cache#HodgeOnVCache = new MutableHashTable;
+    tbl := R.cache#HodgeOnVCache;
+    key := (f, p, options.UseBasis);
+    if tbl#?key then return tbl#key;
 
     ------------------------------------------------------------------------
     -- Steps 1-3. Shared V-filtration setup: Ds, ss, DsF, rhoFp, Jp, M
@@ -382,8 +422,9 @@ hodgeOnV(RingElement,ZZ) := options -> (f,p) -> (
 
     if options.UseBasis == dtBasis then VFiltpPairs = apply(VFiltpPairs, iV -> {iV_0, convertMStoDtBasisBf(iV_1, f, ring (iV_1)_0, p)});
 
-    new HashTable from VFiltpPairs
-    
+    result := new HashTable from VFiltpPairs;
+    tbl#key = result;
+    result
 )
 
 
