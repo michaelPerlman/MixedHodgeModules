@@ -8,7 +8,10 @@
 --cache the Weyl algebra makeWeylAlgebra(R) per polynomial ring R, so subsequent
 --callers share the same W object (and elements sub'd into W are interoperable).
 cachedWeylAlgebra = R -> (
-    if not R.cache#?WeylAlgebraCache then R.cache#WeylAlgebraCache = makeWeylAlgebra R;
+    if not R.cache#?WeylAlgebraCache then (
+        R.cache#WeylAlgebraCache = makeWeylAlgebra R;
+        use R;--restore caller's ring after makeWeylAlgebra contamination
+        );
     R.cache#WeylAlgebraCache
     )
 

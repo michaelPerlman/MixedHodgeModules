@@ -191,159 +191,38 @@ fTorsion = (f,rList,aa,p) -> (
     
 
 --------------------------------------------------------------------
----helper functions to create koszul complex, tensor with N, and take
+---helper function to create koszul complex, tensor with N, and take
 --appropriate graded piece
---------------------------------------------------------------------
-
-
-
+--------------------------------------------------------------------   
+    
+    
 koszulSlice = (A,S,p,N) -> (
---N is a bigraded A-module with bigrade {*,0}
---Form the Koszul complex, tensor with N, slice the {p,0}-graded piece term-by-
---term as S-modules, and assemble.  Avoids freeResolution(DRN) over A.
---
---Optimization: slice presN ONCE per needed de-degree (cached), then
---  (i)  (DRN_i)_{(p,0)} = directSum_k N_{(p-d_{i,k}, 0)} for d_{i,k} the gen
---       degrees of Ktwisted_i;
---  (ii) the differential DRN.dd_i has matrix Ktwisted.dd_i (a small matrix
---       in A); each (l,k) entry a is converted to an S-block by multByASlice.
---Output: complex of S-modules (cokernels).  Callers needing RHom semantics
---should freeResolution before Hom.
+--N is a graded A module
+--form the Koszul complex, tensor with N
+--take the p-th graded piece
+--sub back into S
 
     n := numgens S;
-    QQe := coefficientRing A;
-    QQeToS := map(S, QQe, gens S);
-    nA := numgens A;
-    AtoQQe := map(QQe, A, apply(nA, i -> 0_QQe));
 
-    xigens := ideal apply(toList(0..n-1), i -> A_i);
-    K := freeResolution xigens;
-    Ktwisted := K ** A^{1:{n,0}};
+    xigens := ideal( apply(toList(0..n-1), i -> A_(i)));
+    
+    K :=  freeResolution xigens;
 
-    (lo, hi) := concentration Ktwisted;
+    Ktwisted := K**A^{1:{n,0}};
+    
+    DRN := Ktwisted**N;
 
-    presN := presentation N;
-    F0N := target presN;
-    F0Degs := apply(degrees F0N, d -> first d);
+    FF := freeResolution(DRN);
+    
+    DRp := part({p,0},FF);--a complex of QQ[e_1..e_n]-modules
 
-    --basis cache: q -> 1xr matrix of de-monomials of degree q
-    basisCache := new MutableHashTable;
-    monsAt := q -> (
-	if q < 0 then map(A^1, A^0, 0)
-	else basisCache#q ??= basis({q,0}, A^1)
-	);
+    QQe := ring DRp;
 
-    --rank of (A^1)_{(q,0)} as QQe-module (number of de-monomials of degree q)
-    monoRkAt := q -> if q < 0 then 0 else numcols monsAt q;
+    QQeToS := map(S,QQe, gens S);
 
-    --slice presN at de-degree q, returning a QQe-matrix.
-    presNSrcDegs := apply(degrees source presN, d -> first d);
-    presNTgtDegs := apply(degrees target presN, d -> first d);
+    DRpS := QQeToS(DRp);
 
-    slicePresNAt := q -> (
-	srcMonos := apply(presNSrcDegs, d -> monsAt(q-d));
-	tgtMonos := apply(presNTgtDegs, d -> monsAt(q-d));
-	srcRks := apply(srcMonos, numcols);
-	tgtRks := apply(tgtMonos, numcols);
-	aS := sum srcRks;
-	bS := sum tgtRks;
-	b := #presNTgtDegs;
-	a := #presNSrcDegs;
-
-	if aS == 0 then return map(QQe^bS, QQe^0, 0);
-	if bS == 0 then return map(QQe^0, QQe^aS, 0);
-
-	rowBlocks := for i from 0 to b-1 list (
-	    if tgtRks_i == 0 then map(QQe^0, QQe^aS, 0)
-	    else (
-		entries := for j from 0 to a-1 list (
-		    if srcRks_j == 0 then map(A^1, A^0, 0)
-		    else presN_(i,j) * srcMonos_j
-		    );
-		rowi := matrix {entries};
-		(mns, cfs) := coefficients(rowi,
-		    Variables => gens A,
-		    Monomials => tgtMonos_i);
-		AtoQQe cfs
-		)
-	    );
-	matrix apply(rowBlocks, b1 -> {b1})
-	);
-
-    --cache of N_{(q,0)} as QQe-module
-    NSliceCache := new MutableHashTable;
-    NSlice := q -> NSliceCache#q ??= cokernel slicePresNAt(q);
-
-    --For an A-element a, the QQe-matrix representing multiplication by a on
-    --F_0^N covers sliced at (qSrc, qTgt):
-    --  (F_0^N)_{(qSrc, 0)} -> (F_0^N)_{(qTgt, 0)}.
-    --Block-diagonal across gens of F_0^N (multBy commutes with the gen index).
-    --When a is nonzero, qTgt must equal qSrc + (de-degree of a).
-    multByASlice := (a, qSrc, qTgt) -> (
-	srcRks := apply(F0Degs, δ -> monoRkAt(qSrc - δ));
-	tgtRks := apply(F0Degs, δ -> monoRkAt(qTgt - δ));
-	aS := sum srcRks;
-	bS := sum tgtRks;
-
-	if a == 0 or aS == 0 or bS == 0 then return map(QQe^bS, QQe^aS, 0);
-
-	rowBlocks := for j from 0 to #F0Degs - 1 list (
-	    leftPad := if j == 0 then 0 else sum (srcRks_{0..j-1});
-	    rightPad := aS - leftPad - srcRks#j;
-	    if tgtRks#j == 0 then map(QQe^0, QQe^aS, 0)
-	    else if srcRks#j == 0 then map(QQe^(tgtRks#j), QQe^aS, 0)
-	    else (
-		rowi := a * monsAt(qSrc - F0Degs#j);
-		(mns, cfs) := coefficients(rowi,
-		    Variables => gens A,
-		    Monomials => monsAt(qTgt - F0Degs#j));
-		coreBlock := AtoQQe cfs;
-		leftZeros := map(QQe^(tgtRks#j), QQe^leftPad, 0);
-		rightZeros := map(QQe^(tgtRks#j), QQe^rightPad, 0);
-		leftZeros | coreBlock | rightZeros
-		)
-	    );
-	matrix apply(rowBlocks, b1 -> {b1})
-	);
-
-    --gen degrees of Ktwisted_i (cached)
-    KGenDegsCache := new MutableHashTable;
-    KGenDegs := i -> KGenDegsCache#i ??= apply(degrees Ktwisted_i, d -> first d);
-
-    --(DRN_i)_{(p,0)} as a QQe-module
-    DRSliceCache := new MutableHashTable;
-    DRSlice := i -> DRSliceCache#i ??= (
-	degs := KGenDegs i;
-	if #degs == 0 then QQe^0
-	else directSum apply(degs, d -> NSlice(p - d))
-	);
-
-    --sliced differential DRSlice(i) -> DRSlice(i-1) from Ktwisted.dd_i
-    sliceDiff := i -> (
-	ddi := Ktwisted.dd_i;       --c_{i-1} x c_i matrix over A
-	srcDegs := KGenDegs i;
-	tgtDegs := KGenDegs (i-1);
-	ci := #srcDegs;
-	cim1 := #tgtDegs;
-
-	src := DRSlice i;
-	tgt := DRSlice (i-1);
-
-	if ci == 0 or cim1 == 0 then return map(tgt, src, 0);
-
-	--build the (l,k) block matrix in one shot via matrix(BlockMatrix)
-	blockMat := for l from 0 to cim1 - 1 list (
-	    for k from 0 to ci - 1 list
-		multByASlice(ddi_(l,k), p - srcDegs#k, p - tgtDegs#l)
-	    );
-	map(tgt, src, matrix blockMat)
-	);
-
-    if lo == hi then return QQeToS ** complex(DRSlice lo, Base => lo);
-
-    diffs := apply(toList(lo+1..hi), i -> sliceDiff i);
-
-    QQeToS ** complex(diffs, Base => lo)
+    DRpS
     )
 
 
@@ -366,7 +245,7 @@ deRhamInterval(RingElement, List, ZZ) := options -> (f,B,p) -> (
 --which gives correct cohomology in degrees a..b
 --if a=-n and b=0, then gives correct cohomology everywhere
 
---gives a complex of finitely generated S-modules quasi-isomorphic to DR
+--gives as free complex quasi-isomorphic to DR
 
 
 --step 0: initialize information
@@ -503,7 +382,7 @@ gradedDeRhamComplexH1 = method();
 
 gradedDeRhamComplexH1(RingElement, ZZ) := (f,p) -> (
 --in *homological* degrees n..0
---complex of finitely generated S-modules quasi-isomorphic to Gr^F_p DR(H^1_f(S))
+--free complex quasi-isomorphic
 
     DRp := gradedDeRhamComplex(f,p, InputType => HodgeIdeals);
 
@@ -534,10 +413,8 @@ intersectionDuBoisComplex(RingElement, ZZ) := (f,p) -> (
 
     DRp := gradedDeRhamComplex(f,p-n, InputType => WeightedHodgeIdeals);
 
-    --koszulSlice returns a complex of S-cokernels, so resolve before Hom
-    --to keep this an RHom computation
-    RHomDRp := Hom(freeResolution DRp, S^1);
-
+    RHomDRp := Hom(DRp, S^1);
+    
     RHomDRpShift := RHomDRp[-p-1];
 
     prune RHomDRpShift
@@ -601,9 +478,7 @@ duBoisComplex(RingElement, ZZ) := (f,p) -> (
 
     DRk := gradedDeRhamComplexH1(f,p-n);
 
-    --koszulSlice now returns a complex of S-cokernels, so resolve before Hom
-    --to keep this an RHom computation
-    RHomDRk := Hom(freeResolution DRk, S^1);
+    RHomDRk := Hom(DRk, S^1);
 
     --do the correct cohomological shift
 
@@ -611,6 +486,7 @@ duBoisComplex(RingElement, ZZ) := (f,p) -> (
 
     prune RHomDRkShift
     )
+
 
 duBoisComplex(RingElement, ZZ, List) := (f,p,w) -> (
 --WeightedHomogIsolated variant.
@@ -620,7 +496,7 @@ duBoisComplex(RingElement, ZZ, List) := (f,p,w) -> (
 
     DRk := gradedDeRhamComplexH1(f,p-n,w);
 
-    RHomDRk := Hom(freeResolution DRk, S^1);
+    RHomDRk := Hom(DRk, S^1);
 
     RHomDRkShift := RHomDRk[-p-1];
 
@@ -656,6 +532,7 @@ isPreDuBois(RingElement, ZZ) := (f,m) -> (
    isPre
    )
 
+
 isPreDuBois(RingElement, ZZ, List) := (f,m,w) -> (
 --WeightedHomogIsolated variant.
 
@@ -681,4 +558,13 @@ isPreDuBois(RingElement, ZZ, List) := (f,m,w) -> (
 
 
 end
+
+restart
+load "MixedHodgeModules.m2"
+installPackage "MixedHodgeModules"
+load "MixedHodgeModules/deRhamDraft.m2"
+viewHelp MixedHodgeModules
+check "MixedHodgeModules"
+uninstallPackage "MixedHodgeModules"
+
 

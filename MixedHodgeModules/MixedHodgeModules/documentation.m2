@@ -11,7 +11,7 @@ doc ///
   Key
     MixedHodgeModules
   Headline
-    a package for computing Hodge and weight filtrations on localizations
+    computing Hodge and weight filtrations on localizations
   Description
     Text
      Let $S=\mathbb{C}[x_1,\cdots,x_n]$ and let $f\in S$ be a reduced non-constant polynomial. This package
@@ -87,6 +87,10 @@ doc ///
 	@TOH "duBoisComplex"@
 	@TOH "intersectionDuBoisComplex"@
 	@TOH "isPreDuBois"@
+
+      :Caching
+        @TOH "clearMHMCache"@
+       	
 
 
   Caveat
@@ -1620,7 +1624,7 @@ doc ///
      a complex of finitely generated $S$-modules quasi-isomorphic to $\operatorname{Gr}^F_p(\operatorname{DR}(H^1_f(S)))$
   Description
     Text
-     Given a reduced polynomial $f\in S=\mathbb{Q}[x_1,\cdots,x_n]$ and $p\geq -n$, this function computes a complex of finitely generated $S$-modules
+     Given a reduced polynomial $f\in S=\mathbb{Q}[x_1,\cdots,x_n]$ and $p\geq -n$, this function computes a free complex 
      quasi-isomorphic to $\operatorname{Gr}^F_p(\operatorname{DR}(H^1_f(S)))$. As complexes in Macaulay2
      are homologically graded, the $-i$-th homology of this complex is the $i$-th
      cohomology of $\operatorname{Gr}^F_p(\operatorname{DR}(H^1_f(S)))$.
@@ -2070,4 +2074,25 @@ doc ///
       This option is supported by hodgeIdeal.
   SeeAlso
     hodgeIdeal
+///
+
+
+doc ///
+  Key
+    clearMHMCache
+    (clearMHMCache, Ring)
+  Headline
+    clear cached intermediate computations
+  Usage
+    clearMHMCache S
+  Inputs
+    S: Ring
+      a polynomial ring on which package computations have been performed
+  Description
+    Text
+      Many functions in this package -- including hodgeOnV, weightHodgeOnV, and
+      hodgeIdeal -- share expensive intermediate steps (e.g. annihilators in the
+      Weyl algebra, $b$-functions, V-filtration eliminations), so these intermediate
+      results are cached on $S$ for reuse.  This function resets the cache on $S$ 
+      created by this package, and also clears the caches used by hodgeIdealDet.
 ///
