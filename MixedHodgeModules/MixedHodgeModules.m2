@@ -11,29 +11,6 @@
 --(1) fill in descriptions and examples in documentation for nuAlpha, pFunction (and their strategies)
 --(2) add examples in doc of other strategies for weightLength
 --(3) create tests for every function and add to tests.m2
---(4) Bugs to fix (discovered while writing tests):
---    (a) adjointIdeal(f) and other weight-filtration functions internally do
---        `use ring If` (the Weyl algebra), leaving the user's current ring as
---        the Weyl algebra after the call.  The output ideal lives in R (the
---        original ring), but a subsequent `ideal(b, a)` from the user is now
---        constructed in the Weyl algebra, so equality tests with the output
---        fail with "expected ideals for the same ring."  Fix: restore the
---        caller's current ring (e.g. `use R` at the end) and audit all
---        downstream code that depends on this behavior.  Affects at least:
---        adjointIdeal, weightLevel (the `use ring If` at line ~269 of
---        weightFiltrations.m2), hodgeIdealWeightedHomogIsolated, the WHI
---        helper, and probably others.
---    (b) Calling duBoisComplex(f, 0) then duBoisComplex(f, 1) in the same
---        session yields a DB1 with an extra direct summand:
---        cokernel diag(f, f) instead of cokernel | f |.  Cohomology is the
---        same up to isomorphism but the presentation is wrong.  Likely a
---        mutable-cache issue in koszulSlice's Ktwisted, freeResolution, or
---        Hom.  Reproduce: see tests #28-#33 cluster.
---    (c) Calling hodgeLevel(f, g, alpha) then hodgeCheck(f, g, alpha, p) in
---        the same session errors with "expected pair to have a method for
---        '*'".  Likely related to (a) - hodgeLevel leaves the Weyl algebra
---        as current ring, then hodgeCheck builds `g * f^k` where g is now
---        re-resolved in the wrong ring.
 
 
 
@@ -104,6 +81,8 @@ export {
     "isPreDuBois",
     "gradedDeRhamComplexH1",
     "gradedDeRhamCohomologyH1",
+
+    "clearMHMCache",
 
     --symbols:
      "ByAnnFs",
