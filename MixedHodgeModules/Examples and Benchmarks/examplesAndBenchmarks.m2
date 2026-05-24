@@ -144,7 +144,8 @@ load "MixedHodgeModules.m2"
 S=QQ[x,y,z,w]
 f=x*w-y*z
 
-elapsedTime netList for p from 0 to 3 list duBoisComplex(f,p)--2.05s
+elapsedTime netList for p from 0 to 3 list duBoisComplex(f,p)--.93s
+
 
 ---------------------------------------------------------------
 
