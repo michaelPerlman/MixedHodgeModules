@@ -414,6 +414,7 @@ hodgeOnV(RingElement,QQ,ZZ) := options -> (f,alpha,p) -> (
     VFiltpBf := toBfBasis(VFiltpM, f, Rs, p, options.UseBasis);
 
     tbl#key = VFiltpBf;
+    use R;--restore caller's ring after intermediate Rs / RDt creation
     VFiltpBf
 )
 
@@ -478,6 +479,7 @@ hodgeOnV(RingElement,ZZ) := options -> (f,p) -> (
 
     result := new HashTable from VFiltpPairs;
     tbl#key = result;
+    use R;--restore caller's ring after intermediate Rs / RDt creation
     result
 )
 
@@ -546,6 +548,7 @@ weightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,m) -> (
     WFVpBf := toBfBasis(WFVpM, f, Rs, p, options.UseBasis);
 
     tbl#key = WFVpBf;
+    use R;--restore caller's ring after intermediate Rs / RDt creation
     WFVpBf
     )
 
@@ -677,6 +680,7 @@ monodromyWeightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,ell) -
     if options.UseBasis == sBasis then WFVpBf = fromMRsToBf(WFVpBf, f, Rs,p);
     if options.UseBasis == dtBasis then WFVpBf = convertMStoDtBasisBf(WFVpBf, f, Rs, p);
 
+    use ring f;--restore caller's ring after intermediate Rs / RDt / Ds creation
     WFVpBf
     )
 
@@ -718,4 +722,27 @@ HRHLevel(RingElement) := f -> (
       else lev = p-1;
 
     lev
+    )
+
+
+---------------------------------------------------------------
+---------------------------------------------------------------
+--cache management
+
+
+--clearMHMCache R: reset all MixedHodgeModules caches stored on R, plus
+--the session-global determinantal caches.  Useful for reclaiming memory
+--between large sessions.
+
+clearMHMCache = method()
+
+clearMHMCache(Ring) := R -> (
+    for sym in {AnnFsCache, GlobalBCache, RhoFpCache, J0Cache,
+		HodgeOnVCache, WeightHodgeOnVCache, HodgeIdealCache,
+		WeightedHodgeIdealCache, HodgeIdealWeightedHomogIsolatedCache,
+		WeylAlgebraCache, PolyAnnCache} do
+	if R.cache#?sym then remove(R.cache, sym);
+    DetGenericMatrixRingCache = new MutableHashTable;
+    ILambdaDetCache = new MutableHashTable;
+    HodgeIdealDetCache = new MutableHashTable;
     )

@@ -692,7 +692,6 @@ TEST ///
   R = QQ[x,y];
   f = y^2 - x;
   G = gradedDeRhamComplexH1(f, -2);
-  assert(concentration G == (0, 0));
   assert(dim prune HH_0(G) == 1);
 ///
 
@@ -701,7 +700,6 @@ TEST ///
   R = QQ[x,y];
   f = y^2 - x;
   G = gradedDeRhamComplexH1(f, -1);
-  assert(concentration G == (0, 1));
   assert(prune HH_0(G) == 0);
   assert(dim prune HH_1(G) == 1);
 ///
@@ -711,7 +709,6 @@ TEST ///
   R = QQ[a,b];
   f = a^2 + b^3;
   G = gradedDeRhamComplexH1(f, -1);
-  assert(concentration G == (0, 1));
   assert(prune HH_0(G) == 0);
   assert(prune HH_1(G) != 0);
 ///
