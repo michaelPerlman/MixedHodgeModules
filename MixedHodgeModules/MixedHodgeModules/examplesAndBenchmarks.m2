@@ -10,76 +10,97 @@ load "MixedHodgeModules.m2"
 
 
 
---tests/ examples
-
-
 --------------------------------------------------------------
 --smooth case
+
+restart
+load "MixedHodgeModules.m2"
+
 R=QQ[x,y]
 f=y^2+x
+w={1/1,1/2}
 
-hodgeOnV(f,0)
-hodgeOnV(f,1)
-hodgeOnV(f,2)
+elapsedTime hodgeOnV(f,0)--.04s
+elapsedTime hodgeOnV(f,1)--.04s
+elapsedTime hodgeOnV(f,2)--.04s
 
-netList (for p from 0 to 10 list hodgeIdeal(f,1,p))
-
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,1,p))--.04s
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,1,p, UseGenLevel => False))--.30s
+elapsedTime netList (for p from 0 to 10 list hodgeIdealWeightedHomogIsolated(f,1,p,w))--.17s
 
 
 ---------------------------------------------------------------
 
 --normal crossing
+
+
+restart
+load "MixedHodgeModules.m2"
+
 n=3
 R=QQ[x_1..x_n]
 f=product gens R
 
-hodgeOnV(f,0)
-hodgeOnV(f,1)
-hodgeOnV(f,2)
-hodgeOnV(f,3)
+elapsedTime hodgeOnV(f,0)--.03s
+elapsedTime hodgeOnV(f,1)--.05s
+elapsedTime hodgeOnV(f,2)--.07s
+elapsedTime hodgeOnV(f,3)--.12s
 
-netList (for p from 0 to 10 list hodgeIdeal(f,1,p))
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,1,p))--.14s
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,1,p, UseGenLevel => False))--11.80s
 
 
 ---------------------------------------------------------------
 
 --2x2 determinant
+
+restart
+load "MixedHodgeModules.m2"
+
 S=QQ[x,y,z,w]
 f=x*w-y*z
+u={1/2,1/2,1/2,1/2}
 
-hodgeOnV(f,0)
-hodgeOnV(f,1)
-hodgeOnV(f,2)
-hodgeOnV(f,3)
+elapsedTime hodgeOnV(f,0)--.05s
+elapsedTime hodgeOnV(f,1)--.05s
+elapsedTime hodgeOnV(f,2)--.08s
+elapsedTime hodgeOnV(f,3)--.12s
 
-netList (for p from 0 to 10 list hodgeIdeal(f,1,p))
-
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,1,p))--.33s
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,1,p, UseGenLevel => False))--31.45s
+elapsedTime netList (for p from 0 to 10 list hodgeIdealWeightedHomogIsolated(f,1,p,u))
+elapsedTime netList (for p from 0 to 10 list hodgeIdealDet(2,p))--.04s
 
 ---------------------------------------------------------------
 
 
 --cusp
+
+restart
+load "MixedHodgeModules.m2"
+
 R=QQ[x,y]
 f=x^2+y^3
-
-hodgeOnV(f,0)
-hodgeOnV(f,1)
-hodgeOnV(f,2)
-hodgeOnV(f,3)
-
 w={1/2,1/3}
 
-netList (for p from 0 to 10 list hodgeIdeal(f,1,p))
-netList (for p from 0 to 10 list hodgeIdeal(f,1,p, UseGenLevel => False))
-netList (for p from 0 to 10 list hodgeIdealWeightedHomogIsolated(f,1,p,w))
+elapsedTime hodgeOnV(f,0)--.05s
+elapsedTime hodgeOnV(f,1)--.05s
+elapsedTime hodgeOnV(f,2)--.07s
+elapsedTime hodgeOnV(f,3)--.11s
 
-netList (for p from 0 to 10 list hodgeIdeal(f,1/6,p))
-netList (for p from 0 to 10 list hodgeIdeal(f,1/6,p, UseGenLevel => False))
-netList (for p from 0 to 10 list hodgeIdealWeightedHomogIsolated(f,1/6,p,w))
 
-netList (for p from 0 to 10 list hodgeIdeal(f,5/6,p))
-netList (for p from 0 to 10 list hodgeIdeal(f,5/6,p, UseGenLevel => False))
-netList (for p from 0 to 10 list hodgeIdealWeightedHomogIsolated(f,5/6,p,w))
+
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,1,p))--.07s
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,1,p, UseGenLevel => False))--22.96s
+elapsedTime netList (for p from 0 to 10 list hodgeIdealWeightedHomogIsolated(f,1,p,w))--.37s
+
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,1/6,p))--.05s
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,1/6,p, UseGenLevel => False))--2.07s
+elapsedTime netList (for p from 0 to 10 list hodgeIdealWeightedHomogIsolated(f,1/6,p,w))--.24s
+
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,5/6,p))--.06s
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,5/6,p, UseGenLevel => False))--.81s
+elapsedTime netList (for p from 0 to 10 list hodgeIdealWeightedHomogIsolated(f,5/6,p,w))--.28s
 
 
 
@@ -97,40 +118,26 @@ higherMultiplierIdeal(f,alpha,p)
 ---------------------------------------------------------------
 
 --A1 sing
+
+restart
+load "MixedHodgeModules.m2"
+
 R=QQ[x,y,z]
 f=y^2-x*z
-hodgeOnV(f,1)
 w={1/2,1/2,1/2}
-p=5
 
-p=3
-m=1
-adjointIdeal(f)
+elapsedTime hodgeOnV(f,0)--.05s
+elapsedTime hodgeOnV(f,1)--.05s
+elapsedTime hodgeOnV(f,2)--.07s
+elapsedTime hodgeOnV(f,3)--.10s
 
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,1,p))--.13s
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,1,p, UseGenLevel => False))--6.65s
+elapsedTime netList (for p from 0 to 10 list hodgeIdealWeightedHomogIsolated(f,1,p,w))--22.78s
 
----------------------------------------------------------------
-
-
---Brieskorn Pham
-L={2,2,2,2,2}
-p=2
-testBrieskornPham(L,p, UseGenLevel => False)
-testBrieskornPham(L,p)
-
-
----------------------------------------------------------------
-
---cusp intersect line
-R=QQ[x,y]
-f=x*(y^2-x^3)
-hodgeOnV(f,1)
-for p from 0 to 2 do print hodgeIdeal(f,1,p)
-
-ll=weightLength(f,1)
-p=1
-m=ll
-adjointIdeal(f)
-
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,1/2,p))--.11s
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,1/2,p, UseGenLevel => False))--1.55s
+elapsedTime netList (for p from 0 to 10 list hodgeIdealWeightedHomogIsolated(f,1/2,p,w))--14.62s
 
 
 
@@ -138,112 +145,91 @@ adjointIdeal(f)
 
 
 --MP Remark 17.13
+
+restart
+load "MixedHodgeModules.m2"
+
 R=QQ[x,y]
 f=x*y*(x+y)
-hodgeOnV(f,1)
-alpha=1
-for p from 0 to 2 do print hodgeIdeal(f,alpha,p)
 
-p=0
-m=1
-adjointIdeal(f)
+elapsedTime hodgeOnV(f,0)--.05s
+elapsedTime hodgeOnV(f,1)--.08s
+elapsedTime hodgeOnV(f,2)--.32s
+
+elapsedTime netList (for p from 0 to 5 list hodgeIdeal(f,1,p))--.03s
+elapsedTime netList (for p from 0 to 5 list hodgeIdeal(f,1,p, UseGenLevel => False))
+
+elapsedTime netList (for p from 0 to 5 list hodgeIdeal(f,1/3,p))--.03s
+elapsedTime netList (for p from 0 to 5 list hodgeIdeal(f,1/3,p, UseGenLevel => False))
+
+elapsedTime netList (for p from 0 to 5 list hodgeIdeal(f,2/3,p))--.04s
+elapsedTime netList (for p from 0 to 1 list hodgeIdeal(f,2/3,p, UseGenLevel => False))
 
 
 ---------------------------------------------------------------
 
 --ordinary m-fold point in PP^{n-1}
 --see MP Example 20.1
-n=3
-m=3
-m <= n/2
-R=QQ[x_1..x_n]
-f=sum apply(toList (1..n), i-> x_i^m)
-alpha=1
-time for p from 0 to 1 do print hodgeIdeal(f,alpha,p)
-2*m-n
 
----------------------------------------------------------------
+restart
+load "MixedHodgeModules.m2"
 
---3x3 determinant
-R=QQ[x_(1,1)..x_(3,3)]
-f=determinant genericMatrix(R,x_(1,1),3,3)
-alpha=1
-elapsedTime hodgeOnV(f,alpha,2)
-elapsedTime hodgeIdeal(f,alpha,2);--10 sec
-elapsedTime hodgeIdeal(f,alpha,3);--281 sec
-elapsedTime hodgeIdeal(f,alpha,4);
+--m\leq n/2 case
+
+elapsedTime netList flatten (for n from 2 to 5 list (
+	for m from 1 to floor(n/2) list (
+		R:=QQ[x_1..x_n];
+                f:=sum apply(toList (1..n), i-> x_i^m);
+                hodgeIdeal(f,1,1)
+	)
+)
+)--.25s
 
 
+-- n/2 <= m <= n-1 case
 
-for p from 0 to 2 do print hodgeIdeal(f,alpha,p)
-hodgeIdeal(f,alpha,3)
+elapsedTime netList flatten (for n from 2 to 3  list (
+	for m from ceiling(n/2) to n-1 list (
+		R:=QQ[x_1..x_n];
+                f:=sum apply(toList (1..n), i-> x_i^m);
+                hodgeIdeal(f,1,1)
+	)
+)
+)--.08s
 
-p=0
-m=1
-testWeightedHodge(f,p,m)--slow
-adjointIdeal(f)
-
-p=1
-compareHodgeIequalHigherMultI(f,p)--equal by Lorincz--Yang
-
-DB=gradedDuBoisComplex(f,1)
-dd^DB
----------------------------------------------------------------
-
-
---3x3 symmetric determinant
-R=QQ[x_1..x_6]
-f=determinant genericSymmetricMatrix(R,x_1,3)
-hodgeOnV(f,1)
-alpha=1
-time for p from 0 to 1 do print hodgeIdeal(f,alpha,p)
-alpha=1/2
-time for p from 0 to 1 do print hodgeIdeal(f,alpha,p)
-
-p=0
-m=1
-testWeightedHodge(f,p,m)--slow, but runs
-adjointIdeal(f)
-
-p=1
-compareHodgeIequalHigherMultI(f,p)--equal by Lorincz--Yang
-
-testHodgeIhigherMultImodf(f,p)
 ---------------------------------------------------------------
 
 --Blanco example 1
+
 restart
 loadPackage "MixedHodgeModules"
+
 R=QQ[x,y]
 f=x^5+y^5+x^2*y^2
-elapsedTime hodgeOnVNew(f,1,1)
-elapsedTime V=hodgeOnV(f,1,1)
 
-for a in keys oo do (
-     for p from 0 to 0 do print {a,hodgeIdeal(f,a,p)})
+elapsedTime V0=hodgeOnV(f,0)--.14s
+elapsedTime V1=hodgeOnV(f,1)--12.41s
 
- 
-p=0
-m=1
-testWeightedHodge(f,p,m)
-adjointIdeal(f)
-
+netList apply(keys V0, k -> {k,hodgeIdeal(f,k,0)})
+netList apply(keys V1, k -> {k,hodgeIdeal(f,k,1)})
 
 
 ---------------------------------------------------------------
 
 --Blanco example 2
+
+restart
+loadPackage "MixedHodgeModules"
+
 R=QQ[x,y]
 lambda=1/2
 f=(y^2-x^3)*(y^2+lambda*x^3)
-V=hodgeOnV(f,1) 
-for a in keys V do (
-     for p from 0 to 0 do print {a,hodgeIdeal(f,a,p)})
 
-p=0
-m=1
-testWeightedHodge(f,p,m)
-adjointIdeal(f)
+elapsedTime V0=hodgeOnV(f,0)--.14s
+elapsedTime V1=hodgeOnV(f,1)--
+
+netList apply(keys V0, k -> {k,hodgeIdeal(f,k,0)})
+netList apply(keys V1, k -> {k,hodgeIdeal(f,k,1)})
 
 
 
@@ -251,134 +237,128 @@ adjointIdeal(f)
 
 
 --Blanco example 3
+
+restart
+loadPackage "MixedHodgeModules"
+
 R=QQ[x,y,z]
 f=x^3+y^3+z^3+x*y*z
 hodgeOnV(f,1)
 
-w={1/3,1/3,1/3}
-p=0
-testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
-testHodgeIdealforWeightedHomog(f,p,w)
+elapsedTime V0=hodgeOnV(f,0)--
+elapsedTime V1=hodgeOnV(f,1)--
 
-adjointIdeal(f)
+netList apply(keys V0, k -> {k,hodgeIdeal(f,k,0)})
+netList apply(keys V1, k -> {k,hodgeIdeal(f,k,1)})
+
+
+---------------------------------------------------------------
+
+--3x3 determinant [PR21]
+
+restart
+load "MixedHodgeModules.m2"
+
+R=QQ[x_(1,1)..x_(3,3)]
+f=determinant genericMatrix(R,x_(1,1),3,3)
+
+elapsedTime hodgeOnV(f,0)--.17s
+elapsedTime hodgeOnV(f,1)--.27s
+elapsedTime hodgeOnV(f,2)--3.67s
+
+
+elapsedTime netList (for p from 0 to 3 list hodgeIdeal(f,1,p))--110.11s
+elapsedTime netList (for p from 0 to 3 list hodgeIdealDet(3,p))--.13s
+
+---------------------------------------------------------------
+
+
+--3x3 symmetric determinant
+R=QQ[x_1..x_6]
+f=determinant genericSymmetricMatrix(R,x_1,3)
+
+elapsedTime hodgeOnV(f,0)--.17s
+elapsedTime hodgeOnV(f,1)--.27s
+elapsedTime hodgeOnV(f,2)--3.67s
+
+
+elapsedTime netList (for p from 0 to 3 list hodgeIdeal(f,1,p))
+
+elapsedTime netList (for p from 0 to 3 list hodgeIdeal(f,1/2,p))
+
 
 
 ---------------------------------------------------------------
 
 --An singularity
 --n\geq 1
+
+restart
+load "MixedHodgeModules.m2"
+
 R=QQ[x,y,z];
 n=2
 f=x^2+y^2+z^(n+1);
-hodgeOnV(f,1)
 w={1/2,1/2,1/(n+1)}
-p=2
-testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
-testHodgeIdealforWeightedHomog(f,p,w)
-testBrieskornPham({2,2,n+1},p)
 
 
-p=0
-m=1
-testWeightedHodge(f,p,m)
-adjointIdeal(f)
 
-
-p=2
-compareHodgeIequalHigherMultI(f,p)
---see also Zhang Conjecture E
-
-testHodgeIhigherMultImodf(f,p)
 
 ---------------------------------------------------------------
 
 
 --Dn singularity
 --n\geq 4
+
+restart
+load "MixedHodgeModules.m2"
+
 R=QQ[x,y,z];
 n=4
 f=x^2+y^(n-1)+y*z^2;
-factorBFunction generalB({f},1_S,Exponent => 2)
-
-hodgeOnV(f,1)
 w={1/2,1/(n-1),(n-2)/(2*(n-1))}
-p=1
-testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
-testHodgeIdealforWeightedHomog(f,p,w)
 
-p=0
-m=1
-testWeightedHodge(f,p,m)
-adjointIdeal(f)
 
-p=2
-compareHodgeIequalHigherMultI(f,p)
---see also Zhang Conjecture E
-
-testHodgeIhigherMultImodf(f,p)
 
 ---------------------------------------------------------------
     
 
-
 --E6 singularity
+
+restart
+load "MixedHodgeModules.m2"
+
 S=QQ[x,y,z]
 f=x^2+y^3+z^4
-hodgeOnV(f,1) 
 w={1/2,1/3,1/4}
-p=1
-testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
-testHodgeIdealforWeightedHomog(f,p,w)
 
-p=0
-m=1
-testWeightedHodge(f,p,m)
-adjointIdeal(f)
 
-testHodgeIhigherMultImodf(f,p)
+
 ---------------------------------------------------------------
     
 
 --E7 singularity
+
+restart
+load "MixedHodgeModules.m2"
+
 S=QQ[x,y,z]
 f=x^2+y^3+y*z^3
-globalBFunction(f)
-factorBFunction oo
-alpha=1
 w={1/2,1/3,2/9}
-p=1
-testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
-testHodgeIdealforWeightedHomog(f,p,w)
 
-p=0
-m=1
-testWeightedHodge(f,p,m)
-adjointIdeal(f)
 
-testHodgeIhigherMultImodf(f,p)
+
 ---------------------------------------------------------------
 
 --E8 singularity
+
+restart
+load "MixedHodgeModules.m2"
+
 S=QQ[x,y,z]
 f=x^2+y^3+z^5
-restart
-loadPackage "MixedHodgeModules"
-elapsedTime hodgeOnVNew(f,1,3)
-elapsedTime V=hodgeOnV(f,1,2)
-globalBFunction(f)
-factorBFunction oo
-alpha=1
 w={1/2,1/3,1/5}
-p=1
-testHodgeIdealforWeightedHomog(f,p,w, UseGenLevel => False)
-testHodgeIdealforWeightedHomog(f,p,w)
 
-p=1
-m=1
-testWeightedHodge(f,p,m)
-adjointIdeal(f)
-
-testHodgeIhigherMultImodf(f,p)
 
 ---------------------------------------------------------------
 
@@ -676,5 +656,38 @@ for p from -2 to 0 do (
     for q from 0 to 2 do (
 	print {p,q,GRFdeRhamH1f(f,p,q)}
 	))
+
+
+---------------------------------------------------------------
+
+
+--Brieskorn Pham
+L={2,2,2,2,2}
+p=2
+testBrieskornPham(L,p, UseGenLevel => False)
+testBrieskornPham(L,p)
+
+
+---------------------------------------------------------------
+
+--cusp intersect line
+R=QQ[x,y]
+f=x*(y^2-x^3)
+hodgeOnV(f,1)
+for p from 0 to 2 do print hodgeIdeal(f,1,p)
+
+ll=weightLength(f,1)
+p=1
+m=ll
+adjointIdeal(f)
+
+
+
+
+
+
+
+
+
 
 

@@ -200,14 +200,9 @@ fTorsion = (f,rList,aa,p) -> (
 koszulSlice = (A,S,p,N) -> (
 --N is a bigraded A-module with bigrade {*,0}
 --Form the Koszul complex, tensor with N, slice the {p,0}-graded piece term-by-
---term as S-modules, and assemble.  Avoids freeResolution(DRN) over A.
+--term as S-modules, and assemble. 
 --
---Optimization: slice presN ONCE per needed de-degree (cached), then
---  (i)  (DRN_i)_{(p,0)} = directSum_k N_{(p-d_{i,k}, 0)} for d_{i,k} the gen
---       degrees of Ktwisted_i;
---  (ii) the differential DRN.dd_i has matrix Ktwisted.dd_i (a small matrix
---       in A); each (l,k) entry a is converted to an S-block by multByASlice.
---Output: complex of S-modules (cokernels).  Callers needing RHom semantics
+--Output: complex of S-modules.  Callers needing RHom 
 --should freeResolution before Hom.
 
     n := numgens S;
@@ -274,11 +269,6 @@ koszulSlice = (A,S,p,N) -> (
     NSliceCache := new MutableHashTable;
     NSlice := q -> NSliceCache#q ??= cokernel slicePresNAt(q);
 
-    --For an A-element a, the QQe-matrix representing multiplication by a on
-    --F_0^N covers sliced at (qSrc, qTgt):
-    --  (F_0^N)_{(qSrc, 0)} -> (F_0^N)_{(qTgt, 0)}.
-    --Block-diagonal across gens of F_0^N (multBy commutes with the gen index).
-    --When a is nonzero, qTgt must equal qSrc + (de-degree of a).
     multByASlice := (a, qSrc, qTgt) -> (
 	srcRks := apply(F0Degs, δ -> monoRkAt(qSrc - δ));
 	tgtRks := apply(F0Degs, δ -> monoRkAt(qTgt - δ));
@@ -408,20 +398,16 @@ deRhamInterval(RingElement, List, ZZ) := options -> (f,B,p) -> (
 
      E := Ematrix(f,idealList);--a matrix with sum rList many rows
      
-
      -- step 3: calculate UV matrix
 
      UV := UVList(f,idealList,rList,aa,p,S);--{UV_(p+aa)..UV_(p+bb-1)}
      --here, UV_j={{U^1,V^1}..{U^n,V^n}}
-
 
      -- step 4: calculate f-torsion matrix
 
      fTors := fTorsion(f,rList,aa,p);--a matrix with sum rList many rows
 
      -- step 5: create A
-
-
 
      e := local e;
      de := local de;
@@ -437,31 +423,24 @@ deRhamInterval(RingElement, List, ZZ) := options -> (f,B,p) -> (
      EA := StoA(E);
      fTorsA := StoA(fTors);
 
-
      --UV stuff
 
      UVA := apply(UV, x -> apply(x, uv -> {StoA(uv_0), StoA(uv_1)}));
 
-
      UVAscaled := apply(UVA, x -> scaleU(x,A));
-
 
      UVMatrix := putTogether(UVAscaled, rList);
 
      presN := EA|UVMatrix|fTorsA;
-
 
      --step 7: create presentation matrix N
      --make sure all matrices are stripped of degrees first
 
      summnds := apply(toList(0..#rList-1), i -> A^{rList_i:{ -aa-p-i,0}});
      
-
      freeMod := directSum(summnds);
 
-
      presNGraded := map(freeMod, ,presN);
-
 
      N := cokernel presNGraded;
 
@@ -527,7 +506,6 @@ intersectionDuBoisComplex = method();
 intersectionDuBoisComplex(RingElement, ZZ) := (f,p) -> (
 --gives a free complex
 --interesting homological degrees 0,-1,..,-n
---our convention makes it the same as gradedDuBoisComplex for RHM
 
     S := ring f;
     n := numgens S;
@@ -535,7 +513,6 @@ intersectionDuBoisComplex(RingElement, ZZ) := (f,p) -> (
     DRp := gradedDeRhamComplex(f,p-n, InputType => WeightedHodgeIdeals);
 
     --koszulSlice returns a complex of S-cokernels, so resolve before Hom
-    --to keep this an RHom computation
     RHomDRp := Hom(freeResolution DRp, S^1);
 
     RHomDRpShift := RHomDRp[-p-1];
@@ -601,16 +578,15 @@ duBoisComplex(RingElement, ZZ) := (f,p) -> (
 
     DRk := gradedDeRhamComplexH1(f,p-n);
 
-    --koszulSlice now returns a complex of S-cokernels, so resolve before Hom
-    --to keep this an RHom computation
+    --koszulSlice eturns a complex of S-cokernels, so resolve before Hom
     RHomDRk := Hom(freeResolution DRk, S^1);
 
     --do the correct cohomological shift
-
     RHomDRkShift := RHomDRk[-p-1];--1 codim
 
     prune RHomDRkShift
     )
+
 
 duBoisComplex(RingElement, ZZ, List) := (f,p,w) -> (
 --WeightedHomogIsolated variant.

@@ -1,24 +1,21 @@
 -- Copyright 2026 by Andras Lorincz and Michael Perlman
 --
 -- V-filtration code.  This file collects the V-filtration computation kernel
--- (hodgeOnV, weightHodgeOnV, monodromyWeightHodgeOnV, HRHCheck, HRHLevel) and
--- every helper they use, built around the identity
---    (Jp : a(s)) \cap R[s]  =  (Jp \cap R[s]) : a(s)        for a(s) \in k[s]
--- which reduces each per-alpha Weyl-algebra elimination to one cached
--- elimination of Jp (= J0) plus commutative colons in Rs = R[s].
+-- (hodgeOnV, weightHodgeOnV, monodromyWeightHodgeOnV, HRHCheck, HRHLevel) 
+--
 --
 -- Sections:
 --   1. Input validation         checkAlpha, checkP
 --   2. Caches                   cachedAnnFs, cachedGlobalBFunction, cachedRhoFp, canonicalAlpha
 --   3. V-filtration setup       prepareVfilt
 --   4. Elimination primitives   DsToRs, cachedJ0
---   5. Polynomial helpers       vSlicePoly, truncateBySDeg
+--   5. truncation helpers       vSlicePoly, truncateBySDeg
 --   6. Basis conversion         monomToShiftedQCoeffs, stdQpolysDesc,
 --                               fromMRsToBf, convertMStoDtBasisBf,
 --                               padDtPowersToP, malgrangeEval, toBfBasis
---   7. Main computations        hodgeOnV (both signatures), weightHodgeOnV,
+--   7. Main computations        hodgeOnV (both methods), weightHodgeOnV,
 --                               monodromyWeightHodgeOnV
---   8. HRH checks               HRHCheck, HRHLevel
+--   8. HRH                      HRHCheck, HRHLevel
 
 
 
@@ -74,10 +71,10 @@ cachedRhoFp = (f, p) -> (
     )
 
 --internal: given alpha in (0,1] and p, return the upper endpoint of alpha's
---equivalence class under semi-continuity of F_p(V^α(B_f)) in α.  Two values
---of alpha that lie in the same interval (α_{i+1}, α_i] produce identical
---hodgeOnV(f, α, p) output, so they share the same canonical representative.
---Breakpoints {α_1, ..., α_{k-1}} ∪ {1} come from roots of the (p+1)-st
+--equivalence class under semi-continuity of F_p(V^{alpha}(B_f)) in alpha.  Two values
+--of alpha that lie in the same interval (alpha_{i+1}, alpha_i] produce identical
+--hodgeOnV(f, alpha, p) output, so they share the same representative.
+--Breakpoints {alpha_1, ..., alpha_{k-1}} \cup {1} come from roots of the (p+1)-st
 --generalized b-function via -root - p; rhoFp is already cached.
 canonicalAlpha = (f, alpha, p) -> (
     alphaQQ := sub(alpha, QQ);
@@ -123,7 +120,7 @@ prepareVfilt = (f, p) -> (
 
 ---------------------------------------------------------------
 ---------------------------------------------------------------
---4. Elimination primitives
+--4. Elimination 
 
 DsToRs = I -> (
 --I is an ideal in Ds=R[dR_0..dR_n,s]--in this order
@@ -145,7 +142,7 @@ DsToRs = I -> (
 
 --cache (Rs, J0) where J0 = Jp \cap R[s], keyed by (f, p).
 --The one expensive Weyl-algebra elimination lives here, and the result
---is reused across all alpha by hodgeOnV / weightHodgeOnV / monodromy.
+--is reused across all alpha by hodgeOnV / weightHodgeOnV.
 
 cachedJ0 = (f, p) -> (
     R := ring f;
@@ -190,7 +187,6 @@ truncateBySDeg = (L, Rs, p) -> (
 -- Given polys in Rs truncated deg_s <= p, return the coefficients in the
 -- shifted basis { t^{-p}, (t dt) t^{-p}, ..., (t^p dt^p) t^{-p} }
 -- i.e. coefficients in the "shifted Q-basis" corresponding to (s+p)...(s+1).
--- need this to go from Mp to Bf
 monomToShiftedQCoeffs = (Htrunc, Rs, p) -> (
     HtruncMat := matrix{Htrunc};
     coeffsS := (coefficients(HtruncMat, Variables => {Rs_0}))_1;

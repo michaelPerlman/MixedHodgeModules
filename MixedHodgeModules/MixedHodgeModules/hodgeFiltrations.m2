@@ -367,10 +367,6 @@ hodgeLevel(RingElement,RingElement,QQ) := (f,g,alpha) -> (
 -- For each n, set S_n = (ZZ/32003)[x_(1,1)..x_(n,n)] and f_n = det of
 -- the generic n x n matrix.  hodgeIdealDet(n, p) returns the p-th
 -- Hodge ideal I_p(f_n) as an ideal in S_n.
---
--- Computation is done over ZZ/32003 throughout (no lift to QQ, no
--- mingens) so that the cost stays in characteristic-p Groebner work.
--- ILambda and the final ideal are cached within a session.
 ---------------------------------------------------------------
 ---------------------------------------------------------------
 
