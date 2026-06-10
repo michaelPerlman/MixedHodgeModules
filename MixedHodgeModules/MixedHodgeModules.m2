@@ -145,6 +145,11 @@ protect symbol WeylAlgebraCache;
 --internal symbol for caching polynomialAnnihilator g on a RingElement (with W from cachedWeylAlgebra)
 protect symbol PolyAnnCache;
 
+--internal symbols for hodgeIdealDet session-global caches (stored on detSessionRing.cache)
+protect symbol DetGenericMatrixRingCache;
+protect symbol ILambdaDetCache;
+protect symbol HodgeIdealDetCache;
+
 
 
 
@@ -210,3 +215,19 @@ check "MixedHodgeModules"
 uninstallPackage "MixedHodgeModules"
 
 
+R=QQ[x,y,z]
+g=1_R
+f=x*y*(x-y)*z^2*(x-z)^4
+
+weightLength(f,1/3)
+
+R=QQ[x,y,z,w]
+f=x^2-y*z
+
+HRHLevel(f)
+
+
+R=QQ[x,y,z,w]
+f=x^6+y^5+x^3*y^3+z^5+w^3
+
+HRHCheck(f,0)

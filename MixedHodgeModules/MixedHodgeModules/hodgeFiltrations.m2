@@ -159,6 +159,11 @@ weightGeqAlpha = (R,w,alpha) -> (
 
 --Acknowledgment: Timothy Duff told me how to code this function
 
+   if #w != numgens R then
+       error("weightGeqAlpha: expected length of w to equal numgens R = ", toString numgens R);
+   if not all(w, wi -> sub(wi, QQ) > 0) then
+       error "weightGeqAlpha: expected all weights to be positive rationals";
+
    n := numgens R;
    sumW := sum(w);
 
@@ -258,7 +263,9 @@ hodgeIdealBrieskornPham = method();
 
 hodgeIdealBrieskornPham(List, ZZ, ZZ) :=
 hodgeIdealBrieskornPham(List, QQ, ZZ) := (L,alpha,p) -> (
---calculates Hodge ideals for x_1^(b_1)+\cdots+x_n^(b_n)
+--calculates Hodge ideals for x_1^(b_1)+\cdots+x_n^(b_n) in an internally
+--created polynomial ring QQ[x_1..x_n].  Use (Ring, List, ZZ/QQ, ZZ) variant
+--to compute in a caller-supplied ring.
 --L is the list {b_1,\cdots,b_n}
 --the b_i's should all be positive
 --p is a non-negative integer
@@ -271,6 +278,23 @@ hodgeIdealBrieskornPham(List, QQ, ZZ) := (L,alpha,p) -> (
     n := #L;
     x := local x;
     R := QQ[x_1..x_n];
+    hodgeIdealBrieskornPham(R, L, alpha, p)
+    )
+
+hodgeIdealBrieskornPham(Ring, List, ZZ, ZZ) :=
+hodgeIdealBrieskornPham(Ring, List, QQ, ZZ) := (R,L,alpha,p) -> (
+--Variant that computes the Brieskorn-Pham Hodge ideal in a caller-supplied
+--polynomial ring R = k[x_1,...,x_n].  Useful when the caller already has
+--names for the variables and wants the output ideal to live in their ring.
+
+    if #L == 0 then error "expected L to be non-empty";
+    if not all(L, b -> instance(b,ZZ) and b >= 1) then
+        error "expected entries of L to be positive integers";
+    if #L != numgens R then
+        error("expected length of L to equal numgens R = ", toString numgens R);
+    checkAlpha alpha;
+    checkP p;
+    n := #L;
     f := sum apply(toList(0..n-1), i -> R_i^(L_i));
     w := apply(L, i -> 1/i);
     hodgeIdealWeightedHomogIsolated(f,alpha,p,w)
@@ -370,13 +394,21 @@ hodgeLevel(RingElement,RingElement,QQ) := (f,g,alpha) -> (
 ---------------------------------------------------------------
 ---------------------------------------------------------------
 
-DetGenericMatrixRingCache = new MutableHashTable;
-ILambdaDetCache = new MutableHashTable;
-HodgeIdealDetCache = new MutableHashTable;
+--stable cache home for hodgeIdealDet's session-global caches.  Cache
+--symbols (DetGenericMatrixRingCache, ILambdaDetCache, HodgeIdealDetCache)
+--are protected in MixedHodgeModules.m2 and used as keys on this ring.
+detSessionRing = QQ[];
+
+detEnsureCache = sym -> (
+    if not detSessionRing.cache#?sym then
+	detSessionRing.cache#sym = new MutableHashTable;
+    detSessionRing.cache#sym
+    )
 
 --Returns Skk = (ZZ/32003)[x_(1,1)..x_(n,n)], cached per n.
-detGenericMatrixRing = n -> DetGenericMatrixRingCache#n ??= (
-    x := getSymbol "x";
+--`local x` keeps the user's global symbol x untouched.
+detGenericMatrixRing = n -> (detEnsureCache DetGenericMatrixRingCache)#n ??= (
+    x := local x;
     (ZZ/32003)[x_(1,1)..x_(n,n)]
     );
 
@@ -400,7 +432,7 @@ detSymbolicPowerParts = (p, d, n) -> (
     );
 
 --ILambda for partition lam (over ZZ/32003), cached by (lam, n).
-ILambdaDet = (lam, n) -> ILambdaDetCache#(lam, n) ??= (
+ILambdaDet = (lam, n) -> (detEnsureCache ILambdaDetCache)#(lam, n) ??= (
     Skk := detGenericMatrixRing n;
     kk := coefficientRing Skk;
     r := local r;
@@ -428,7 +460,7 @@ detSymbolicPower = (p, d, n) -> (
     );
 
 hodgeIdealDet = method();
-hodgeIdealDet(ZZ, ZZ) := (n, p) -> HodgeIdealDetCache#(n, p) ??= (
+hodgeIdealDet(ZZ, ZZ) := (n, p) -> (detEnsureCache HodgeIdealDetCache)#(n, p) ??= (
     powers := apply(toList(1..n - 1), q ->
 	{q, (n - q)*(p - 1) - binomial(n - q, 2)});
     ideals := apply(powers, g -> detSymbolicPower(g_0, g_1, n));

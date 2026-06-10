@@ -693,12 +693,25 @@ monodromyWeightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,ell) -
 HRHCheck = method();
 
 HRHCheck(RingElement, ZZ) := (f,p) -> (
---checks if F_p(Gr^0_V(B_f)) = 0.  Equivalently, the operator N = s+p+1
---annihilates Gr^1_V(B_f), which holds iff -p-1 is either not a root of
---the (p+1)-st generalized b-function or appears with multiplicity 1.
+--checks if F_p(Gr^0_V(B_f)) = 0.  By [DOR, Thm H] and the can/var reduction,
+--this holds iff N = s+p+1 annihilates F_p Gr^1_V(B_f)
 
+    R := ring f;
     rhoFp := cachedRhoFp(f, p);
-    not any(rhoFp, i -> i_0 == -p-1 and i_1 > 1)
+    (Rs, J0) := cachedJ0(f, p);
+
+    -- roots <  -p-1  ->  V^{>1};   roots <= -p-1  ->  V^1
+    aLess := vSlicePoly(select(rhoFp, i -> i_0 <  -p-1), Rs);
+    aLeq  := vSlicePoly(select(rhoFp, i -> i_0 <= -p-1), Rs);
+
+    Igt1 := J0 : ideal aLess;                                    -- lift of V^{>1}
+    kerN := Igt1 : ideal(Rs_0 + p + 1);                          -- lift of ker(N) on Gr^1_V
+    FpV1 := truncateBySDeg(                                       -- R-gens of F_p V^1
+        flatten entries gens gb (J0 : ideal aLeq), Rs, p);
+
+    use R;--restore caller's ring after intermediate Rs creation
+    if #FpV1 == 0 then return true;                              -- F_p Gr^1_V = 0
+    isSubset(ideal FpV1, kerN)                                   -- F_p V^1 subset ker N
     )
 
 

@@ -405,6 +405,8 @@ load "MixedHodgeModules.m2"
 R=QQ[x_1..x_6]
 f=determinant genericSymmetricMatrix(R,x_1,3)
 
+
+
 elapsedTime hodgeOnV(f,0)--.11s
 elapsedTime hodgeOnV(f,1)--.15s
 elapsedTime hodgeOnV(f,2)--.94s
@@ -557,8 +559,14 @@ elapsedTime hodgeOnV(f,0)--.06s
 elapsedTime hodgeOnV(f,1)--.71s
 elapsedTime hodgeOnV(f,2)--
 
-elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,1,p))--
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,1,p))--.51s
 elapsedTime netList (for p from 0 to 10 list hodgeIdealWeightedHomogIsolated(f,1,p,w))--
+
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,1/2,p))--
+elapsedTime netList (for p from 0 to 10 list hodgeIdealWeightedHomogIsolated(f,1/2,p,w))--
+
+elapsedTime netList (for p from 0 to 10 list hodgeIdeal(f,1/18,p))--
+elapsedTime netList (for p from 0 to 10 list hodgeIdealWeightedHomogIsolated(f,1/18,p,w))--
 
 --add other roots
 
@@ -660,3 +668,21 @@ uninstallPackage "MixedHodgeModules"
 
 -------------------------------------
 
+ S = QQ[x_(1,1)..x_(3,2)];
+     M = transpose genericMatrix(S,x_(1,1),2,3);
+     I = minors(2,M);
+
+
+elapsedTime localCohomFW(I,2,0,2+6)
+elapsedTime localCohomFW(I,2,2,2+6)
+
+elapsedTime localCohomFW(I,3,1,2+6+2)
+
+
+S = QQ[x,y,z,w]
+R = QQ[s,t]
+F=map(R,S,{s^3, s^2*t, s*t^2, t^3})
+I=kernel F
+codim I
+
+localCohomFW(I,2,0,2+4)
