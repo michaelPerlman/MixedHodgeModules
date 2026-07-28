@@ -1,21 +1,9 @@
 -- Copyright 2026 by Andras Lorincz and Michael Perlman
 --
 -- V-filtration code.  This file collects the V-filtration computation kernel
--- (hodgeOnV, weightHodgeOnV, monodromyWeightHodgeOnV, HRHCheck, HRHLevel) 
---
---
--- Sections:
---   1. Input validation         checkAlpha, checkP
---   2. Caches                   cachedAnnFs, cachedGlobalBFunction, cachedRhoFp, canonicalAlpha
---   3. V-filtration setup       prepareVfilt
---   4. Elimination primitives   DsToRs, cachedJ0
---   5. truncation helpers       vSlicePoly, truncateBySDeg
---   6. Basis conversion         monomToShiftedQCoeffs, stdQpolysDesc,
---                               fromMRsToBf, convertMStoDtBasisBf,
---                               padDtPowersToP, malgrangeEval, toBfBasis
---   7. Main computations        hodgeOnV (both methods), weightHodgeOnV,
---                               monodromyWeightHodgeOnV
---   8. HRH                      HRHCheck, HRHLevel
+-- (hodgeOnV, weightHodgeOnV, HRHCheck, HRHLevel)
+
+
 
 
 
@@ -71,9 +59,7 @@ cachedRhoFp = (f, p) -> (
     )
 
 --internal: given alpha in (0,1] and p, return the upper endpoint of alpha's
---equivalence class under semi-continuity of F_p(V^{alpha}(B_f)) in alpha.  Two values
---of alpha that lie in the same interval (alpha_{i+1}, alpha_i] produce identical
---hodgeOnV(f, alpha, p) output, so they share the same representative.
+--equivalence class under semi-continuity of F_p(V^{alpha}(B_f)) in alpha.  
 --Breakpoints {alpha_1, ..., alpha_{k-1}} \cup {1} come from roots of the (p+1)-st
 --generalized b-function via -root - p; rhoFp is already cached.
 canonicalAlpha = (f, alpha, p) -> (
@@ -94,8 +80,7 @@ canonicalAlpha = (f, alpha, p) -> (
 ---------------------------------------------------------------
 --3. V-filtration setup
 
---shared V-filtration setup used by hodgeOnV, weightHodgeOnV,
---monodromyWeightHodgeOnV, and HRHCheck.
+--shared V-filtration setup used by hodgeOnV, weightHodgeOnV, and HRHCheck.
 --Returns the common quantities derived from f and p:
 --  Ds    : Weyl algebra D[s] containing AnnFs(f)
 --  ss    : the s-variable, Ds_(numgens Ds - 1)
@@ -141,7 +126,7 @@ DsToRs = I -> (
 
 
 --cache (Rs, J0) where J0 = Jp \cap R[s], keyed by (f, p).
---The one expensive Weyl-algebra elimination lives here, and the result
+--The expensive Weyl-algebra elimination lives here, and the result
 --is reused across all alpha by hodgeOnV / weightHodgeOnV.
 
 cachedJ0 = (f, p) -> (
@@ -554,138 +539,6 @@ weightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,m) -> (
 
 
 ---------------------------------------------------------------
-
-monodromyWeightHodgeOnV = method(Options => {UseBasis => dtBasis})
-
---use "UseBasis => sBasis" to get s-basis (will have denominators)
-
-monodromyWeightHodgeOnV(RingElement, ZZ, ZZ, ZZ) :=
-monodromyWeightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,ell) -> (
---alpha is a rational number in (0,1]
---p is a non-negative integer
---ell is the monodromy weight index, centered at 0
---calculates W(N)_ell F_p Gr^alpha_V(B_f), lifted to F_p V^alpha(B_f)
-
-    checkAlpha alpha;
-    checkP p;
-    if ell < 0 then error "expected input weight to be a non-negative integer";
-    if (options.UseBasis != dtBasis) and  (options.UseBasis != sBasis) then error "invalid UseBasis";
-
-    ------------------------------------------------------------------------
-    -- Steps 1-2. Shared V-filtration setup: Ds, ss, DsF, rhoFp, Jp, M
-    ------------------------------------------------------------------------
-
-    negAlphaQQ := -sub(alpha,QQ);
-    (Ds, ss, DsF, rhoFp, Jp, M) := prepareVfilt(f, p);
-
-    ------------------------------------------------------------------------
-    -- Step 3. Compute eigenspace kernels for V^>alpha and V^alpha
-    ------------------------------------------------------------------------
-
-    sLamMapsLess := {};
-    sLamMapsAlpha := {};
-
-    for i in rhoFp do (
-        lam := sub(i_0, Ds);
-        mult := i_1;
-        a := (ss - lam)^mult;
-
-        if i_0 < negAlphaQQ-p then (
-            sLamMapsLess = append(sLamMapsLess, a)
-        )
-        else if i_0 == negAlphaQQ-p then (
-            sLamMapsAlpha = append(sLamMapsAlpha, a)
-        );
-    );
-    -- entries store (ss - lam)^mult; kernels via colon ideal
-
-    Galpha := ideal flatten apply(sLamMapsLess, a -> flatten entries gens (Jp : ideal a));
-    Klams := ideal flatten apply(sLamMapsAlpha, a -> flatten entries gens (Jp : ideal a));
-
-    preVgAlpha := Galpha;              -- corresponds to V^(>alpha)
-    preVAlpha := Galpha + Klams;       -- corresponds to V^alpha
-
-    ------------------------------------------------------------------------
-    -- Step 4. Monodromy operator N = s + alpha
-    -- In the shifted M-coordinate, this is ss + p + alpha
-    ------------------------------------------------------------------------
-
-    Nop := ss + p + alpha;
-
-    ------------------------------------------------------------------------
-    -- Step 5. Nilpotence index at alpha
-    ------------------------------------------------------------------------
-
-    nilIndex := 0;
-
-    for i in rhoFp do (
-        if i_0 == negAlphaQQ-p then nilIndex = i_1;
-    );
-
-    ------------------------------------------------------------------------
-    -- Step 6. Helper functions for lifted kernels and images
-    --
-    -- kerLift(r) = lift of ker(N^r) inside V^alpha/V^>alpha
-    -- imLift(b)  = lift of im(N^b) inside V^alpha/V^>alpha
-    ------------------------------------------------------------------------
-
-    preVgAlpha = sub(preVgAlpha, Ds);
-    preVAlpha = sub(preVAlpha, Ds);
-
-    kerLift := r -> (
-        if r <= 0 then ideal(0_Ds)
-        else intersect(preVAlpha, ((preVgAlpha + Jp) : ideal(Nop^r)))
-    );
-
-    imLift := b -> (
-        if b == 0 then preVAlpha
-        else (
-            ideal flatten apply(flatten entries gens preVAlpha, g -> Nop^b*g)
-        ) + preVgAlpha + Jp
-    );
-
-    ------------------------------------------------------------------------
-    -- Step 7. Compute W(N)_ell, centered at 0:
-    --
-    -- W(N)_ell = sum_{b >= 0, ell+b >= 0}
-    --            ker(N^(ell+b+1)) cap im(N^b)
-    ------------------------------------------------------------------------
-
-    Wlift := preVgAlpha + Jp;
-
-    lowerB := max(0,-ell);
-    upperB := nilIndex;
-
-    if lowerB <= upperB then (
-        for b from lowerB to upperB do (
-            r := ell + b + 1;
-            summand := intersect(kerLift(r), imLift(b));
-            Wlift = Wlift + summand;
-        );
-    );
-
-    K := intersect(preVAlpha, Wlift);
-
-    ------------------------------------------------------------------------
-    -- Step 8. Eliminate, truncate, and change coordinates
-    ------------------------------------------------------------------------
-
-    Halpha := DsToRs(K);
-    Rs := ring Halpha_0;
-    WFVpM := select(Halpha, g -> degree(Rs_0, g) <= p);
-    -- this is W(N)_ell F_p Gr^alpha_V in the M-coordinate, lifted to V^alpha
-
-    WFVpBf := WFVpM;
-
-    if options.UseBasis == sBasis then WFVpBf = fromMRsToBf(WFVpBf, f, Rs,p);
-    if options.UseBasis == dtBasis then WFVpBf = convertMStoDtBasisBf(WFVpBf, f, Rs, p);
-
-    use ring f;--restore caller's ring after intermediate Rs / RDt / Ds creation
-    WFVpBf
-    )
-
-
----------------------------------------------------------------
 ---------------------------------------------------------------
 --8. HRH checks
 
@@ -693,8 +546,8 @@ monodromyWeightHodgeOnV(RingElement, QQ, ZZ, ZZ) := options -> (f,alpha,p,ell) -
 HRHCheck = method();
 
 HRHCheck(RingElement, ZZ) := (f,p) -> (
---checks if F_p(Gr^0_V(B_f)) = 0.  By [DOR, Thm H] and the can/var reduction,
---this holds iff N = s+p+1 annihilates F_p Gr^1_V(B_f)
+--checks if F_p(Gr^0_V(B_f)) = 0 [DOR, Thm H].  
+--this holds iff N = s+1 annihilates F_p Gr^1_V(B_f)
 
     R := ring f;
     rhoFp := cachedRhoFp(f, p);

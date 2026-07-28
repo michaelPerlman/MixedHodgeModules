@@ -33,7 +33,6 @@ doc ///
      discussed above using the module $V^{\alpha}(B_f)$.
 
      This package has functionality for calculating the Hodge filtration $F_{\bullet}$ on $V^{\alpha}(B_f)$,
-     as well as the monodromy weight filtration on a Hodge filtered piece $F_p(\operatorname{Gr}_V^{\alpha}(B_f))$,
      using algorithms based on  [Bla22]. As applications, this package computes the Hodge ideals, weighted Hodge ideals,
      and higher multiplier ideals for $\mathbb{Q}$-divisors, as well as related invariants including the generation
      level of the Hodge filtration on $S_ff^{-\alpha}$ and the HRH level.
@@ -51,7 +50,6 @@ doc ///
 	@TOH "hodgeOnV"@
 	@TOH "HRHCheck"@
 	@TOH "HRHLevel"@
-        @TOH "monodromyWeightHodgeOnV"@
 	@TOH "weightHodgeOnV"@
 
       :Hodge Filtrations
@@ -72,7 +70,6 @@ doc ///
       :Weight Filtrations
 	@TOH "adjointIdeal"@
 	@TOH "localCohomFW"@
-	@TOH "monodromyWeightHodgeOnV"@
 	@TOH "nuAlpha"@
 	@TOH "pFunction"@
 	@TOH "weightCheck"@
@@ -828,7 +825,6 @@ doc ///
      a submodule of $S_f[s]f^s$, which generally will have denominators.
   SeeAlso
      hodgeOnV
-     monodromyWeightHodgeOnV
      weightHodgeOnV
      dtBasis
      sBasis
@@ -995,87 +991,6 @@ doc ///
 
 doc ///
   Key
-    monodromyWeightHodgeOnV
-    (monodromyWeightHodgeOnV, RingElement, QQ, ZZ, ZZ)
-    (monodromyWeightHodgeOnV, RingElement, ZZ, ZZ, ZZ)
-  Headline
-    compute the monodromy weight filtration on $F_p(\operatorname{Gr}^{\alpha}_V(B_f))$
-  Usage
-    L = monodromyWeightHodgeOnV(f,alphaQQ,p,m)
-    L = monodromyWeightHodgeOnV(f,alphaQQ,p,m,UseBasis => sBasis)
-    L = monodromyWeightHodgeOnV(f,alphaZZ,p,m)
-    L = monodromyWeightHodgeOnV(f,alphaZZ,p,m,UseBasis => sBasis)
-  Inputs
-    f: RingElement
-     a polynomial with rational coefficients
-    alphaQQ: QQ
-     a rational number in $(0,1]$. May also be given as an integer.
-    alphaZZ: ZZ
-     the integer $1$.
-    p: ZZ
-     a non-negative integer
-    m: ZZ
-     a non-negative integer indexing the monodromy weight filtration (centered at $0$)
-  Outputs
-    L: List
-     a list representing an $S$-basis for a lift of $F_p(W(N)_m(\operatorname{Gr}^{\alpha}_V(B_f)))$ to $F_p(V^{\alpha}(B_f))$
-  Description
-    Text
-     Let $s=-\partial_t t$. Multiplication by $(s+\alpha)$ is a nilpotent operator on $\operatorname{Gr}^{\alpha}_V(B_f)$.
-     Writing $N = s+\alpha$, we obtain the monodromy weight filtration $W(N)_\bullet$ on $\operatorname{Gr}^{\alpha}_V(B_f)$,
-     centered at $0$, given by
-    Text
-     $W(N)_m = \sum_{i+j=m} \operatorname{ker}(N^{i+1}) \cap \operatorname{im}(N^{-j})$.
-    Text
-     This is an increasing filtration by $\mathcal{D}$-modules. The function computes a lift of
-     $F_p(W(N)_m(\operatorname{Gr}^{\alpha}_V(B_f)))$ to a submodule of $F_p(V^{\alpha}(B_f))$.
-     The output is an $S$-basis for a submodule of $F_p(V^{\alpha}(B_f))$ whose image in
-     $\operatorname{Gr}^{\alpha}_V(B_f)$ is equal to $F_p(W(N)_m(\operatorname{Gr}^{\alpha}_V(B_f)))$.
-     In particular, the output always contains $F_p(V^{>\alpha}(B_f))$, and equality with
-     $F_p(V^{>\alpha}(B_f))$ corresponds to the case when
-     $F_p(W(N)_m(\operatorname{Gr}^{\alpha}_V(B_f))) = 0$.
-    Text
-     For the $\mathsf{A}_1$ singularity, the output stabilizes immediately.
-    Example
-     S = QQ[x,y,z];
-     f = y^2-x*z;
-     monodromyWeightHodgeOnV(f,1,1,0)
-     monodromyWeightHodgeOnV(f,1,1,1)
-    Text
-     For the $2\times 2$ determinant, one sees a jump between $m=0$ and $m=1$.
-    Example
-     S = QQ[x,y,z,w];
-     f = x*w-y*z;
-     monodromyWeightHodgeOnV(f,1,1,0)
-     monodromyWeightHodgeOnV(f,1,1,1)
-  SeeAlso
-     hodgeOnV
-     weightHodgeOnV
-     weightedHodgeIdeal
-///
-
-doc ///
-  Key
-    [monodromyWeightHodgeOnV, UseBasis]
-  Headline
-   toggle between $\partial_t$-basis of $V^{\alpha}(B_f)$ and $s$ basis inside $S_f[s]f^s$
-  Description
-    Text
-     The Malgrange isomorphism gives an identification between $V^{\alpha}(\Gamma_+(S_f))$ and $S_f[s]f^s$.
-     If UseBasis is set to dtBasis (default), then outputs an $S$-basis of $V^{\alpha}(B_f) in terms
-     of powers of $\partial_t$. If UseBasis is set to sBasis, then outputs an $S$-basis of $V^{\alpha}(B_f) as
-     a submodule of $S_f[s]f^s$, which generally will have denominators.
-  SeeAlso
-     hodgeOnV
-     monodromyWeightHodgeOnV
-     weightHodgeOnV
-     dtBasis
-     sBasis
-     UseBasis
-///
-
-doc ///
-  Key
     nuAlpha
     (nuAlpha, RingElement, RingElement, QQ)
     (nuAlpha, RingElement, RingElement, ZZ)
@@ -1103,7 +1018,14 @@ doc ///
     N: ZZ
   Description
     Text
-     A description of what
+      The $k$-th generalized Bernstein-Sato polynomial $b_k(s)$ of a function g with respect
+      to f is given by the minimal monic polynomial in $\mathbb{Q}[s]$ satisfying an equation of the
+      form $P(s) g f^{s+k} = b_k(s) f^s$ with $P(s) \in \mathcal{D}[s]$, and agrees, up to a rescaling,
+      with the usual generalized Bernstein-Sato polynomial of $g$ with respect to $f^k$.
+      By [LY26+], given an $\alpha \in \mathbb{Q}$, the multiplicity of $-\alpha$ as a root of
+      $b_k(s)$ stabilizes as $k \to \infty$, and is defined to be $\nu_{\alpha}$. One can
+      also define these numbers using pFunctions. Note that $\nu_{\alpha}$ also gives
+      an upper bound on the weight level of $g f^{-\alpha}$.
   SeeAlso
      pFunction
      weightLength
@@ -1150,7 +1072,11 @@ doc ///
      a univariate polynomial
   Description
     Text
-     A description of what 
+      The p-function $p(s)$ is the monic polynomial of minimal degree in $\mathbb{Q}[s]$ such that $p(s) g f^s
+      \in V^{\alpha}$, where $V^{\bullet}$ denotes the Kashiwara--Malgrange $V$-filtration of $B_f$ with
+      respect to $f$. By [LY26+], for $\gamma<\alpha$ the multiplicity of $-\gamma \in \mathbb{Q}$ as a root
+      of $p(s)$ agrees with nuAlpha(f,g, $\gamma$). Note that the degree of $p(s)$ also gives an
+      upper bound on the Hodge level of $g f^{-\alpha}$. 
   SeeAlso
      nuAlpha
      
@@ -1496,7 +1422,6 @@ doc ///
      f = y^2-x*z;
      weightHodgeOnV(f,1/2,1,1, UseBasis => sBasis)
   SeeAlso
-     monodromyWeightHodgeOnV
      weightedHodgeIdeal
      weightLength
      hodgeOnV
@@ -1900,13 +1825,12 @@ doc ///
     UseBasis => dtBasis
   Description
     Text
-      When UseBasis is set to dtBasis, functions such as hodgeOnV, weightHodgeOnV, and monodromyWeightHodgeOnV.
+      When UseBasis is set to dtBasis, functions such as hodgeOnV and weightHodgeOnV
       return bases expressed in a polynomial ring S[dt] (this is the default).
   SeeAlso
     UseBasis
     sBasis
     hodgeOnV
-    monodromyWeightHodgeOnV
     weightHodgeOnV
 ///
 
@@ -2013,13 +1937,12 @@ doc ///
     UseBasis => sBasis
   Description
     Text
-      When UseBasis is set to sBasis, functions such as hodgeOnV, weightHodgeOnV, and monodromyWeightHodgeOnV.
+      When UseBasis is set to sBasis, functions such as hodgeOnV and weightHodgeOnV
       return bases in the s-variable model S_f[s]f^s, which may introduce denominators.
   SeeAlso
     UseBasis
     dtBasis
     hodgeOnV
-    monodromyWeightHodgeOnV
     weightHodgeOnV
 ///
 
@@ -2051,10 +1974,9 @@ doc ///
     UseBasis => sBasis
   Description
     Text
-      This option is supported by hodgeOnV, weightHodgeOnV, and monodromyWeightHodgeOnV.
+      This option is supported by hodgeOnV and weightHodgeOnV.
   SeeAlso
     hodgeOnV
-    monodromyWeightHodgeOnV
     weightHodgeOnV
     dtBasis
     sBasis

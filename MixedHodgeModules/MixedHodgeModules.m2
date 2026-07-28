@@ -67,7 +67,6 @@ export {
     "HRHLevel",
     "IHmoduleAdjoint",
     "localCohomFW",
-    "monodromyWeightHodgeOnV",
     "nuAlpha",
     "pFunction",
     "weightCheck",
@@ -156,7 +155,7 @@ protect symbol HodgeIdealDetCache;
 
 ---------------------------------------------------------------
 --V-filtration computation kernel and helpers:
---hodgeOnV, weightHodgeOnV, monodromyWeightHodgeOnV, HRHCheck, HRHLevel
+--hodgeOnV, weightHodgeOnV, HRHCheck, HRHLevel
 ---------------------------------------------------------------
 load "./MixedHodgeModules/vFiltrations.m2"
 

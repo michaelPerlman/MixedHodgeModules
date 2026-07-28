@@ -26,7 +26,6 @@ TEST ///
  assert(HRHCheck(f,2));
  assert(HRHLevel(f) == "rational homology manifold");
  assert(sub((weightHodgeOnV(f,1,0,0))_0,R) == (R_1^2+R_0));
- assert(#monodromyWeightHodgeOnV(f,1,1,0) == 2);
 ///
 
 ---------------------------------------------------------------
@@ -40,7 +39,6 @@ TEST ///
  assert( m == 1_(ring m));
  assert(not HRHCheck(f,0));
  assert(HRHLevel(f) == -1);
- assert(#monodromyWeightHodgeOnV(f,1,1,0) == 7);
  ///
 
  ---------------------------------------------------------------
@@ -55,7 +53,6 @@ TEST ///
   assert(HRHCheck(f,0));
   assert(not HRHCheck(f,1));
   assert(HRHLevel(f) == 0);
-  assert(#monodromyWeightHodgeOnV(f,1,1,0) == 5);
  ///
 
 ---------------------------------------------------------------
@@ -65,8 +62,6 @@ TEST ///
   f = x*z-y^2;
   assert(keys(hodgeOnV(f,0)) == {1_QQ});
   assert(keys hodgeOnV(f,1) == {1_QQ,1/2});
-  assert(#monodromyWeightHodgeOnV(f,1/2,1,0) == 2);
-  assert(#monodromyWeightHodgeOnV(f,1,1,0) == 4);
   assert(HRHCheck(f,2));
   assert(HRHLevel(f) == "rational homology manifold");
  ///
@@ -581,11 +576,6 @@ TEST ///
   R = QQ[x,y];
   f = y^2 + x;
   g = 1_R;
-
-  -- monodromyWeightHodgeOnV: alpha and p validation
-  assert(try (monodromyWeightHodgeOnV(f,0,0,0);   false) else true);  -- alpha = 0
-  assert(try (monodromyWeightHodgeOnV(f,3/2,0,0); false) else true);  -- alpha > 1
-  assert(try (monodromyWeightHodgeOnV(f,1,-1,0);  false) else true);  -- p < 0
 
   -- nuAlpha: alpha > 0
   assert(try (nuAlpha(f,g,0);  false) else true);

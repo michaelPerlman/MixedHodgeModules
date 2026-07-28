@@ -1,7 +1,7 @@
 --Copyright 2026 by Andras Lorincz and Michael Perlman
 --
 -- Weighted-Hodge-ideal code and related downstream invariants.  The V-filtration
--- helpers and the core weightHodgeOnV / monodromyWeightHodgeOnV computations
+-- helpers and the core weightHodgeOnV computations
 -- live in vFiltrations.m2.
 
 
