@@ -394,7 +394,7 @@ hodgeLevel(RingElement,RingElement,QQ) := (f,g,alpha) -> (
 ---------------------------------------------------------------
 ---------------------------------------------------------------
 
---stable cache home for hodgeIdealDet's session-global caches.  Cache
+--cache for hodgeIdealDet's session-global caches.  Cache
 --symbols (DetGenericMatrixRingCache, ILambdaDetCache, HodgeIdealDetCache)
 --are protected in MixedHodgeModules.m2 and used as keys on this ring.
 detSessionRing = QQ[];
@@ -460,6 +460,7 @@ detSymbolicPower = (p, d, n) -> (
     );
 
 hodgeIdealDet = method();
+--uses formula from Perlman-Raicu
 hodgeIdealDet(ZZ, ZZ) := (n, p) -> (detEnsureCache HodgeIdealDetCache)#(n, p) ??= (
     powers := apply(toList(1..n - 1), q ->
 	{q, (n - q)*(p - 1) - binomial(n - q, 2)});

@@ -344,7 +344,7 @@ translateToAlpha = (alpha,beta) -> (
  
  
 pFunction = method(Options => {NuMethod => ByAnnFs});
---to do: modify so don't compute high nus
+
 
 --user may select NuMethod using syntax above
 --default is ByAnnFs

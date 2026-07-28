@@ -1,6 +1,6 @@
 -- Copyright 2026 by Andras Lorincz and Michael Perlman
 --
--- V-filtration code.  This file collects the V-filtration computation kernel
+-- V-filtration code.  
 -- (hodgeOnV, weightHodgeOnV, HRHCheck, HRHLevel)
 
 

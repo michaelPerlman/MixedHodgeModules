@@ -8,33 +8,15 @@
 
 
 --to do:
---(1) fill in descriptions and examples in documentation for nuAlpha, pFunction (and their strategies)
---(2) add examples in doc of other strategies for weightLength
---(3) create tests for every function and add to tests.m2
+--(1) Fill in examples for p-function and nuAlpha, and mention strategies
 
-
-
---change/add soon:
---(1) allow alpha as a parameter in hodgeIdeal (work over QQ(alpha) where alpha is variable)?
---(2) There is an old comment on pFunction "to do: modify so don't compute high nus". 
-
-
-
---to add eventually?:
---(1) use minimal exponent formula for generation level as optional strategy
---in Hodge ideal?
---(2) allow user to input generation level as optional strategy?
---(3) get generation level on IC_f using weighted Hodge ideal?
---(4) Bernstein--Sato polynomials on singular ambient varieties X (Dirks) and microlocal b-functions on
--- singular ambient varieties?
---(5) nearby cycles and vanishing cycles? vanishing cycles are implicitly calculated in HRHCheck
 
 
 
 newPackage(
     "MixedHodgeModules",
     Version => "1.0",
-    Date => "May 22, 2026",
+    Date => "July 28, 2026",
     Headline => "Calculations involving Hodge and weight filtrations on localizations",
     Authors => {{ Name => "András C. Lőrincz",  Email => "lorincz@ou.edu",  HomePage => "https://math.ou.edu/~alorincz/"},
 	        { Name => "Michael Perlman",    Email => "mperlman@ua.edu", HomePage => "https://sites.google.com/view/michaelperlman/home"}},
@@ -65,7 +47,6 @@ export {
     "hodgeOnV",
     "HRHCheck",
     "HRHLevel",
-    "IHmoduleAdjoint",
     "localCohomFW",
     "nuAlpha",
     "pFunction",
@@ -213,20 +194,3 @@ viewHelp MixedHodgeModules
 check "MixedHodgeModules"
 uninstallPackage "MixedHodgeModules"
 
-
-R=QQ[x,y,z]
-g=1_R
-f=x*y*(x-y)*z^2*(x-z)^4
-
-weightLength(f,1/3)
-
-R=QQ[x,y,z,w]
-f=x^2-y*z
-
-HRHLevel(f)
-
-
-R=QQ[x,y,z,w]
-f=x^6+y^5+x^3*y^3+z^5+w^3
-
-HRHCheck(f,0)

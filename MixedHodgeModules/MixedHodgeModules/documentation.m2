@@ -913,38 +913,6 @@ doc ///
     See [DOR] and [PP25] at @TO "Works Cited"@.
 ///
 
-doc ///
-  Key
-    IHmoduleAdjoint
-    (IHmoduleAdjoint, RingElement)
-  Headline
-    construct a presentation of the intersection cohomology $\mathcal{D}$-module using the adjoint ideal
-  Usage
-    M = IHmoduleAdjoint(f)
-  Inputs
-    f: RingElement
-     a polynomial with rational coefficients
-  Outputs
-    M: Module
-     a left module over the Weyl algebra of ring f, equal to D^r/K
-  Description
-    Text
-     This function constructs a $\mathcal{D}$-module presentation of the intersection cohomology module associated to the
-     hypersurface $f$ using generators of adjointIdeal(f).
-    Example
-     S = QQ[x,y];
-     f = x^2+y^3;
-     IHmoduleAdjoint(f)
-    Text
-     When $f$ has rational singularities, this presents the intersection cohomology module as a cyclic module.
-    Example
-     S = QQ[x,y,z,w];
-     f = x*w-y*z;
-     IHmoduleAdjoint(f)
-  SeeAlso
-     adjointIdeal
-     weightedHodgeIdeal
-///
 
 doc ///
   Key
@@ -1804,7 +1772,7 @@ doc ///
   Headline
     option value for LengthStrategy computing weightLength via weightLevel
   Usage
-    Strategy => ByWeightLevel
+    LengthStrategy => ByWeightLevel
   Description
     Text
       When LengthStrategy is set to ByWeightLevel, weightLength is computed by calling weightLevel at a
