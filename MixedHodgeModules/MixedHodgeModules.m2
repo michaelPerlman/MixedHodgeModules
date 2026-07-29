@@ -16,7 +16,7 @@
 newPackage(
     "MixedHodgeModules",
     Version => "1.0",
-    Date => "July 28, 2026",
+    Date => "July 29, 2026",
     Headline => "Calculations involving Hodge and weight filtrations on localizations",
     Authors => {{ Name => "András C. Lőrincz",  Email => "lorincz@ou.edu",  HomePage => "https://math.ou.edu/~alorincz/"},
 	        { Name => "Michael Perlman",    Email => "mperlman@ua.edu", HomePage => "https://sites.google.com/view/michaelperlman/home"}},
