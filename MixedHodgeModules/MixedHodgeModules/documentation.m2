@@ -994,8 +994,12 @@ doc ///
       $b_k(s)$ stabilizes as $k \to \infty$, and is defined to be $\nu_{\alpha}$. One can
       also define these numbers using pFunctions. Note that $\nu_{\alpha}$ also gives
       an upper bound on the weight level of $g f^{-\alpha}$.
+
+      There are three strategies for nuAlpha: Malgrange (only for g=1_S), PowerBFunction, and ByAnnFs (default).
+      Strategy can be selected using @TO "NuMethod"@.
   SeeAlso
      pFunction
+     NuMethod
      weightLength
      
   References
@@ -1045,8 +1049,12 @@ doc ///
       respect to $f$. By [LY26+], for $\gamma<\alpha$ the multiplicity of $-\gamma \in \mathbb{Q}$ as a root
       of $p(s)$ agrees with nuAlpha(f,g, $\gamma$). Note that the degree of $p(s)$ also gives an
       upper bound on the Hodge level of $g f^{-\alpha}$. 
+
+      There are three strategies for pFunction: Malgrange (only for g=1_S), PowerBFunction, and ByAnnFs (default).
+      Strategy can be selected using @TO "NuMethod"@.
   SeeAlso
      nuAlpha
+     NuMethod
      
   References
      See [LY26+] at @TO "Works Cited"@.
@@ -1165,6 +1173,10 @@ doc ///
      for which the graded piece $\operatorname{Gr}^W_{m+n}(S_ff^{-\alpha})$ is nonzero.
      In this setup, the smallest weight $m$ such that $W_{m+n}(S_ff^{-\alpha})$ is nonzero is $m=0$.
 
+     There are two strategies for weightLength: ByNuAlpha (default) and ByWeightLevel.
+     The strategy can be chosen using @TO LengthStrategy@. If ByNuAlpha is selected, then
+     the user can select @TO NuMethod@.
+
      When $D=V(f)$ is a rational homology manifold and $\alpha=1$, the weight length is one.
     Example
      S = QQ[x,y,z];
@@ -1184,6 +1196,8 @@ doc ///
      alpha = 5/6;
      weightLength(f,alpha)       
   SeeAlso
+     LengthStrategy
+     NuMethod
      weightCheck
      weightLevel
      weightedHodgeIdeal
