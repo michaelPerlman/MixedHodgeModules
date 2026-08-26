@@ -1480,15 +1480,30 @@ doc ///
      DB2 = duBoisComplex(f,2)
      prune HH_0(DB2)
     Text
-     The following example shows that the cusp does not have Du Bois singularities, as $H^1(\underline{\Omega}^0_D)\neq 0$.
+     For the cusp, the higher cohomology of the Du Bois complexes vanishes.  However,
+     $\mathcal H^0(\underline{\Omega}^0_D)$ is the normalization module, so the natural map
+     $\mathcal O_D\to\mathcal H^0(\underline{\Omega}^0_D)$ is not an isomorphism and the cusp is not Du Bois.
     Example
      S = QQ[x,y];
      f = x^2+y^3;
      DB0 = duBoisComplex(f,0)
+     prune HH_0(DB0)
      prune HH_(-1)(DB0)
      DB1 = duBoisComplex(f,1)
      prune HH_(-1)(DB1)
     Text
+     The surface $D=V(x^2+y^3+z^7)$ is not pre $0$-Du Bois, since
+     $\mathcal H^1(\underline{\Omega}^0_D)$ is nonzero.
+    Example
+     S = QQ[x,y,z];
+     f = x^2+y^3+z^7;
+     DB0 = duBoisComplex(f,0)
+     prune HH_(-1)(DB0)
+     isPreDuBois(f,0)
+    Text
+     In fact, $\mathcal H^1(\underline{\Omega}^0_D)\simeq S/(x,y,z)$.
+     Thus, this cohomology module is supported at the origin.
+
      If $f$ is weighted-homogeneous of weight $1$ with respect to a list of
      weights $w$ and has an isolated singularity at the origin, passing $w$
      uses @TO "hodgeIdealWeightedHomogIsolated"@ internally, which is
@@ -1656,11 +1671,13 @@ doc ///
      isPreDuBois(f,1)
      isPreDuBois(f,2)
     Text
-     On the other hand, the cusp is not pre $0$-Du Bois:
+     The cusp is pre $1$-Du Bois, even though it is not Du Bois: its failure to be
+     Du Bois occurs in cohomological degree zero.
     Example
      S = QQ[x,y];
      f = x^2+y^3;
      isPreDuBois(f,0)
+     isPreDuBois(f,1)
     Text
      When $f$ is weighted-homogeneous of weight $1$ with respect to weights $w$
      and has an isolated singularity at the origin, passing $w$ uses

@@ -33,11 +33,12 @@ TEST ///
   assert(isPreDuBois(y^2 - x, 1));
 ///
 
--- isPreDuBois: cusp is NOT pre-0-Du Bois
+-- A reduced curve is pre-p-Du Bois: the cusp fails to be Du Bois because
+-- O_D -> H^0(Omega_D^0) is not an isomorphism, not because of higher cohomology.
 TEST ///
   R = QQ[a,b];
-  assert(not isPreDuBois(a^2 + b^3, 0));
-  assert(not isPreDuBois(a^2 + b^3, 1));
+  assert(isPreDuBois(a^2 + b^3, 0));
+  assert(isPreDuBois(a^2 + b^3, 1));
 ///
 
 
@@ -108,13 +109,17 @@ TEST ///
   assert(prune HH_(-1)(DB) == 0);     -- Du Bois (smooth)
 ///
 
--- duBoisComplex on the cusp: not Du Bois (HH_{-1} nonzero)
+-- duBoisComplex on the cusp: the higher cohomology vanishes, while HH_0
+-- is the normalization module (and is strictly larger than S/(f)).
 TEST ///
   R = QQ[a,b];
   f = a^2 + b^3;
   DB = duBoisComplex(f, 0);
-  assert(prune HH_(-1)(DB) != 0);
-  assert(dim prune HH_(-1)(DB) == 0);  -- 0-dimensional (finite-length) module
+  assert(prune HH_(-1)(DB) == 0);
+  cuspNormalization = cokernel matrix{{R_1,-R_0},{R_0,R_1^2}};
+  assert(prune HH_0(DB) == cuspNormalization);
+  DB1 = duBoisComplex(f, 1);
+  assert(prune HH_(-1)(DB1) == 0);
 ///
 
 
@@ -132,9 +137,11 @@ TEST ///
   R = QQ[a,b];
   f = a^2 + b^3;
   IDB = intersectionDuBoisComplex(f, 0);
-  -- HH_(-1) is nonzero (0-dimensional)
-  assert(prune HH_(-1)(IDB) != 0);
-  assert(dim prune HH_0(IDB) == 1);
+  assert(prune HH_(-1)(IDB) == 0);
+  cuspNormalization = cokernel matrix{{R_1,-R_0},{R_0,R_1^2}};
+  assert(prune HH_0(IDB) == cuspNormalization);
+  IDB1 = intersectionDuBoisComplex(f, 1);
+  assert(prune HH_(-1)(IDB1) == 0);
 ///
 
 
@@ -849,5 +856,3 @@ TEST ///
   assert(instance(weightCheck(f,g,3/2,0), Boolean));
   assert(instance(weightLevel(f,g,3/2),   ZZ));
 ///
-
-

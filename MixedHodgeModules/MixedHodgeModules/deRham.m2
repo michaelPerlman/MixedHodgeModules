@@ -8,9 +8,15 @@
 --helper functions to represent S-presentations of Gr^F_p
 --------------------------------------------------------------------
 
-Epair = (f,I,J) -> (
+Epair = (f,I,J,k) -> (
+--presents Gr^F_k H^1_f(S).  Besides the image f*I_{k-1}, the numerator
+--f^(k+1) represents an element of S inside S_f and is therefore zero in
+--H^1_f(S)=S_f/S.  The latter relation is essential for k=0; for k<0 both
+--filtration pieces are zero.
 
-    M := module(J)/module(f*I);
+    relations := module(f*I);
+    if k >= 0 then relations = relations + module ideal(f^(k+1));
+    M := module(J)/relations;
     P := matrix entries presentation M;
 
     P
@@ -18,12 +24,12 @@ Epair = (f,I,J) -> (
 
 --------------------------------------------------------------------
 
-Ematrix = (f,idealList) -> (
+Ematrix = (f,idealList,k0) -> (
 
     S := ring f;
 
     t := #idealList;
-    Epairs := apply(toList(0..t-2), i -> Epair(f,idealList_i, idealList_(i+1)));
+    Epairs := apply(toList(0..t-2), i -> Epair(f,idealList_i, idealList_(i+1),k0+i));
 
     EpairsFixZeros := apply(Epairs, M -> if M == 0_ZZ then matrix{{0_S}} else M);
     
@@ -285,7 +291,7 @@ deRhamInterval(RingElement, List, ZZ) := options -> (f,B,p) -> (
      
      -- step 2: calculate Ematrix
 
-     E := Ematrix(f,idealList);--a matrix with sum rList many rows
+     E := Ematrix(f,idealList,p+aa);--a matrix with sum rList many rows
      
 
      -- step 3: calculate UV matrix
@@ -524,8 +530,7 @@ isPreDuBois(RingElement, ZZ) := (f,m) -> (
 
        DBC := duBoisComplex(f,p);
        coho := apply(toList(1..n), i -> prune HH_(-i)(DBC));
-       uniqueCoho := unique coho;
-       if #uniqueCoho > 1 then isPre = false;
+       if any(coho, H -> H != 0) then isPre = false;
        p = p+1;
        );
 
@@ -546,7 +551,7 @@ isPreDuBois(RingElement, ZZ, List) := (f,m,w) -> (
 
        DBC := duBoisComplex(f,p,w);
        coho := apply(toList(1..n), i -> prune HH_(-i)(DBC));
-       if #(unique coho) > 1 then isPre = false;
+       if any(coho, H -> H != 0) then isPre = false;
        p = p+1;
        );
 
@@ -566,5 +571,4 @@ load "MixedHodgeModules/deRhamDraft.m2"
 viewHelp MixedHodgeModules
 check "MixedHodgeModules"
 uninstallPackage "MixedHodgeModules"
-
 
