@@ -61,6 +61,16 @@ TEST ///
 ///
 
 
+-- clearMHMCache: determinantal caches can be cleared and rebuilt
+TEST ///
+  R = QQ[x];
+  hodgeIdealDet(2, 2);
+  clearMHMCache R;
+  I22 = hodgeIdealDet(2, 2);
+  assert(I22 == ideal vars ring I22);
+///
+
+
 -- gradedDeRhamCohomologyH1: smooth f, supports only at certain (p, q)
 TEST ///
   R = QQ[x,y];

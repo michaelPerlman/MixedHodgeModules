@@ -608,7 +608,8 @@ clearMHMCache(Ring) := R -> (
 		WeightedHodgeIdealCache, HodgeIdealWeightedHomogIsolatedCache,
 		WeylAlgebraCache, PolyAnnCache} do
 	if R.cache#?sym then remove(R.cache, sym);
-    DetGenericMatrixRingCache = new MutableHashTable;
-    ILambdaDetCache = new MutableHashTable;
-    HodgeIdealDetCache = new MutableHashTable;
+    for sym in {DetGenericMatrixRingCache, ILambdaDetCache,
+		HodgeIdealDetCache} do
+	if detSessionRing.cache#?sym then
+	    remove(detSessionRing.cache, sym);
     )
