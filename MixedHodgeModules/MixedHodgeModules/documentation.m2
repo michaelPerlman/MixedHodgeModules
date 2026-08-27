@@ -121,7 +121,9 @@ doc ///
   References
      [Bla22] G. Blanco, An algorithm for Hodge ideals, Math. Comp. {\bf 91} (2022), no. 338, 2955--2967; MR4473109
 
-     [DOR] B. Dirks, S. Olano, D. Raychaudhury, A Hodge theoretic generalization of $\mathbb{Q}$-homology manifolds, arXiv preprint arXiv:2501.14065 (2025)
+     [DOR1] B. Dirks, S. Olano, D. Raychaudhury, A Hodge theoretic generalization of $\mathbb{Q}$-homology manifolds I: general case, arXiv preprint arXiv:2501.14065 (2026)
+
+     [DOR2] B. Dirks, S. Olano, D. Raychaudhury, A Hodge theoretic generalization of $\mathbb{Q}$-homology manifolds II: local complete intersections, arXiv preprint arXiv:2607.25861 (2026)
 
      [DY25] D. Davis and R. Yang, On the Hodge filtrations and V-filtrations of mixed Hodge modules, arXiv:2503.16619v4
   
@@ -850,7 +852,7 @@ doc ///
      true or false
   Description
     Text
-     This function returns true if $\operatorname{HRH}(f)\geq p$, where $\operatorname{HRH}(f)$ is the HRH level of [DOR, PP25].
+     This function returns true if $\operatorname{HRH}(f)\geq p$, where $\operatorname{HRH}(f)$ is the HRH level of [DOR1, DOR2, PP25].
 
      The following example shows that the HRH level of the $2\times 2$ determinant is zero.
     Example
@@ -873,7 +875,7 @@ doc ///
     weightCheck
     weightLevel
   References
-    See [DOR] and [PP25] at @TO "Works Cited"@.
+    See [DOR1], [DOR2], and [PP25] at @TO "Works Cited"@.
 ///
 
 doc ///
@@ -891,7 +893,7 @@ doc ///
     L: ZZ
   Description
     Text
-     This function determines $\operatorname{HRH}(f)$, the HRH level of [DOR, PP25].
+     This function determines $\operatorname{HRH}(f)$, the HRH level of [DOR1, DOR2, PP25].
      If $\operatorname{HRH}(f)=\infty$ then this function outputs the string "rational homology manifold".
 
      The following example shows that the HRH level of the $2\times 2$ determinant is zero.
@@ -910,7 +912,7 @@ doc ///
     HRHCheck
     weightLevel
   References
-    See [DOR] and [PP25] at @TO "Works Cited"@.
+    See [DOR1], [DOR2], and [PP25] at @TO "Works Cited"@.
 ///
 
 
