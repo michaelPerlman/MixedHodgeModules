@@ -608,6 +608,24 @@ TEST ///
   assert(hodgeIdeal(f,1,2) == sub(ideal(y^2*z^2,x*y*z^2,x^2*z^2,x*y^2*z,x^2*y*z,x^2*y^2),R));
 ///
 
+---------------------------------------------------------------
+
+TEST ///
+ S = QQ[x,y,z];
+ f = x*y*z;
+ G = {1_S,z,y*z,f,0_S};
+ expected = {3,2,1,0,0};
+ assert(apply(G, g -> weightLevel(f,g,1)) == expected);
+ bfs = globalBFunction f;
+ assert(apply(G, g -> weightLevel(f,g,bfs,1)) == expected);
+ scan(#G, i -> (
+     assert(weightCheck(f,G#i,1,expected#i));
+     if expected#i > 0 then assert(not weightCheck(f,G#i,1,expected#i-1));
+     ));
+ assert(weightLevel(f,1_S,1/2) == 0);
+ assert(weightLevel(f,1_S,bfs,1/2) == 0);
+///
+
 
 
 

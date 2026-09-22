@@ -211,7 +211,7 @@ hodgeIdealWeightedHomogIsolatedHelper = (f,alpha,p,w) -> (
   if p == 0 then hodgeI = weightGeqAlpha(R, w, alpha)
 
       else  (
-	  RgeqPplusAlpha := weightGeqAlpha(R,w,p+alpha);--the first summand of Zheng's formula
+	  RgeqPplusAlpha := weightGeqAlpha(R,w,p+alpha);--the first summand of Zhang's formula
 	  if RgeqPplusAlpha == ideal(1_R) then hodgeI = ideal(1_R)
 
                  else (

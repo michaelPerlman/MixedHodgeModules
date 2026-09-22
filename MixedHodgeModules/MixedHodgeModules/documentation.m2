@@ -1248,8 +1248,8 @@ doc ///
   Usage
     L = weightLevel(f,g,alphaQQ)
     L = weightLevel(f,g,alphaZZ)
-    L = weightLevel(f,g,bgfs,alphaQQ)
-    L = weightLevel(f,g,bgfs,alphaZZ)
+    L = weightLevel(f,g,bfs,alphaQQ)
+    L = weightLevel(f,g,bfs,alphaZZ)
   Inputs
     f: RingElement
      a polynomial with rational coefficients
@@ -1259,8 +1259,8 @@ doc ///
      a positive rational number. May also be given as an integer.
     alphaZZ: ZZ
      a positive integer.
-    bgfs: RingElement
-     the b-function of g with respect to f, as an element of QQ[s].
+    bfs: RingElement
+     the Bernstein-Sato polynomial $b_f(s)$ of f, as an element of QQ[s], as returned by globalBFunction f.
   Outputs
     L: ZZ
   Description
@@ -1268,6 +1268,7 @@ doc ///
      This function finds the minimal weight level $m$ for which $g/f^{\alpha}$ is in $W_m(S_ff^{-\alpha})$.
      If $\beta\in (0,1]$ and $k\in \mathbb{Z}$  with $\alpha = \beta+k$ then it
      finds minimal weight level $m$ for which $(g/f^k)\cdot f^{-\beta}$ is in $W_m(S_ff^{-\beta})$.
+     The four-argument form uses the supplied polynomial $b_f(s)$ to avoid recomputing it.
      
      For $k>0$, if $f$ is smooth, the quotient $1/f^k$ belongs to $W_1(S_f)$ but not $W_0(S_f)$:
     Example

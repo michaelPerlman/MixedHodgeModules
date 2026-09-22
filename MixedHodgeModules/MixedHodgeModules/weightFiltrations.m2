@@ -138,17 +138,11 @@ weightLevel(RingElement, RingElement, RingElement, QQ) := (f,g,bfs,alpha) -> (
     if sub(alpha,QQ) <= 0 then error "expected alpha to be a positive rational number";
     bMM := bMinMax(bfs,alpha);
     k1 := floor bMM_0;
+    --Test from weight zero: polynomial numerators can lower the weight level.
     w := -1;
     Roots := bFunctionRoots bfs;
     AlphaInts := reverse sort select(Roots, i-> denominator(sub(i + alpha,QQ)) == 1);
     if (#AlphaInts == 0) or (AlphaInts_0 < -alpha) then w = 0 else (
-	if k1 == 0 then (----lower bound in equation 4 (by Corollary 6.1)
-	    B := factorBFunction bfs;
-	    positionAlphaInts:=select(toList(0..(#B - 1)), i-> denominator( substitute(B#i#0 - (ring bfs)_0 - alpha,QQ)) == 1);
-	    mults := apply(positionAlphaInts, i-> B#i#1);
-	    w = max mults-1;
-	   -- if ((alpha > 1) and (denominator(sub(alpha,QQ)) == 1) and (sub(g,ring f) == 1_(ring f))) then w = w+1);----Prop 1.6
-	   );
     	k2 := floor bMM_1;
     	If := cachedAnnFs f;-----hard part
     	varDsFs := flatten entries vars ring If;
