@@ -347,16 +347,9 @@ hodgeCheck(RingElement,RingElement,QQ,ZZ) := (f,g,alpha,p) -> (
     betaQQ := if (denominator(sub(alpha,QQ)) == 1) then 1_QQ else alpha-floor(alpha);
     poleOrder := if (denominator(sub(alpha,QQ)) == 1) then floor(alpha)-1 else floor(alpha);
 
-    isMemberFp := true;
-
-    if (p+1-poleOrder)<0 then isMemberFp = false
-
-      else(
-	  IpBeta := hodgeIdeal(f,betaQQ,p);
-	  gTwist := g*f^(p+1-poleOrder);
-	  isMemberFp = isMember(gTwist, IpBeta);
-	  );
-    isMemberFp
+    IpBeta := hodgeIdeal(f,betaQQ,p);
+    if p >= poleOrder then isMember(g*f^(p-poleOrder), IpBeta)
+    else isMember(g, f^(poleOrder-p)*IpBeta)
     )
 
 

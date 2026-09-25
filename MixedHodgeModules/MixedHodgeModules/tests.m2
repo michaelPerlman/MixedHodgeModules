@@ -232,6 +232,10 @@ TEST ///
 TEST ///
   R = QQ[x,y];
   assert(hodgeLevel(x, 1_R, 1) == 0);
+  assert(hodgeLevel(x, 1_R, 2) == 1);
+  assert(hodgeLevel(x, 1_R, 3/2) == 1);
+  assert(hodgeLevel(x, x^2, 3) == 0);
+  assert(hodgeLevel(x, x, 3/2) == 0);
 ///
 
 -- hodgeCheck on smooth f (own block to avoid state contamination
@@ -239,6 +243,14 @@ TEST ///
 TEST ///
   R = QQ[x,y];
   assert(hodgeCheck(x, 1_R, 1, 0));
+  assert(not hodgeCheck(x, 1_R, 2, 0));
+  assert(hodgeCheck(x, 1_R, 2, 1));
+  assert(not hodgeCheck(x, 1_R, 3/2, 0));
+  assert(hodgeCheck(x, 1_R, 3/2, 1));
+  assert(hodgeCheck(x, x^2, 3, 0));
+  assert(not hodgeCheck(x, x, 3, 0));
+  assert(hodgeCheck(x, x, 3/2, 0));
+  assert(hodgeCheck(x, 0_R, 3, 0));
 ///
 
 -- hodgeLevel on smooth y^2 - x
@@ -250,7 +262,7 @@ TEST ///
 -- hodgeLevel on the cusp
 TEST ///
   R = QQ[a,b];
-  assert(hodgeLevel(a^2 + b^3, 1_R, 1) == 0);
+  assert(hodgeLevel(a^2 + b^3, 1_R, 1) == 1);
 ///
 
 
@@ -574,9 +586,13 @@ TEST ///
  assert(weightLength(f,alpha,LengthStrategy => ByNuAlpha, NuMethod => Malgrange) == 1);
  assert(not weightCheck(f,g,alpha,0));
  assert(weightLevel(f,g,alpha) == 1);
- assert(first degree (pFunction(f,g,alpha)) == 1);
- assert(first degree (pFunction(f,g,alpha, NuMethod => Malgrange)) == 1);
- assert(first degree (pFunction(f,g,alpha, NuMethod => PowerBFunction)) == 1); 
+ assert(pFunction(f,g,alpha) == 1);
+ assert(pFunction(f,g,alpha, NuMethod => Malgrange) == 1);
+ assert(pFunction(f,g,alpha, NuMethod => PowerBFunction) == 1);
+ scan({ByAnnFs,Malgrange,PowerBFunction}, strategy -> (
+     pp := pFunction(f,g,2,NuMethod => strategy);
+     assert(pp == (ring pp)_0+1);
+     ));
 ///
 
 ---------------------------------------------------------------
@@ -654,9 +670,9 @@ TEST ///
  assert(weightLength(f,alpha,LengthStrategy => ByNuAlpha) == 2);
  assert(weightLength(f,alpha,LengthStrategy => ByNuAlpha, NuMethod => Malgrange) == 2);
  assert(weightLength(f,alpha,LengthStrategy => ByNuAlpha, NuMethod => PowerBFunction) == 2);
- assert(first degree (pFunction(f,g,alpha)) == 1);
- assert(first degree (pFunction(f,g,alpha, NuMethod => Malgrange)) == 1);
- assert(first degree (pFunction(f,g,alpha, NuMethod => PowerBFunction)) == 1);
+ assert(pFunction(f,g,alpha) == 1);
+ assert(pFunction(f,g,alpha, NuMethod => Malgrange) == 1);
+ assert(pFunction(f,g,alpha, NuMethod => PowerBFunction) == 1);
  alpha = 2;
  assert(not weightCheck(f,g,alpha,1));
  assert(weightCheck(f,g,alpha,2));
@@ -681,9 +697,11 @@ TEST ///
  assert(weightLength(f,alpha,LengthStrategy => ByNuAlpha) == 1);
  assert(weightLength(f,alpha,LengthStrategy => ByNuAlpha, NuMethod => Malgrange) == 1);
  assert(weightLength(f,alpha,LengthStrategy => ByNuAlpha, NuMethod => PowerBFunction) == 1);
- assert(first degree (pFunction(f,g,alpha)) == 1);
- assert(first degree (pFunction(f,g,alpha, NuMethod => Malgrange)) == 1);
- assert(first degree (pFunction(f,g,alpha, NuMethod => PowerBFunction)) == 1);
+ assert(pFunction(f,g,alpha) == 1);
+ assert(pFunction(f,g,alpha, NuMethod => Malgrange) == 1);
+ assert(pFunction(f,g,alpha, NuMethod => PowerBFunction) == 1);
+ pp = pFunction(f,g,3/2);
+ assert(pp == (ring pp)_0+1);
  alpha = 1/2;
  assert(weightLevel(f,g,alpha) == 0);
  assert(weightLength(f,alpha,LengthStrategy => ByNuAlpha) == 1);

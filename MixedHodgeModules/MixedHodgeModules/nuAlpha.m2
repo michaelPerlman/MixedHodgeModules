@@ -330,12 +330,12 @@ nuAlphaMalgrange(RingElement,RingElement,QQ) := (f,bf,alpha) -> (
  
 translateToAlpha = (alpha,beta) -> (
      translates := {};
-     bool := (beta >= -alpha);
+     bool := (beta > -alpha);
      counter :=beta;
      while bool do (
 	 translates = append(translates, counter);   
 	 counter = counter - 1;
-	 bool = (counter >= -alpha));
+	 bool = (counter > -alpha));
      translates
      )
  

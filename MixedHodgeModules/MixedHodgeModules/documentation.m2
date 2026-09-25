@@ -417,7 +417,7 @@ doc ///
     check if an element of the twisted localization $S_ff^{-\alpha}$ belongs to a particular Hodge level
   Usage
     B = hodgeCheck(f,g,alphaQQ,p)
-    B = hodgeCheck(f,g,alphaZZ,w)
+    B = hodgeCheck(f,g,alphaZZ,p)
   Inputs
     f: RingElement
      a polynomial with rational coefficients
@@ -436,7 +436,7 @@ doc ///
     Text
      This function checks if $g/f^{\alpha}$ is in $F_p(S_ff^{-\alpha})$ for a rational number $\alpha>0$.
      If $\beta\in (0,1]$ and $k\in \mathbb{Z}$ with $\alpha = \beta+k$ then it checks if $(g/f^k)\cdot f^{-\beta}$
-     is in $F_p(S_ff^{-\alpha})$.
+     is in $F_p(S_ff^{-\beta})$.
 
      The following example exhibits that, for $f$ smooth, $1/f^{p+1}$ belongs to $F_p(S_f)$ but not $F_{p-1}(S_f)$.
     Example
@@ -444,10 +444,10 @@ doc ///
      f = x^2+y;
      g = 1_S;
      alpha = 1 + 6;
-     hodgeCheck(f,g,alpha,4)
      hodgeCheck(f,g,alpha,5)
+     hodgeCheck(f,g,alpha,6)
     Text
-     So $f^{-6}$ belongs to $F_5(S_f)$ but not $F_4(S_f)$.
+     So $f^{-7}$ belongs to $F_6(S_f)$ but not $F_5(S_f)$.
 
      We carry out another example.
     Example
@@ -455,10 +455,10 @@ doc ///
      f = y^2-x*z;
      g = x*y;
      alpha = 1/2 + 3;
-     hodgeCheck(f,g,alpha,1)
      hodgeCheck(f,g,alpha,2)
+     hodgeCheck(f,g,alpha,3)
     Text
-     So $(g/f^3)\cdot f^{-1/2}$ belongs to $F_2(S_ff^{-1/2})$ but not $F_1(S_ff^{-1/2})$.
+     So $(g/f^3)\cdot f^{-1/2}$ belongs to $F_3(S_ff^{-1/2})$ but not $F_2(S_ff^{-1/2})$.
   SeeAlso
     hodgeLevel
     hodgeIdeal
@@ -709,8 +709,6 @@ doc ///
   Usage
     L = hodgeLevel(f,g,alphaQQ)
     L = hodgeLevel(f,g,alphaZZ)
-    L = hodgeLevel(f,g,bgfs,alphaQQ)
-    L = hodgeLevel(f,g,bgfs,alphaZZ)
   Inputs
     f: RingElement
      a polynomial with rational coefficients
@@ -736,7 +734,7 @@ doc ///
      alpha = 1 + 6;
      hodgeLevel(f,g,alpha)
     Text
-     So $f^{-6}$ belongs to $F_5(S_f)$ but not $F_4(S_f)$.
+     So $f^{-7}$ belongs to $F_6(S_f)$ but not $F_5(S_f)$.
 
      We carry out another example.
     Example
@@ -746,7 +744,7 @@ doc ///
      alpha = 1/2 + 3;
      hodgeLevel(f,g,alpha)
     Text
-     So $(g/f^3)\cdot f^{-1/2}$ belongs to $F_2(S_ff^{-1/2})$ but not $F_1(S_ff^{-1/2})$.
+     So $(g/f^3)\cdot f^{-1/2}$ belongs to $F_3(S_ff^{-1/2})$ but not $F_2(S_ff^{-1/2})$.
   SeeAlso
     hodgeCheck
     hodgeIdeal
