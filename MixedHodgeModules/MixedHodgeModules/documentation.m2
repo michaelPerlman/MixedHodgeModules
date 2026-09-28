@@ -16,7 +16,7 @@ doc ///
     Text
      Let $S=\mathbb{C}[x_1,\cdots,x_n]$ and let $f\in S$ be a reduced non-constant polynomial. This package
      has functionality for calculating Hodge filtrations, weight filtrations, and related invariants on the localization $S_f$ and, more generally,
-     twisted localizations $S_ff^{-\alpha}$, where $\alpha$ is a rational number in $(0,1]$.
+     twisted localizations $S_ff^{-\alpha}$, where $\alpha$ is a rational number.
      Many of our algorithms are based on [LY26+] and extensions of [Bla22].
 
      Writing $\mathcal{D}$ for the Weyl algebra of $S$, the $\mathcal{D}$-module $S_ff^{-\alpha}$ underlies
@@ -44,6 +44,11 @@ doc ///
 
      As applications, the functionality above is used to calculate the Du Bois complexes $\underline{\Omega}^p_{V(f)}$ and
      the intersection Du Bois complexes $I\underline{\Omega}^p_{V(f)}$.
+
+     The routines based on Blanco's algorithm take $0<\alpha\leq1$. On the other hand, the routines @TO "hodgeCheck"@,
+     @TO "hodgeLevel"@, @TO "weightCheck"@, @TO "weightLevel"@, @TO "nuAlpha"@, and @TO "pFunction"@
+     accept every positive rational $\alpha$. We specify the parameter ranges below. These restrictions concern
+     the implementation, rather than the definition of twisted localizations.
      
     Tree
       :Filtrations on the Graph Embedding

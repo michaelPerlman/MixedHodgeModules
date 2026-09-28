@@ -4,12 +4,7 @@
 --(1) maintain the current file structure:
 -- MixedHodgeModules(folder) -> {MixedHodgeModules (folder), MixedHodgeModules.m2 (this file)} -> {aux files}
 --(2) launch the package from this file, using code after "end"
-
-
-
---to do:
---(1) Fill in examples for p-function and nuAlpha, and mention strategies
-
+--(3) User's version of M2 must include the Complexes package
 
 
 
