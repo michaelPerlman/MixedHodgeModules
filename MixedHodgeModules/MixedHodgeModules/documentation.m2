@@ -136,7 +136,7 @@ doc ///
 
      [LY25] A. C. Lőrincz and R. Yang, Filtrations of D-modules along semi-invariant functions, arXiv:2504.19383
      
-     [LY26+] A. C. Lőrincz and R. Yang, Filtrations on D-modules and multiplicities of roots of Bernstein-Sato polynomials, preprint (2026)
+     [LY26+] A. C. Lőrincz and R. Yang, Filtrations on D-modules and multiplicities of roots of Bernstein-Sato polynomials, arXiv preprint arXiv:2609.05215 (2026)
 
      [MP19] M. Mustaţă and M. Popa, Hodge ideals, Mem. Amer. Math. Soc. {\bf 262} (2019), no. 1268, v+80 pp.; MR4044463
      
