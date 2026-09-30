@@ -132,6 +132,9 @@ nuAlphaPowerBFunction(RingElement,RingElement,QQ) := (f,g,alpha) -> (
 
 nuAlphaAnnFs=method();
 --default strategy
+--AnnFs and AnnIFs put their central parameter last. Map b-function variables
+--to it explicitly: distinct symbols can both print as s, and sub(B,Ds)
+--silently sends an unmatched variable to zero.
 
 
 
@@ -165,6 +168,7 @@ nuAlphaAnnFs(RingElement,RingElement,RingElement,QQ) := (f,g,bgfs,alpha) -> (
 	    Anng = cachedPolynomialAnnihilator g;
 	    Annfs = AnnIFs(Anng,newF);
 	    );
+        ss := last gens ring Annfs;
    	newerF := sub(newF, ring(Annfs));
     	J := Annfs + ideal(newerF^(k0));
     	twists := toList(0..k0-1);
@@ -187,8 +191,7 @@ nuAlphaAnnFs(RingElement,RingElement,RingElement,QQ) := (f,g,bgfs,alpha) -> (
 	   	mult = mult - 1;
 	   	B = B/ (sub(goodFactor, ring B));
 	   	B = sub(B, (ring goodFactor));
-	   	BB := sub(B, ring(Annfs));
-	   	----BB:=sub(B, {(ring B)_0 => -(ring MalgIn)_(2*n+1)*(ring MalgIn)_n});
+                BB := sub(B, {(ring B)_0 => ss});
 	   	memb = ((BB % J) == 0_(ring J)));
        	    mult = mult + 1));
      	mult
@@ -231,6 +234,7 @@ nuAlphaAnnFs(RingElement,RingElement,QQ) := (f,g,alpha) -> (
     	else (
 	    Annfs = AnnIFs(Anng,newF);
 	    );
+        ss := last gens ring Annfs;
    	newerF := sub(newF, ring(Annfs));
     	J := Annfs + ideal(newerF^(k0));
     	twists := toList(0..k0-1);
@@ -253,7 +257,7 @@ nuAlphaAnnFs(RingElement,RingElement,QQ) := (f,g,alpha) -> (
 	   	mult = mult - 1;
 	   	B = B/ (sub(goodFactor, ring B));
 	   	B = sub(B, (ring goodFactor));
-	   	BB := sub(B, ring(Annfs));
+                BB := sub(B, {(ring B)_0 => ss});
 	   	memb = ((BB % J) == 0_(ring J)));
        	    mult = mult + 1));
      	mult

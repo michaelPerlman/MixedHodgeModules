@@ -650,6 +650,36 @@ TEST ///
 ---------------------------------------------------------------
 
 TEST ///
+ R = QQ[x,y,z];
+ f = x^3+y^3+z^3;
+ -- The default b-function parameter and the AnnFs parameter are distinct symbols.
+ assert(nuAlpha(f,1_R,2) == 2);
+ assert(nuAlpha(f,1_R,2_QQ) == 2);
+ scan({Malgrange,PowerBFunction}, strategy ->
+     assert(nuAlpha(f,1_R,2,NuMethod => strategy) == 2));
+ bf = globalBFunction f;
+ assert(nuAlpha(f,1_R,bf,2) == 2);
+ -- A supplied b-function may use any univariate parameter.
+ T = QQ[q];
+ bq = sub(bf,{(ring bf)_0 => T_0});
+ assert(nuAlpha(f,1_R,bq,2_QQ) == 2);
+ pp = pFunction(f,1_R,7/3);
+ ss = (ring pp)_0;
+ assert(pp == (ss+1)^2*(ss+4/3)*(ss+5/3)*(ss+2)^2);
+///
+
+TEST ///
+ R = QQ[x];
+ f = x;
+ g = x;
+ -- Exercise AnnIFs with a nonconstant g and a renamed b-function parameter.
+ T = QQ[q];
+ assert(nuAlpha(f,g,3) == 1);
+ assert(nuAlpha(f,g,T_0+2,3) == 1);
+ assert(nuAlpha(f,g,3,NuMethod => PowerBFunction) == 1);
+///
+
+TEST ///
  S = QQ[x,y,z,w];
  f = x*y-z*w;
  g = 1_S;
